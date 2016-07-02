@@ -8,7 +8,6 @@ module.exports = function (options, cy, snap) {
     function tapDrag(e) {
         var nodePos = snap.snapPos(attachedNode.position());
         var mousePos = snap.snapPos(e.cyPosition);
-        console.log(nodePos, mousePos);
         if (nodePos.x != mousePos.x || nodePos.y != mousePos.y){
             attachedNode.unlock();
             snap.snapNode(attachedNode, mousePos);
@@ -17,7 +16,6 @@ module.exports = function (options, cy, snap) {
     }
 
     function tapStartNode(e){
-        console.log("start");
         attachedNode = e.cyTarget;
         attachedNode.lock();
         cy.on("tapdrag", tapDrag);
@@ -25,7 +23,6 @@ module.exports = function (options, cy, snap) {
     }
 
     function tapEnd(e){
-        console.log("end");
         attachedNode.unlock();
         cy.off("tapdrag", tapDrag);
         cy.off("tapend", tapEnd);
