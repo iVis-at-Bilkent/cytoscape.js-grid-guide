@@ -1,0 +1,21 @@
+{
+  "name": "cytoscape-snap-to-grid",
+  "description": "Framework for snap-to-grid interactions.",
+  "main": "cytoscape-snap-to-grid.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/iVis-at-Bilkent/cytoscape.js-snap-to-grid.git"
+  },
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "keywords": [
+    "cytoscape",
+    "cyext"
+  ],
+  "license": "MIT"
+}
