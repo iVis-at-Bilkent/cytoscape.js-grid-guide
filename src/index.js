@@ -8,11 +8,19 @@
 
         var options = {
             gridSpacing: 40,
-            discreteDragEnabled: true
+            discreteDragEnabled: true,
+            drawGrid: true,
+            stackOrder: -1,
+            strokeStyle: '#CCCCCC',
+            lineWidth: 1.0,
+            lineDash: [5,8],
+            zoomDash: true,
+            panGrid: true
         };
 
         var _snap = require("./snap");
         var _discreteDrag = require("./discrete_drag");
+        var _drawGrid = require("./draw_grid");
 
         cytoscape( 'core', 'snapToGrid', function(opts){
             var cy = this;
@@ -20,6 +28,7 @@
 
             var snap = _snap(options, cy);
             var discreteDrag = _discreteDrag(options, cy, snap);
+            var drawGrid = _drawGrid(options, cy, $);
 
             return this; // chainability
         } );

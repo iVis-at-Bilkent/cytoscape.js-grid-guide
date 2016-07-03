@@ -6,7 +6,7 @@ module.exports = function (options, cy, snap) {
     var attachedNode;
 
     function tapDrag(e) {
-        var nodePos = snap.snapPos(attachedNode.position());
+        var nodePos = attachedNode.position();
         var mousePos = snap.snapPos(e.cyPosition);
         if (nodePos.x != mousePos.x || nodePos.y != mousePos.y){
             attachedNode.unlock();

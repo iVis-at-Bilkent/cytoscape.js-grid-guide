@@ -7,7 +7,7 @@ module.exports = function (options, cy, snap) {
     var attachedNode;
 
     function tapDrag(e) {
-        var nodePos = snap.snapPos(attachedNode.position());
+        var nodePos = attachedNode.position();
         var mousePos = snap.snapPos(e.cyPosition);
         if (nodePos.x != mousePos.x || nodePos.y != mousePos.y){
             attachedNode.unlock();
@@ -37,6 +37,108 @@ module.exports = function (options, cy, snap) {
 
 };
 },{}],2:[function(require,module,exports){
+module.exports = function (options, cy, $) {
+
+    var drawGrid = function() {
+        clearDrawing();
+
+        if(!options.drawGrid) {
+            return;
+        }
+
+        var zoom = cy.zoom();
+        var canvasWidth = $container.width();
+        var canvasHeight = $container.height();
+        var increment = options.gridSpacing*zoom;
+        var pan = cy.pan();
+        var initialValueX = pan.x%increment;
+        var initialValueY = pan.y%increment;
+
+        ctx.strokeStyle = options.strokeStyle;
+        ctx.lineWidth = options.lineWidth;
+
+        if(options.zoomDash) {
+            var zoomedDash = options.lineDash.slice();
+
+            for(var i = 0; i < zoomedDash.length; i++) {
+                zoomedDash[ i ] = options.lineDash[ i ]*zoom;
+            }
+            ctx.setLineDash( zoomedDash );
+        } else {
+            ctx.setLineDash( options.lineDash );
+        }
+
+        if(options.panGrid) {
+            ctx.lineDashOffset = -pan.y;
+        } else {
+            ctx.lineDashOffset = 0;
+        }
+
+        for(var i = initialValueX; i < canvasWidth; i += increment) {
+            ctx.beginPath();
+            ctx.moveTo( i, 0 );
+            ctx.lineTo( i, canvasHeight );
+            ctx.stroke();
+        }
+
+        if(options.panGrid) {
+            ctx.lineDashOffset = -pan.x;
+        } else {
+            ctx.lineDashOffset = 0;
+        }
+
+        for(var i = initialValueY; i < canvasHeight; i += increment) {
+            ctx.beginPath();
+            ctx.moveTo( 0, i );
+            ctx.lineTo( canvasWidth, i );
+            ctx.stroke();
+        }
+    };
+    var clearDrawing = function() {
+        var width = $container.width();
+        var height = $container.height();
+
+        ctx.clearRect( 0, 0, width, height );
+    };
+
+    var resizeCanvas = function() {
+        $canvas
+            .attr( 'height', $container.height() )
+            .attr( 'width', $container.width() )
+            .css( {
+                'position': 'absolute',
+                'top': 0,
+                'left': 0,
+                'z-index': options.stackOrder
+            } );
+
+        setTimeout( function() {
+            var canvasBb = $canvas.offset();
+            var containerBb = $container.offset();
+
+            $canvas
+                .attr( 'height', $container.height() )
+                .attr( 'width', $container.width() )
+                .css( {
+                    'top': -( canvasBb.top - containerBb.top ),
+                    'left': -( canvasBb.left - containerBb.left )
+                } );
+            drawGrid();
+        }, 0 );
+    };
+    
+    var container = cy.container();
+    var $canvas = $( '<canvas></canvas>' );
+    var $container = $( container );
+    var ctx = $canvas[ 0 ].getContext( '2d' );
+    $container.append( $canvas );
+    $( window ).on( 'resize', resizeCanvas );
+    resizeCanvas();
+
+
+    
+};
+},{}],3:[function(require,module,exports){
 ;(function(){ 'use strict';
 
     // registers the extension on a cytoscape lib ref
@@ -47,11 +149,19 @@ module.exports = function (options, cy, snap) {
 
         var options = {
             gridSpacing: 40,
-            discreteDragEnabled: true
+            discreteDragEnabled: true,
+            drawGrid: true,
+            stackOrder: -1,
+            strokeStyle: '#CCCCCC',
+            lineWidth: 1.0,
+            lineDash: [5,8],
+            zoomDash: true,
+            panGrid: true
         };
 
         var _snap = require("./snap");
         var _discreteDrag = require("./discrete_drag");
+        var _drawGrid = require("./draw_grid");
 
         cytoscape( 'core', 'snapToGrid', function(opts){
             var cy = this;
@@ -59,6 +169,7 @@ module.exports = function (options, cy, snap) {
 
             var snap = _snap(options, cy);
             var discreteDrag = _discreteDrag(options, cy, snap);
+            var drawGrid = _drawGrid(options, cy, $);
 
             return this; // chainability
         } );
@@ -81,7 +192,7 @@ module.exports = function (options, cy, snap) {
 
 })();
 
-},{"./discrete_drag":1,"./snap":3}],3:[function(require,module,exports){
+},{"./discrete_drag":1,"./draw_grid":2,"./snap":4}],4:[function(require,module,exports){
 module.exports = function (options, cy) {
 
     function snapCyTarget(e) {
@@ -96,8 +207,8 @@ module.exports = function (options, cy) {
 
     var snapPos = function (pos) {
         var newPos = {
-            x: Math.round(pos.x / options.gridSpacing) * options.gridSpacing,
-            y: Math.round(pos.y / options.gridSpacing) * options.gridSpacing
+            x: (Math.floor(pos.x / options.gridSpacing) + 0.5) * options.gridSpacing,
+            y: (Math.floor(pos.y / options.gridSpacing) + 0.5) * options.gridSpacing
         };
 
         return newPos;
@@ -128,4 +239,4 @@ module.exports = function (options, cy) {
     };
 
 };
-},{}]},{},[2]);
+},{}]},{},[3]);

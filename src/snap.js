@@ -12,8 +12,8 @@ module.exports = function (options, cy) {
 
     var snapPos = function (pos) {
         var newPos = {
-            x: Math.round(pos.x / options.gridSpacing) * options.gridSpacing,
-            y: Math.round(pos.y / options.gridSpacing) * options.gridSpacing
+            x: (Math.floor(pos.x / options.gridSpacing) + 0.5) * options.gridSpacing,
+            y: (Math.floor(pos.y / options.gridSpacing) + 0.5) * options.gridSpacing
         };
 
         return newPos;
