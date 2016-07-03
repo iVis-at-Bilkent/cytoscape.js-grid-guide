@@ -1,4 +1,4 @@
-module.exports = function (options, cy, snap) {
+module.exports = function (cy, snap) {
 
     var attachedNode;
 
@@ -27,11 +27,6 @@ module.exports = function (options, cy, snap) {
         cy.off("tapdrag", tapDrag);
         cy.off("tapend", tapEnd);
     }
-
-/*
-    function enable() {
-        cy.on("tapstart", "node", tapStartNode);
-    }*/
 
     return {
         tapStartNode: tapStartNode

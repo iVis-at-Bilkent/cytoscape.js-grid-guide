@@ -1,11 +1,13 @@
-module.exports = function (options, cy, $) {
+module.exports = function (opts, cy, $) {
+
+    var options = opts;
+
+    var changeOptions = function (opts) {
+      options = opts;
+    };
 
     var drawGrid = function() {
         clearDrawing();
-
-        if(!options.drawGrid) {
-            return;
-        }
 
         var zoom = cy.zoom();
         var canvasWidth = $container.width();
@@ -88,14 +90,18 @@ module.exports = function (options, cy, $) {
         }, 0 );
     };
     
-    var container = cy.container();
     var $canvas = $( '<canvas></canvas>' );
-    var $container = $( container );
+    var $container = $( cy.container() );
     var ctx = $canvas[ 0 ].getContext( '2d' );
     $container.append( $canvas );
-    $( window ).on( 'resize', resizeCanvas );
-    resizeCanvas();
 
 
-    
+
+    return {
+        initCanvas: resizeCanvas,
+        resizeCanvas: resizeCanvas,
+        clearCanvas: clearDrawing,
+        drawGrid: drawGrid,
+        changeOptions: changeOptions
+    };
 };

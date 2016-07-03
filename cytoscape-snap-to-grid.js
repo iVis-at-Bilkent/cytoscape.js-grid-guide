@@ -1,5 +1,5 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-module.exports = function (options, cy, snap) {
+module.exports = function (cy, snap) {
 
     var attachedNode;
 
@@ -29,11 +29,6 @@ module.exports = function (options, cy, snap) {
         cy.off("tapend", tapEnd);
     }
 
-/*
-    function enable() {
-        cy.on("tapstart", "node", tapStartNode);
-    }*/
-
     return {
         tapStartNode: tapStartNode
     };
@@ -41,14 +36,16 @@ module.exports = function (options, cy, snap) {
 
 };
 },{}],2:[function(require,module,exports){
-module.exports = function (options, cy, $) {
+module.exports = function (opts, cy, $) {
+
+    var options = opts;
+
+    var changeOptions = function (opts) {
+      options = opts;
+    };
 
     var drawGrid = function() {
         clearDrawing();
-
-        if(!options.drawGrid) {
-            return;
-        }
 
         var zoom = cy.zoom();
         var canvasWidth = $container.width();
@@ -131,18 +128,132 @@ module.exports = function (options, cy, $) {
         }, 0 );
     };
     
-    var container = cy.container();
     var $canvas = $( '<canvas></canvas>' );
-    var $container = $( container );
+    var $container = $( cy.container() );
     var ctx = $canvas[ 0 ].getContext( '2d' );
     $container.append( $canvas );
-    $( window ).on( 'resize', resizeCanvas );
-    resizeCanvas();
 
 
-    
+
+    return {
+        initCanvas: resizeCanvas,
+        resizeCanvas: resizeCanvas,
+        clearCanvas: clearDrawing,
+        drawGrid: drawGrid,
+        changeOptions: changeOptions
+    };
 };
 },{}],3:[function(require,module,exports){
+module.exports = function ( cy, snap, resize, discreteDrag, drawGrid, $) {
+
+    var feature = function (func) {
+        return function (enable) {
+            func(enable);
+        };
+    };
+
+    var controller = {
+        discreteDrag: new feature(setDiscreteDrag),
+        resize: new feature(setResize),
+        snapToGrid: new feature(setSnapToGrid),
+        drawGrid: new feature(setDrawGrid)
+    };
+
+    
+    function applyToCyTarget(func) {
+        return function (e) {
+            func(e.cyTarget);
+        }
+    }
+    
+    function applyToAllNodes(func) {
+        return function () {
+            cy.nodes().each(function (i, ele) {
+                func(ele);
+            });
+        };
+    }
+    function eventStatus(enable) {
+        return enable ? "on" : "off";
+    }
+
+
+    // Discrete Drag
+    function setDiscreteDrag(enable) {
+        cy[eventStatus(enable)]("tapstart", "node", discreteDrag.tapStartNode);
+    }
+
+    // Resize
+    var resizeAllNodes = applyToAllNodes(resize.resizeNode);
+    var resizeNode = applyToCyTarget(resize.resizeNode);
+    var recoverAllNodeDimensions = applyToAllNodes(resize.recoverNodeDimensions);
+
+    function setResize(enable) {
+        cy[eventStatus(enable)]("ready", resizeAllNodes);
+        cy[eventStatus(enable)]("style", "node", resizeNode);
+        enable ? resizeAllNodes() : recoverAllNodeDimensions();
+    }
+
+    // Snap To Grid
+    var snapAllNodes= applyToAllNodes(snap.snapNode);
+    var snapNode = applyToCyTarget(snap.snapNode);
+
+    function setSnapToGrid(enable) {
+        cy[eventStatus(enable)]("add", "node", snapNode);
+        cy[eventStatus(enable)]("ready", snapAllNodes);
+
+        cy[eventStatus(enable)]("free", "node", snapNode); // TODO: If discrete drag is disabled
+
+        if (enable) {
+            snapAllNodes();
+        } else {
+
+        }
+    }
+    
+    // Draw Grid
+    var drawGridOnZoom = function () { console.log("zoom"); if( latestOptions.zoomDash ) drawGrid.drawGrid() };
+    var drawGridOnPan = function () { console.log("pan"); if( latestOptions.panGrid ) drawGrid.drawGrid() };
+
+    function setDrawGrid(enable) {
+
+        cy[eventStatus(enable)]( 'zoom', drawGridOnZoom );
+        cy[eventStatus(enable)]( 'pan', drawGridOnPan );
+
+        if (enable){
+            drawGrid.changeOptions(currentOptions);
+            drawGrid.initCanvas();
+            $( window ).on( 'resize', drawGrid.resizeCanvas );
+        } else {
+            drawGrid.clearCanvas();
+            $( window ).off( 'resize', drawGrid.resizeCanvas );
+        }
+    }
+
+    // Sync with options: Enables/disables changed via options.
+    var latestOptions = {};
+    var currentOptions;
+    function syncWithOptions(options) {
+        currentOptions = options;
+        for (var key in controller)
+            if (latestOptions[key] != options[key])
+                controller[key](options[key]);
+        latestOptions = options;
+    }
+
+    function init(options) {
+        currentOptions = options;
+        syncWithOptions(options);
+        latestOptions = options;
+    }
+    
+    return {
+        init: init,
+        syncWithOptions: syncWithOptions
+    };
+    
+};
+},{}],4:[function(require,module,exports){
 ;(function(){ 'use strict';
 
     // registers the extension on a cytoscape lib ref
@@ -152,31 +263,43 @@ module.exports = function (options, cy, $) {
 
 
         var options = {
-            gridSpacing: 40,
-            discreteDragEnabled: true,
+            snapToGrid: true,
+            discreteDrag: true,
+            resize: true,
             drawGrid: true,
+            zoomDash: true,
+            panGrid: true,
+            gridSpacing: 40,
             stackOrder: -1,
             strokeStyle: '#CCCCCC',
             lineWidth: 1.0,
             lineDash: [5,8],
-            zoomDash: true,
-            panGrid: true
         };
 
         var _snap = require("./snap");
         var _discreteDrag = require("./discrete_drag");
         var _drawGrid = require("./draw_grid");
         var _resize = require("./resize");
+        var _eventsController = require("./events_controller");
+        var snap, resize, discreteDrag, drawGrid, eventsController;
 
+        var initialized = false;
         cytoscape( 'core', 'snapToGrid', function(opts){
             var cy = this;
             $.extend(true, options, opts);
 
-            var snap = _snap(options.gridSpacing);
-            var resize = _resize(options.gridSpacing);
+            if (!initialized) {
+                snap = _snap(options.gridSpacing);
+                resize = _resize(options.gridSpacing);
+                discreteDrag = _discreteDrag(cy, snap);
+                drawGrid = _drawGrid(options, cy, $);
+                eventsController = _eventsController(cy, snap, resize, discreteDrag, drawGrid, $);
 
-            _discreteDrag(options, cy, snap);
-            _drawGrid(options, cy, $);
+
+                eventsController.init(options);
+            } else
+                eventsController.syncWithOptions(options)
+
 
             return this; // chainability
         } );
@@ -199,9 +322,16 @@ module.exports = function (options, cy, $) {
 
 })();
 
-},{"./discrete_drag":1,"./draw_grid":2,"./resize":4,"./snap":5}],4:[function(require,module,exports){
+},{"./discrete_drag":1,"./draw_grid":2,"./events_controller":3,"./resize":5,"./snap":6}],5:[function(require,module,exports){
 module.exports = function (gridSpacing) {
 
+
+    var getScratch = function (node) {
+        if (!node.scratch("_snapToGrid"))
+            node.scratch("_snapToGrid", {});
+
+        return node.scratch("_snapToGrid");
+    };
 
     function resizeNode(node) {
         var width = node.width();
@@ -213,40 +343,39 @@ module.exports = function (gridSpacing) {
         newWidth = newWidth > 0 ? newWidth : gridSpacing;
         newHeight = newHeight > 0 ? newHeight : gridSpacing;
 
-        if (width != newWidth || height != newHeight)
+        if (width != newWidth || height != newHeight) {
             node.style({
                 "width": newWidth,
                 "height": newHeight
             });
+            getScratch(node).resize = {
+                oldWidth: width,
+                oldHeight: height
+            };
+        }
     }
 
-    function resizeNodes(nodes) {
-        nodes.each(function (i, ele) {
-            resizeNode(node);
-        });
+    function recoverNodeDimensions(node) {
+        var oldSizes = getScratch(node);
+        if (oldSizes.resize)
+            node.style({
+                "width": oldWidth,
+                "height": oldHeight
+            });
+
     }
+
 
 
     return {
         resizeNode: resizeNode,
-        resizeNodes: resizeNodes
+        recoverNodeDimensions: recoverNodeDimensions
     };
-   // cy.on("style", "node", onStyleChanged);
-
 
 };
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 module.exports = function (gridSpacing) {
-/*
-    function snapCyTarget(e) {
-        snapNode(e.cyTarget);
-    }
 
-    //cy.on("style", "node", snapCyTarget);
-    cy.on("add", "node", snapCyTarget);
-    cy.on("free", "node", snapCyTarget); // If discrete drag is disabled
-    cy.on("ready", snapAllNodes);
-*/
 
     var snapPos = function (pos) {
         var newPos = {
@@ -269,17 +398,10 @@ module.exports = function (gridSpacing) {
 
     };
 
-    var snapNodes = function (nodes) {
-        return nodes.each(function (i, node) {
-            snapNode(node);
-        });
-    };
-
     return {
         snapPos: snapPos,
-        snapNode: snapNode,
-        snapNodes: snapNodes
+        snapNode: snapNode
     };
 
 };
-},{}]},{},[3]);
+},{}]},{},[4]);
