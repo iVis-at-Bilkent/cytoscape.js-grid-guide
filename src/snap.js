@@ -1,19 +1,19 @@
-module.exports = function (options, cy) {
-
+module.exports = function (gridSpacing) {
+/*
     function snapCyTarget(e) {
         snapNode(e.cyTarget);
     }
 
-    cy.on("style", "node", snapCyTarget);
+    //cy.on("style", "node", snapCyTarget);
     cy.on("add", "node", snapCyTarget);
     cy.on("free", "node", snapCyTarget); // If discrete drag is disabled
     cy.on("ready", snapAllNodes);
-
+*/
 
     var snapPos = function (pos) {
         var newPos = {
-            x: (Math.floor(pos.x / options.gridSpacing) + 0.5) * options.gridSpacing,
-            y: (Math.floor(pos.y / options.gridSpacing) + 0.5) * options.gridSpacing
+            x: (Math.floor(pos.x / gridSpacing) + 0.5) * gridSpacing,
+            y: (Math.floor(pos.y / gridSpacing) + 0.5) * gridSpacing
         };
 
         return newPos;
@@ -31,8 +31,8 @@ module.exports = function (options, cy) {
 
     };
 
-    var snapAllNodes = function () {
-        return cy.nodes().each(function (i, node) {
+    var snapNodes = function (nodes) {
+        return nodes.each(function (i, node) {
             snapNode(node);
         });
     };
@@ -40,7 +40,7 @@ module.exports = function (options, cy) {
     return {
         snapPos: snapPos,
         snapNode: snapNode,
-        snapAllNodes: snapAllNodes
+        snapNodes: snapNodes
     };
 
 };

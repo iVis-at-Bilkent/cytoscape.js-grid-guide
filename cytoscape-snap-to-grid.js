@@ -1,9 +1,6 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 module.exports = function (options, cy, snap) {
 
-    enable();
-
-
     var attachedNode;
 
     function tapDrag(e) {
@@ -13,26 +10,33 @@ module.exports = function (options, cy, snap) {
             attachedNode.unlock();
             snap.snapNode(attachedNode, mousePos);
             attachedNode.lock();
+            attachedNode.trigger("drag");
         }
     }
 
     function tapStartNode(e){
         attachedNode = e.cyTarget;
         attachedNode.lock();
+        attachedNode.trigger("grab");
         cy.on("tapdrag", tapDrag);
         cy.on("tapend", tapEnd);
     }
 
     function tapEnd(e){
         attachedNode.unlock();
+        attachedNode.trigger("free");
         cy.off("tapdrag", tapDrag);
         cy.off("tapend", tapEnd);
     }
 
-
+/*
     function enable() {
         cy.on("tapstart", "node", tapStartNode);
-    }
+    }*/
+
+    return {
+        tapStartNode: tapStartNode
+    };
     
 
 };
@@ -162,14 +166,17 @@ module.exports = function (options, cy, $) {
         var _snap = require("./snap");
         var _discreteDrag = require("./discrete_drag");
         var _drawGrid = require("./draw_grid");
+        var _resize = require("./resize");
 
         cytoscape( 'core', 'snapToGrid', function(opts){
             var cy = this;
             $.extend(true, options, opts);
 
-            var snap = _snap(options, cy);
-            var discreteDrag = _discreteDrag(options, cy, snap);
-            var drawGrid = _drawGrid(options, cy, $);
+            var snap = _snap(options.gridSpacing);
+            var resize = _resize(options.gridSpacing);
+
+            _discreteDrag(options, cy, snap);
+            _drawGrid(options, cy, $);
 
             return this; // chainability
         } );
@@ -192,23 +199,59 @@ module.exports = function (options, cy, $) {
 
 })();
 
-},{"./discrete_drag":1,"./draw_grid":2,"./snap":4}],4:[function(require,module,exports){
-module.exports = function (options, cy) {
+},{"./discrete_drag":1,"./draw_grid":2,"./resize":4,"./snap":5}],4:[function(require,module,exports){
+module.exports = function (gridSpacing) {
 
+
+    function resizeNode(node) {
+        var width = node.width();
+        var height = node.height();
+
+        var newWidth = Math.round(width / gridSpacing) * gridSpacing;
+        var newHeight = Math.round(height / gridSpacing) * gridSpacing;
+
+        newWidth = newWidth > 0 ? newWidth : gridSpacing;
+        newHeight = newHeight > 0 ? newHeight : gridSpacing;
+
+        if (width != newWidth || height != newHeight)
+            node.style({
+                "width": newWidth,
+                "height": newHeight
+            });
+    }
+
+    function resizeNodes(nodes) {
+        nodes.each(function (i, ele) {
+            resizeNode(node);
+        });
+    }
+
+
+    return {
+        resizeNode: resizeNode,
+        resizeNodes: resizeNodes
+    };
+   // cy.on("style", "node", onStyleChanged);
+
+
+};
+},{}],5:[function(require,module,exports){
+module.exports = function (gridSpacing) {
+/*
     function snapCyTarget(e) {
         snapNode(e.cyTarget);
     }
 
-    cy.on("style", "node", snapCyTarget);
+    //cy.on("style", "node", snapCyTarget);
     cy.on("add", "node", snapCyTarget);
     cy.on("free", "node", snapCyTarget); // If discrete drag is disabled
     cy.on("ready", snapAllNodes);
-
+*/
 
     var snapPos = function (pos) {
         var newPos = {
-            x: (Math.floor(pos.x / options.gridSpacing) + 0.5) * options.gridSpacing,
-            y: (Math.floor(pos.y / options.gridSpacing) + 0.5) * options.gridSpacing
+            x: (Math.floor(pos.x / gridSpacing) + 0.5) * gridSpacing,
+            y: (Math.floor(pos.y / gridSpacing) + 0.5) * gridSpacing
         };
 
         return newPos;
@@ -226,8 +269,8 @@ module.exports = function (options, cy) {
 
     };
 
-    var snapAllNodes = function () {
-        return cy.nodes().each(function (i, node) {
+    var snapNodes = function (nodes) {
+        return nodes.each(function (i, node) {
             snapNode(node);
         });
     };
@@ -235,7 +278,7 @@ module.exports = function (options, cy) {
     return {
         snapPos: snapPos,
         snapNode: snapNode,
-        snapAllNodes: snapAllNodes
+        snapNodes: snapNodes
     };
 
 };

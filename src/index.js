@@ -21,15 +21,17 @@
         var _snap = require("./snap");
         var _discreteDrag = require("./discrete_drag");
         var _drawGrid = require("./draw_grid");
+        var _resize = require("./resize");
 
         cytoscape( 'core', 'snapToGrid', function(opts){
             var cy = this;
             $.extend(true, options, opts);
 
-            var snap = _snap(options, cy);
-            
+            var snap = _snap(options.gridSpacing);
+            var resize = _resize(options.gridSpacing);
+
             _discreteDrag(options, cy, snap);
-            var drawGrid = _drawGrid(options, cy, $);
+            _drawGrid(options, cy, $);
 
             return this; // chainability
         } );
