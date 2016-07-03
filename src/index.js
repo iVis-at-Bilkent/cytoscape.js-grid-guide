@@ -27,7 +27,8 @@
             $.extend(true, options, opts);
 
             var snap = _snap(options, cy);
-            var discreteDrag = _discreteDrag(options, cy, snap);
+            
+            _discreteDrag(options, cy, snap);
             var drawGrid = _drawGrid(options, cy, $);
 
             return this; // chainability

@@ -12,18 +12,21 @@ module.exports = function (options, cy, snap) {
             attachedNode.unlock();
             snap.snapNode(attachedNode, mousePos);
             attachedNode.lock();
+            attachedNode.trigger("drag");
         }
     }
 
     function tapStartNode(e){
         attachedNode = e.cyTarget;
         attachedNode.lock();
+        attachedNode.trigger("grab");
         cy.on("tapdrag", tapDrag);
         cy.on("tapend", tapEnd);
     }
 
     function tapEnd(e){
         attachedNode.unlock();
+        attachedNode.trigger("free");
         cy.off("tapdrag", tapDrag);
         cy.off("tapend", tapEnd);
     }
