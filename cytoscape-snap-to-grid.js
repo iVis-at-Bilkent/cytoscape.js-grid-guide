@@ -17,7 +17,6 @@ module.exports = function (options, cy, snap) {
     }
 
     function tapStartNode(e){
-        console.log("start");
         attachedNode = e.cyTarget;
         attachedNode.lock();
         cy.on("tapdrag", tapDrag);
@@ -25,7 +24,6 @@ module.exports = function (options, cy, snap) {
     }
 
     function tapEnd(e){
-        console.log("end");
         attachedNode.unlock();
         cy.off("tapdrag", tapDrag);
         cy.off("tapend", tapEnd);
@@ -59,8 +57,7 @@ module.exports = function (options, cy, snap) {
             var cy = this;
             $.extend(true, options, opts);
 
-            var snap = _snap(options);
-            console.log(_snap);
+            var snap = _snap(options, cy);
             var discreteDrag = _discreteDrag(options, cy, snap);
 
             return this; // chainability
@@ -85,9 +82,19 @@ module.exports = function (options, cy, snap) {
 })();
 
 },{"./discrete_drag":1,"./snap":3}],3:[function(require,module,exports){
-module.exports = function (options) {
+module.exports = function (options, cy) {
 
-    snapPos = function (pos) {
+    function snapCyTarget(e) {
+        snapNode(e.cyTarget);
+    }
+
+    cy.on("style", "node", snapCyTarget);
+    cy.on("add", "node", snapCyTarget);
+    cy.on("free", "node", snapCyTarget); // If discrete drag is disabled
+    cy.on("ready", snapAllNodes);
+
+
+    var snapPos = function (pos) {
         var newPos = {
             x: Math.round(pos.x / options.gridSpacing) * options.gridSpacing,
             y: Math.round(pos.y / options.gridSpacing) * options.gridSpacing
@@ -96,19 +103,28 @@ module.exports = function (options) {
         return newPos;
     };
 
-    snapNode = function (node, toPos) {
+    var snapNode = function (node, toPos) {
         var pos = node.position();
 
         if (!toPos)
-            var toPos = snapPos(pos);
+            var newPos = snapPos(pos);
+        else
+            newPos = snapPos(toPos);
 
-        return node.position(toPos);
+        return node.position(newPos);
 
+    };
+
+    var snapAllNodes = function () {
+        return cy.nodes().each(function (i, node) {
+            snapNode(node);
+        });
     };
 
     return {
         snapPos: snapPos,
-        snapNode: snapNode
+        snapNode: snapNode,
+        snapAllNodes: snapAllNodes
     };
 
 };

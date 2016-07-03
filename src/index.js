@@ -18,8 +18,7 @@
             var cy = this;
             $.extend(true, options, opts);
 
-            var snap = _snap(options);
-            console.log(_snap);
+            var snap = _snap(options, cy);
             var discreteDrag = _discreteDrag(options, cy, snap);
 
             return this; // chainability
