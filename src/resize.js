@@ -12,11 +12,11 @@ module.exports = function (gridSpacing) {
         var width = node.width();
         var height = node.height();
 
-        var newWidth = Math.round(width / gridSpacing) * gridSpacing;
-        var newHeight = Math.round(height / gridSpacing) * gridSpacing;
+        var newWidth = Math.round((width-gridSpacing) / (gridSpacing * 2)) * (gridSpacing * 2);
+        var newHeight = Math.round((height-gridSpacing) / (gridSpacing * 2)) * (gridSpacing * 2);
 
-        newWidth = newWidth > 0 ? newWidth : gridSpacing;
-        newHeight = newHeight > 0 ? newHeight : gridSpacing;
+        newWidth = newWidth > 0 ? newWidth + gridSpacing : gridSpacing;
+        newHeight = newHeight > 0 ? newHeight + gridSpacing : gridSpacing;
 
         if (width != newWidth || height != newHeight) {
             node.style({
