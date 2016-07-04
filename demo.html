@@ -57,20 +57,27 @@
 								'target-arrow-shape': 'triangle'
 							}
 						},
-
 						{
-							selector: ':selected',
+							selector: '.bigNode',
 							style: {
-
+								"width": 110,
+								"height": 110
+							}
+						},
+						{
+							selector: ".mediumNode",
+							style: {
+								"width": 90,
+								"height": 90
 							}
 						}
 					],
 
 					elements: {
 						nodes: [
-							{ data: { id: 'j', name: 'Jerry' } },
+							{ data: { id: 'j', name: 'Jerry' }, classes: "bigNode" },
 							{ data: { id: 'e', name: 'Elaine' } },
-							{ data: { id: 'k', name: 'Kramer' } },
+							{ data: { id: 'k', name: 'Kramer' }, classes: "mediumNode" },
 							{ data: { id: 'g', name: 'George' } }
 						],
 						edges: [

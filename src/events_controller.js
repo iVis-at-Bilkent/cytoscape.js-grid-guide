@@ -66,8 +66,8 @@ module.exports = function ( cy, snap, resize, discreteDrag, drawGrid, $) {
     }
     
     // Draw Grid
-    var drawGridOnZoom = function () { console.log("zoom"); if( latestOptions.zoomDash ) drawGrid.drawGrid() };
-    var drawGridOnPan = function () { console.log("pan"); if( latestOptions.panGrid ) drawGrid.drawGrid() };
+    var drawGridOnZoom = function () { if( latestOptions.zoomDash ) drawGrid.drawGrid() };
+    var drawGridOnPan = function () { if( latestOptions.panGrid ) drawGrid.drawGrid() };
 
     function setDrawGrid(enable) {
 

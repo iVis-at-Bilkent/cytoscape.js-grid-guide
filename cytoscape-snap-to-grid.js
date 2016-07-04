@@ -212,8 +212,8 @@ module.exports = function ( cy, snap, resize, discreteDrag, drawGrid, $) {
     }
     
     // Draw Grid
-    var drawGridOnZoom = function () { console.log("zoom"); if( latestOptions.zoomDash ) drawGrid.drawGrid() };
-    var drawGridOnPan = function () { console.log("pan"); if( latestOptions.panGrid ) drawGrid.drawGrid() };
+    var drawGridOnZoom = function () { if( latestOptions.zoomDash ) drawGrid.drawGrid() };
+    var drawGridOnPan = function () { if( latestOptions.panGrid ) drawGrid.drawGrid() };
 
     function setDrawGrid(enable) {
 
@@ -254,6 +254,80 @@ module.exports = function ( cy, snap, resize, discreteDrag, drawGrid, $) {
     
 };
 },{}],4:[function(require,module,exports){
+module.exports = function (cy) {
+
+    function calcDistance(p1, p2){
+        return Math.sqrt(Math.pow(p1.x - p2.y ,2) + Math.pow(p1.x - p2.y, 2));
+    }
+
+    var dims = function (node) {
+
+        var pos = node.position();
+        var width = node.width();
+        var height = node.height();
+        this.X = {
+            center: pos.x,
+            left: pos.x - width/2,
+            right: pos.x + width/2
+        };
+
+        this.Y = {
+            center: pos.y,
+            top: pos.y - height/2,
+            bot: pos.y + height/2
+        };
+
+        return this;
+    };
+
+    cy.on("drag", "node", function (e) {
+        var node = e.cyTarget;
+
+        var mainDims = new dims(node);
+
+        var cy = e.cy;
+        console.log("TRY");
+        var nearests = {
+            X: {
+                id: "_none_",
+                distance: Number.MAX_VALUE
+            },
+            Y: {
+                id: "_none_",
+                distance: Number.MAX_VALUE
+            }
+        };
+        cy.nodes(":visible").not(node).each(function (i, ele) {
+            var nodeDims = new dims(ele);
+
+
+            for (var dim in mainDims) {
+                var mainDim = mainDims[dim];
+                var nodeDim = nodeDims[dim];
+                var otherDim = dim == "X" ? "y" : "x";
+                for (var key in mainDim) {
+                    for (var key2 in nodeDim){
+                        if (mainDim[key] == nodeDim[key2]) {
+                            var distance = calcDistance(node.position(), ele.position()); //Math.abs(ele.position(otherDim) - node.position(otherDim));
+                            if (nearests[dim].distance > distance) {
+                                nearests[dim] = {
+                                    id: ele.id(),
+                                    distance: distance
+                                }
+                            }
+                        }
+                           // console.log(key + " of " + node.id() + " -> " + key2 + " of " + ele.id())
+                    }
+                }
+            }
+        });
+        console.log(nearests.X.id + " of X with distance " + nearests.X.distance);
+        console.log(nearests.Y.id + " of Y with distance " + nearests.Y.distance);
+
+    });
+
+};
+},{}],5:[function(require,module,exports){
 ;(function(){ 'use strict';
 
     // registers the extension on a cytoscape lib ref
@@ -263,9 +337,9 @@ module.exports = function ( cy, snap, resize, discreteDrag, drawGrid, $) {
 
 
         var options = {
-            snapToGrid: true,
-            discreteDrag: true,
-            resize: true,
+            snapToGrid: false,
+            discreteDrag: false,
+            resize: false,
             drawGrid: true,
             zoomDash: true,
             panGrid: true,
@@ -281,7 +355,8 @@ module.exports = function ( cy, snap, resize, discreteDrag, drawGrid, $) {
         var _drawGrid = require("./draw_grid");
         var _resize = require("./resize");
         var _eventsController = require("./events_controller");
-        var snap, resize, discreteDrag, drawGrid, eventsController;
+        var _guidelines = require("./guidelines");
+        var snap, resize, discreteDrag, drawGrid, eventsController, guidelines;
 
         var initialized = false;
         cytoscape( 'core', 'snapToGrid', function(opts){
@@ -293,6 +368,8 @@ module.exports = function ( cy, snap, resize, discreteDrag, drawGrid, $) {
                 resize = _resize(options.gridSpacing);
                 discreteDrag = _discreteDrag(cy, snap);
                 drawGrid = _drawGrid(options, cy, $);
+                guidelines = _guidelines(cy);
+
                 eventsController = _eventsController(cy, snap, resize, discreteDrag, drawGrid, $);
 
 
@@ -322,7 +399,7 @@ module.exports = function ( cy, snap, resize, discreteDrag, drawGrid, $) {
 
 })();
 
-},{"./discrete_drag":1,"./draw_grid":2,"./events_controller":3,"./resize":5,"./snap":6}],5:[function(require,module,exports){
+},{"./discrete_drag":1,"./draw_grid":2,"./events_controller":3,"./guidelines":4,"./resize":6,"./snap":7}],6:[function(require,module,exports){
 module.exports = function (gridSpacing) {
 
 
@@ -337,11 +414,11 @@ module.exports = function (gridSpacing) {
         var width = node.width();
         var height = node.height();
 
-        var newWidth = Math.round(width / gridSpacing) * gridSpacing;
-        var newHeight = Math.round(height / gridSpacing) * gridSpacing;
+        var newWidth = Math.round((width-gridSpacing) / (gridSpacing * 2)) * (gridSpacing * 2);
+        var newHeight = Math.round((height-gridSpacing) / (gridSpacing * 2)) * (gridSpacing * 2);
 
-        newWidth = newWidth > 0 ? newWidth : gridSpacing;
-        newHeight = newHeight > 0 ? newHeight : gridSpacing;
+        newWidth = newWidth > 0 ? newWidth + gridSpacing : gridSpacing;
+        newHeight = newHeight > 0 ? newHeight + gridSpacing : gridSpacing;
 
         if (width != newWidth || height != newHeight) {
             node.style({
@@ -373,7 +450,7 @@ module.exports = function (gridSpacing) {
     };
 
 };
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 module.exports = function (gridSpacing) {
 
 
@@ -404,4 +481,4 @@ module.exports = function (gridSpacing) {
     };
 
 };
-},{}]},{},[4]);
+},{}]},{},[5]);
