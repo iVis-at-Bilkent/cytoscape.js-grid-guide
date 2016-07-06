@@ -5,9 +5,9 @@
 
         if( !cytoscape ){ return; } // can't register if cytoscape unspecified
 
-        
+
         var options = {
-            // On/Off
+            // On/Off Modules
             snapToGrid: true, // Snap to grid functionality
             discreteDrag: true, // Discrete Drag
             guidelines: true, // Guidelines on dragging nodes
@@ -15,15 +15,16 @@
             parentPadding: true, // Adjust parent sizes to cell sizes by padding
             drawGrid: true, // Draw grid background
 
-            zoomDash: true, // Determines whether the size of the dashes should change when the drawing is zoomed in and out.
-            panGrid: true, // Determines whether the grid should move then the user moves the graph.
+            // Other settings
+            zoomDash: true, // Determines whether the size of the dashes should change when the drawing is zoomed in and out if grid is drawn.
+            panGrid: true, // Determines whether the grid should move then the user moves the graph if grid is drawn.
             gridSpacing: 40, // Distance between the lines of the grid.
-            gridStackOrder: -1, //
-            strokeStyle: '#CCCCCC',
-            lineWidth: 1.0,
-            lineDash: [5,8],
-            guidelinesStackOrder: 4,
-            guidelinesTolerance: 0.08
+            gridStackOrder: -1, // Namely z-index
+            strokeStyle: '#CCCCCC', // Color of grid lines
+            lineWidth: 1.0, // Width of grid lines
+            lineDash: [5,8], // Defines style of dash. Read: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/setLineDash
+            guidelinesStackOrder: 4, // z-index of guidelines
+            guidelinesTolerance: 0.08 // Tolerance distance for rendered positions of nodes' interaction.
         };
 
         var _snap = require("./snap");
