@@ -86,7 +86,7 @@ module.exports = function (opts, cy, $) {
                 }
             };
 
-            cy.nodes(":visible").not(node).each(function (i, ele) {
+            cy.nodes(":visible").not(":parent").not(node).each(function (i, ele) {
                 var nodeDims = new dims(ele);
 
 

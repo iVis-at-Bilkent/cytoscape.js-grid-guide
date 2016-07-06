@@ -163,13 +163,14 @@ module.exports = function ( cy, snap, resize, discreteDrag, drawGrid, guidelines
     
     function applyToCyTarget(func) {
         return function (e) {
-            func(e.cyTarget);
+            if(!e.cyTarget.is(":parent"))
+                func(e.cyTarget);
         }
     }
     
     function applyToAllNodes(func) {
         return function () {
-            cy.nodes().each(function (i, ele) {
+            cy.nodes().not(":parent").each(function (i, ele) {
                 func(ele);
             });
         };
@@ -266,7 +267,7 @@ module.exports = function ( cy, snap, resize, discreteDrag, drawGrid, guidelines
         init: init,
         syncWithOptions: syncWithOptions
     };
-    
+
 };
 },{}],4:[function(require,module,exports){
 module.exports = function (opts, cy, $) {
@@ -357,7 +358,7 @@ module.exports = function (opts, cy, $) {
                 }
             };
 
-            cy.nodes(":visible").not(node).each(function (i, ele) {
+            cy.nodes(":visible").not(":parent").not(node).each(function (i, ele) {
                 var nodeDims = new dims(ele);
 
 
