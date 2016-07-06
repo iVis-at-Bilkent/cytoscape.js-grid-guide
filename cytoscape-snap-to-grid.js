@@ -435,6 +435,8 @@ module.exports = function (opts, cy, $) {
             resize: true,
             guidelines: true,
             drawGrid: true,
+            parentPadding: true,
+            
             zoomDash: true,
             panGrid: true,
             gridSpacing: 40,
@@ -452,7 +454,8 @@ module.exports = function (opts, cy, $) {
         var _resize = require("./resize");
         var _eventsController = require("./events_controller");
         var _guidelines = require("./guidelines");
-        var snap, resize, discreteDrag, drawGrid, eventsController, guidelines;
+        var _parentSnap = require("./parentage");
+        var snap, resize, discreteDrag, drawGrid, eventsController, guidelines, parentSnap;
 
         var initialized = false;
         cytoscape( 'core', 'snapToGrid', function(opts){
@@ -465,6 +468,7 @@ module.exports = function (opts, cy, $) {
                 discreteDrag = _discreteDrag(cy, snap);
                 drawGrid = _drawGrid(options, cy, $);
                 guidelines = _guidelines(options, cy, $);
+                parentSnap = _parentSnap(options, cy);
 
                 eventsController = _eventsController(cy, snap, resize, discreteDrag, drawGrid, guidelines, $);
 
@@ -495,7 +499,15 @@ module.exports = function (opts, cy, $) {
 
 })();
 
-},{"./discrete_drag":1,"./draw_grid":2,"./events_controller":3,"./guidelines":4,"./resize":6,"./snap":7}],6:[function(require,module,exports){
+},{"./discrete_drag":1,"./draw_grid":2,"./events_controller":3,"./guidelines":4,"./parentage":6,"./resize":7,"./snap":8}],6:[function(require,module,exports){
+module.exports = function (options, cy) {
+
+    cy.style()
+        .selector(':parent')
+        .style('width', 1231)
+        .update();
+};
+},{}],7:[function(require,module,exports){
 module.exports = function (gridSpacing) {
 
 
@@ -546,7 +558,7 @@ module.exports = function (gridSpacing) {
     };
 
 };
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 module.exports = function (gridSpacing) {
 
 

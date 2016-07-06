@@ -5,17 +5,20 @@
 
         if( !cytoscape ){ return; } // can't register if cytoscape unspecified
 
-
+        
         var options = {
-            snapToGrid: true,
-            discreteDrag: true,
-            resize: true,
-            guidelines: true,
-            drawGrid: true,
-            zoomDash: true,
-            panGrid: true,
-            gridSpacing: 40,
-            gridStackOrder: -1,
+            // On/Off
+            snapToGrid: true, // Snap to grid functionality
+            discreteDrag: true, // Discrete Drag
+            guidelines: true, // Guidelines on dragging nodes
+            resize: true, // Adjust node sizes to cell sizes
+            parentPadding: true, // Adjust parent sizes to cell sizes by padding
+            drawGrid: true, // Draw grid background
+
+            zoomDash: true, // Determines whether the size of the dashes should change when the drawing is zoomed in and out.
+            panGrid: true, // Determines whether the grid should move then the user moves the graph.
+            gridSpacing: 40, // Distance between the lines of the grid.
+            gridStackOrder: -1, //
             strokeStyle: '#CCCCCC',
             lineWidth: 1.0,
             lineDash: [5,8],
@@ -29,7 +32,8 @@
         var _resize = require("./resize");
         var _eventsController = require("./events_controller");
         var _guidelines = require("./guidelines");
-        var snap, resize, discreteDrag, drawGrid, eventsController, guidelines;
+        var _parentSnap = require("./parentage");
+        var snap, resize, discreteDrag, drawGrid, eventsController, guidelines, parentSnap;
 
         var initialized = false;
         cytoscape( 'core', 'snapToGrid', function(opts){
@@ -42,6 +46,7 @@
                 discreteDrag = _discreteDrag(cy, snap);
                 drawGrid = _drawGrid(options, cy, $);
                 guidelines = _guidelines(options, cy, $);
+                parentSnap = _parentSnap(options, cy);
 
                 eventsController = _eventsController(cy, snap, resize, discreteDrag, drawGrid, guidelines, $);
 

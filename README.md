@@ -4,13 +4,40 @@ cytoscape-snap-to-grid
 
 ## Description
 
-Framework for snap-to-grid interactions.
+Framework for grid interactions. Provides discrete dragging, grid background, gridlines on dragging, resizing nodes 
+& compounds to fit cells.
 
+
+## API
+
+ *`cy.snapToGrid(options)` Sets stated options any time wanted.
+ 
+## Default Options
+```js
+        var options = {
+            snapToGrid: true,
+            discreteDrag: true,
+            resize: true,
+            guidelines: true,
+            drawGrid: true,
+            parentPadding: true,
+            
+            zoomDash: true,
+            panGrid: true,
+            gridSpacing: 40,
+            gridStackOrder: -1,
+            strokeStyle: '#CCCCCC',
+            lineWidth: 1.0,
+            lineDash: [5,8],
+            guidelinesStackOrder: 4,
+            guidelinesTolerance: 0.08
+        };
+```
 
 ## Dependencies
 
- * Cytoscape.js ^x.y.z
- * <List your dependencies here please>
+ * Cytoscape.js ^1.6.10
+ * jQuery ^1.4 || ^2.0 || ^3.0
 
 
 ## Usage instructions
@@ -27,7 +54,7 @@ CommonJS:
 var cytoscape = require('cytoscape');
 var snap-to-grid = require('cytoscape-snap-to-grid');
 
-snap-to-grid( cytoscape ); // register extension
+snap-to-grid( cytoscape, jquery ); // register extension
 ```
 
 AMD:
@@ -40,29 +67,6 @@ require(['cytoscape', 'cytoscape-snap-to-grid'], function( cytoscape, snap-to-gr
 Plain HTML/JS has the extension registered for you automatically, because no `require()` is needed.
 
 
-## API
-
-Please briefly describe your API here:
-
-```js
-cy.snap-to-grid({
-  foo: 'bar', // some option that does this
-  baz: 'bat' // some options that does that
-  // ... and so on
-});
-```
-
-Or maybe if you have a collection extension:
-
-```js
-cy.elements().test({
-  foo: 'bar', // some option that does this
-  baz: 'bat' // some options that does that
-  // ... and so on
-});
-```
-
-
 ## Publishing instructions
 
 This project is set up to automatically be published to npm and bower.  To publish:
@@ -70,3 +74,7 @@ This project is set up to automatically be published to npm and bower.  To publi
 1. Set the version number environment variable: `export VERSION=1.2.3`
 1. Publish: `gulp publish`
 1. If publishing to bower for the first time, you'll need to run `bower register cytoscape-snap-to-grid https://github.com/iVis-at-Bilkent/cytoscape.js-snap-to-grid.git`
+
+
+## Credits
+Draw grid functionality is written by [guimeira](https://github.com/guimeira).
