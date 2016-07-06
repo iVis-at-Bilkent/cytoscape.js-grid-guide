@@ -72,7 +72,7 @@ module.exports = function (opts, cy, $) {
                 'position': 'absolute',
                 'top': 0,
                 'left': 0,
-                'z-index': options.stackOrder
+                'z-index': options.gridStackOrder
             } );
 
         setTimeout( function() {

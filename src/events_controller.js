@@ -1,4 +1,4 @@
-module.exports = function ( cy, snap, resize, discreteDrag, drawGrid, $) {
+module.exports = function ( cy, snap, resize, discreteDrag, drawGrid, guidelines, $) {
 
     var feature = function (func) {
         return function (enable) {
@@ -10,7 +10,8 @@ module.exports = function ( cy, snap, resize, discreteDrag, drawGrid, $) {
         discreteDrag: new feature(setDiscreteDrag),
         resize: new feature(setResize),
         snapToGrid: new feature(setSnapToGrid),
-        drawGrid: new feature(setDrawGrid)
+        drawGrid: new feature(setDrawGrid),
+        guidelines: new feature(setGuidelines)
     };
 
     
@@ -82,6 +83,20 @@ module.exports = function ( cy, snap, resize, discreteDrag, drawGrid, $) {
             drawGrid.clearCanvas();
             $( window ).off( 'resize', drawGrid.resizeCanvas );
         }
+    }
+
+    // Guidelines
+
+    function setGuidelines(enable) {
+        if (enable)
+            guidelines.changeOptions(currentOptions);
+
+        cy[eventStatus(enable)]( 'zoom', guidelines.onZoom);
+        cy[eventStatus(enable)]( 'drag', "node", guidelines.onDragNode);
+        cy[eventStatus(enable)]( 'grab', "node", guidelines.onGrabNode);
+        cy[eventStatus(enable)]( 'free', "node", guidelines.onFreeNode);
+
+
     }
 
     // Sync with options: Enables/disables changed via options.

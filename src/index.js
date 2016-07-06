@@ -7,17 +7,20 @@
 
 
         var options = {
-            snapToGrid: false,
-            discreteDrag: false,
-            resize: false,
+            snapToGrid: true,
+            discreteDrag: true,
+            resize: true,
+            guidelines: true,
             drawGrid: true,
             zoomDash: true,
             panGrid: true,
             gridSpacing: 40,
-            stackOrder: -1,
+            gridStackOrder: -1,
             strokeStyle: '#CCCCCC',
             lineWidth: 1.0,
             lineDash: [5,8],
+            guidelinesStackOrder: 4,
+            guidelinesTolerance: 0.08
         };
 
         var _snap = require("./snap");
@@ -38,9 +41,9 @@
                 resize = _resize(options.gridSpacing);
                 discreteDrag = _discreteDrag(cy, snap);
                 drawGrid = _drawGrid(options, cy, $);
-                guidelines = _guidelines(cy);
+                guidelines = _guidelines(options, cy, $);
 
-                eventsController = _eventsController(cy, snap, resize, discreteDrag, drawGrid, $);
+                eventsController = _eventsController(cy, snap, resize, discreteDrag, drawGrid, guidelines, $);
 
 
                 eventsController.init(options);
@@ -49,7 +52,7 @@
 
 
             return this; // chainability
-        } );
+        } ) ;
 
     };
 
