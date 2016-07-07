@@ -11,7 +11,8 @@ module.exports = function ( cy, snap, resize, discreteDrag, drawGrid, guidelines
         resize: new feature(setResize),
         snapToGrid: new feature(setSnapToGrid),
         drawGrid: new feature(setDrawGrid),
-        guidelines: new feature(setGuidelines)
+        guidelines: new feature(setGuidelines),
+        parentPadding: new feature(setParentPadding)
     };
 
     
@@ -108,7 +109,7 @@ module.exports = function ( cy, snap, resize, discreteDrag, drawGrid, guidelines
             parentPadding.setPaddings();
         }
 
-        cy[eventStatus(enable)]( 'ready', parentPadding.setParentPadding());
+        cy[eventStatus(enable)]( 'ready', parentPadding.setPaddings);
     }
 
     // Sync with options: Enables/disables changed via options.

@@ -157,7 +157,8 @@ module.exports = function ( cy, snap, resize, discreteDrag, drawGrid, guidelines
         resize: new feature(setResize),
         snapToGrid: new feature(setSnapToGrid),
         drawGrid: new feature(setDrawGrid),
-        guidelines: new feature(setGuidelines)
+        guidelines: new feature(setGuidelines),
+        parentPadding: new feature(setParentPadding)
     };
 
     
@@ -254,7 +255,7 @@ module.exports = function ( cy, snap, resize, discreteDrag, drawGrid, guidelines
             parentPadding.setPaddings();
         }
 
-        cy[eventStatus(enable)]( 'ready', parentPadding.setParentPadding());
+        cy[eventStatus(enable)]( 'ready', parentPadding.setPaddings);
     }
 
     // Sync with options: Enables/disables changed via options.
@@ -410,9 +411,10 @@ module.exports = function (opts, cy, $) {
                     ctx.beginPath();
                     ctx.moveTo(item.fromPos.x, item.fromPos.y);
                     ctx.lineTo(item.toPos.x, item.toPos.y);
-                    
-                    for (var key in options.guidelinesStyle)
-                        ctx[key] = options.guidelinesStyle[key];
+
+                    for (var styleKey in options.guidelinesStyle)
+                        if (ctx.hasOwnProperty(styleKey))
+                        ctx[styleKey] = options.guidelinesStyle[styleKey];
 
                     ctx.stroke();
                 }
@@ -469,8 +471,8 @@ module.exports = function (opts, cy, $) {
             // Guidelines
             guidelinesStackOrder: 4, // z-index of guidelines
             guidelinesTolerance: 0.08, // Tolerance distance for rendered positions of nodes' interaction.
-            guidelinesStyle: {
-               // strokeStyle: "red"
+            guidelinesStyle: { // Set ctx properties of line. Properties are here: http://www.w3schools.com/tags/ref_canvas.asp
+                strokeStyle: "black"
             },
 
             // Parent Padding
