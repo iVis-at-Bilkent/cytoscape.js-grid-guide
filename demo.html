@@ -20,13 +20,23 @@
 				font-family: helvetica neue, helvetica, liberation sans, arial, sans-serif;
 				font-size: 14px;
 			}
-
+			#config {
+				position: absolute;
+				right: 0;
+				top: 0;
+				bottom: 0;
+				width: 15em;
+				background: darksalmon;
+				padding: 0.5em;
+				color: #fff;
+				overflow: auto;
+			}
 			#cy {
 				position: absolute;
 				left: 0;
 				top: 0;
 				bottom: 0;
-				right: 0;
+				right: 16em;
 				z-index: 999;
 			}
 
@@ -99,7 +109,7 @@
 				// demo your core ext
 				cy.snapToGrid({
 					guidelinesStyle: {
-						strokeStyle: "blue"
+						strokeStyle: "red"
 					}
 				} );
 
@@ -111,7 +121,10 @@
 		<h1>cytoscape-snap-to-grid demo</h1>
 
 		<div id="cy"></div>
+		<div id="config">
 
+			<h1>Modules</h1>
+		</div>
 	</body>
 
 </html>

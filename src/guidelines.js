@@ -129,7 +129,6 @@ module.exports = function (opts, cy, $) {
                     ctx.lineTo(item.toPos.x, item.toPos.y);
 
                     for (var styleKey in options.guidelinesStyle)
-                        if (ctx.hasOwnProperty(styleKey))
                         ctx[styleKey] = options.guidelinesStyle[styleKey];
 
                     ctx.stroke();
