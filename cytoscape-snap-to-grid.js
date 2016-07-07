@@ -144,7 +144,7 @@ module.exports = function (opts, cy, $) {
     };
 };
 },{}],3:[function(require,module,exports){
-module.exports = function ( cy, snap, resize, discreteDrag, drawGrid, guidelines, $) {
+module.exports = function ( cy, snap, resize, discreteDrag, drawGrid, guidelines, parentPadding, $) {
 
     var feature = function (func) {
         return function (enable) {
@@ -244,6 +244,17 @@ module.exports = function ( cy, snap, resize, discreteDrag, drawGrid, guidelines
         cy[eventStatus(enable)]( 'free', "node", guidelines.onFreeNode);
 
 
+    }
+
+    // Parent Padding
+
+    function setParentPadding(enable) {
+        if (enable) {
+            parentPadding.changeOptions(currentOptions);
+            parentPadding.setPaddings();
+        }
+
+        cy[eventStatus(enable)]( 'ready', parentPadding.setParentPadding());
     }
 
     // Sync with options: Enables/disables changed via options.
@@ -399,6 +410,10 @@ module.exports = function (opts, cy, $) {
                     ctx.beginPath();
                     ctx.moveTo(item.fromPos.x, item.fromPos.y);
                     ctx.lineTo(item.toPos.x, item.toPos.y);
+                    
+                    for (var key in options.guidelinesStyle)
+                        ctx[key] = options.guidelinesStyle[key];
+
                     ctx.stroke();
                 }
             }
@@ -430,22 +445,36 @@ module.exports = function (opts, cy, $) {
 
 
         var options = {
-            snapToGrid: true,
-            discreteDrag: true,
-            resize: true,
-            guidelines: true,
-            drawGrid: true,
-            parentPadding: true,
-            
-            zoomDash: true,
-            panGrid: true,
-            gridSpacing: 40,
-            gridStackOrder: -1,
-            strokeStyle: '#CCCCCC',
-            lineWidth: 1.0,
-            lineDash: [5,8],
-            guidelinesStackOrder: 4,
-            guidelinesTolerance: 0.08
+            // On/Off Modules
+            snapToGrid: true, // Snap to grid functionality
+            discreteDrag: true, // Discrete Drag
+            guidelines: true, // Guidelines on dragging nodes
+            resize: true, // Adjust node sizes to cell sizes
+            parentPadding: true, // Adjust parent sizes to cell sizes by padding
+            drawGrid: true, // Draw grid background
+
+            // Other settings
+
+            // General
+            gridSpacing: 40, // Distance between the lines of the grid.
+
+            // Draw Grid
+            zoomDash: true, // Determines whether the size of the dashes should change when the drawing is zoomed in and out if grid is drawn.
+            panGrid: true, // Determines whether the grid should move then the user moves the graph if grid is drawn.
+            gridStackOrder: -1, // Namely z-index
+            strokeStyle: '#CCCCCC', // Color of grid lines
+            lineWidth: 1.0, // Width of grid lines
+            lineDash: [5,8], // Defines style of dash. Read: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/setLineDash
+
+            // Guidelines
+            guidelinesStackOrder: 4, // z-index of guidelines
+            guidelinesTolerance: 0.08, // Tolerance distance for rendered positions of nodes' interaction.
+            guidelinesStyle: {
+               // strokeStyle: "red"
+            },
+
+            // Parent Padding
+            parentSpacing: -1 // -1 to set paddings of parents to gridSpacing
         };
 
         var _snap = require("./snap");
@@ -454,8 +483,8 @@ module.exports = function (opts, cy, $) {
         var _resize = require("./resize");
         var _eventsController = require("./events_controller");
         var _guidelines = require("./guidelines");
-        var _parentSnap = require("./parentage");
-        var snap, resize, discreteDrag, drawGrid, eventsController, guidelines, parentSnap;
+        var _parentPadding = require("./parentPadding");
+        var snap, resize, discreteDrag, drawGrid, eventsController, guidelines, parentPadding;
 
         var initialized = false;
         cytoscape( 'core', 'snapToGrid', function(opts){
@@ -468,9 +497,9 @@ module.exports = function (opts, cy, $) {
                 discreteDrag = _discreteDrag(cy, snap);
                 drawGrid = _drawGrid(options, cy, $);
                 guidelines = _guidelines(options, cy, $);
-                parentSnap = _parentSnap(options, cy);
+                parentPadding = _parentPadding(options, cy);
 
-                eventsController = _eventsController(cy, snap, resize, discreteDrag, drawGrid, guidelines, $);
+                eventsController = _eventsController(cy, snap, resize, discreteDrag, drawGrid, guidelines, parentPadding, $);
 
 
                 eventsController.init(options);
@@ -499,13 +528,34 @@ module.exports = function (opts, cy, $) {
 
 })();
 
-},{"./discrete_drag":1,"./draw_grid":2,"./events_controller":3,"./guidelines":4,"./parentage":6,"./resize":7,"./snap":8}],6:[function(require,module,exports){
-module.exports = function (options, cy) {
+},{"./discrete_drag":1,"./draw_grid":2,"./events_controller":3,"./guidelines":4,"./parentPadding":6,"./resize":7,"./snap":8}],6:[function(require,module,exports){
+module.exports = function (opts, cy) {
 
-    cy.style()
-        .selector(':parent')
-        .style('width', 1231)
-        .update();
+    var options = opts;
+
+    function changeOptions(opts) {
+        options = opts;
+    }
+
+    function setPaddings() {
+        var padding = options.parentSpacing < 0 ? options.gridSpacing : options.parentSpacing;
+
+
+        cy.style()
+            .selector(':parent')
+            .style("compound-sizing-wrt-labels", "exclude")
+            .style("padding-left", padding)
+            .style("padding-right", padding)
+            .style("padding-top", padding)
+            .style("padding-bottom", padding)
+            .update();
+
+    }
+
+    return {
+        changeOptions: changeOptions,
+        setPaddings: setPaddings
+    };
 };
 },{}],7:[function(require,module,exports){
 module.exports = function (gridSpacing) {

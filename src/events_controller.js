@@ -1,4 +1,4 @@
-module.exports = function ( cy, snap, resize, discreteDrag, drawGrid, guidelines, $) {
+module.exports = function ( cy, snap, resize, discreteDrag, drawGrid, guidelines, parentPadding, $) {
 
     var feature = function (func) {
         return function (enable) {
@@ -98,6 +98,17 @@ module.exports = function ( cy, snap, resize, discreteDrag, drawGrid, guidelines
         cy[eventStatus(enable)]( 'free', "node", guidelines.onFreeNode);
 
 
+    }
+
+    // Parent Padding
+
+    function setParentPadding(enable) {
+        if (enable) {
+            parentPadding.changeOptions(currentOptions);
+            parentPadding.setPaddings();
+        }
+
+        cy[eventStatus(enable)]( 'ready', parentPadding.setParentPadding());
     }
 
     // Sync with options: Enables/disables changed via options.
