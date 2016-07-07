@@ -2,129 +2,184 @@
 
 <html>
 
-	<head>
-		<title>cytoscape-snap-to-grid.js demo</title>
+<head>
+    <title>cytoscape-snap-to-grid.js demo</title>
 
-		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
 
-		<script src="https://code.jquery.com/jquery-3.0.0.min.js"></script>
-		<script src="http://cytoscape.github.io/cytoscape.js/api/cytoscape.js-latest/cytoscape.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.0.0.min.js"></script>
+    <script src="http://cytoscape.github.io/cytoscape.js/api/cytoscape.js-latest/cytoscape.min.js"></script>
 
-		<!-- for testing with local version of cytoscape.js -->
-		<!--<script src="../cytoscape.js/build/cytoscape.js"></script>-->
+    <!-- for testing with local version of cytoscape.js -->
+    <!--<script src="../cytoscape.js/build/cytoscape.js"></script>-->
 
-		<script src="cytoscape-snap-to-grid.js"></script>
+    <script src="cytoscape-snap-to-grid.js"></script>
 
-		<style>
-			body {
-				font-family: helvetica neue, helvetica, liberation sans, arial, sans-serif;
-				font-size: 14px;
-			}
-			#config {
-				position: absolute;
-				right: 0;
-				top: 0;
-				bottom: 0;
-				width: 15em;
-				background: darksalmon;
-				padding: 0.5em;
-				color: #fff;
-				overflow: auto;
-			}
-			#cy {
-				position: absolute;
-				left: 0;
-				top: 0;
-				bottom: 0;
-				right: 16em;
-				z-index: 999;
-			}
+    <style>
+        body {
+            font-family: helvetica neue, helvetica, liberation sans, arial, sans-serif;
+            font-size: 14px;
+        }
 
-			h1 {
-				opacity: 0.5;
-				font-size: 1em;
-				font-weight: bold;
-			}
-		</style>
+        .modules div {
+            margin: 1em;
+            cursor: pointer;
+        }
 
-		<script>
-			document.addEventListener('DOMContentLoaded', function(){
+        .modules div.enabled b {
+            color: darkblue;
+        }
 
-				var cy = window.cy = cytoscape({
-					container: document.getElementById('cy'),
+        .modules div.disabled b {
+            color: darkred;
+        }
 
-					style: [
-						{
-							selector: 'node',
-							style: {
-								'content': 'data(name)'
-							}
-						},
+        #config {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            width: 15em;
+            background: darksalmon;
+            padding: 0.5em;
+            color: #fff;
+            overflow: auto;
+        }
 
-						{
-							selector: 'edge',
-							style: {
-								'target-arrow-shape': 'triangle'
-							}
-						},
-						{
-							selector: '.bigNode',
-							style: {
-								"width": 110,
-								"height": 110
-							}
-						},
-						{
-							selector: ".mediumNode",
-							style: {
-								"width": 90,
-								"height": 90
-							}
-						}
-					],
+        #cy {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            right: 16em;
+            z-index: 999;
+        }
 
-					elements: {
-						nodes: [
-							{ data: { id: 'j', name: 'Jerry' }, classes: "bigNode" },
-							{ data: { id: 'e', name: 'Elaine' } },
-							{ data: { id: 'k', name: 'Kramer' }, classes: "mediumNode" },
-							{ data: { id: 'g', name: 'George', parent:"e" } },
-							{ data: { id: 'qwe', name: 'qwe', parent:"e" } },
-							{ data: { id: 'asd', name: 'asd', parent:"e" } }
-						],
-						edges: [
-							{ data: { source: 'j', target: 'e' } },
-							{ data: { source: 'j', target: 'k' } },
-							{ data: { source: 'j', target: 'g' } },
-							{ data: { source: 'e', target: 'j' } },
-							{ data: { source: 'e', target: 'k' } },
-							{ data: { source: 'k', target: 'j' } },
-							{ data: { source: 'k', target: 'e' } },
-							{ data: { source: 'k', target: 'g' } },
-							{ data: { source: 'g', target: 'j' } }
-						]
-					}
-				});
+        h1 {
+            opacity: 0.5;
+            font-size: 1em;
+            font-weight: bold;
+        }
+    </style>
 
-				// demo your core ext
-				cy.snapToGrid({
-					guidelinesStyle: {
-						strokeStyle: "red"
-					}
-				} );
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
 
-			});
-		</script>
-	</head>
+            var cy = window.cy = cytoscape({
+                container: document.getElementById('cy'),
 
-	<body>
-		<h1>cytoscape-snap-to-grid demo</h1>
+                style: [
+                    {
+                        selector: 'node',
+                        style: {
+                            'content': 'data(name)'
+                        }
+                    },
 
-		<div id="cy"></div>
-		<div id="config">
+                    {
+                        selector: 'edge',
+                        style: {
+                            'target-arrow-shape': 'triangle'
+                        }
+                    },
+                    {
+                        selector: '.bigNode',
+                        style: {
+                            "width": 110,
+                            "height": 110
+                        }
+                    },
+                    {
+                        selector: ".mediumNode",
+                        style: {
+                            "width": 90,
+                            "height": 90
+                        }
+                    }
+                ],
 
-			<h1>Modules</h1>
-		</div>
-	</body>
+                elements: {
+                    nodes: [
+                        {data: {id: 'j', name: 'Jerry'}, classes: "bigNode"},
+                        {data: {id: 'e', name: 'Elaine'}},
+                        {data: {id: 'k', name: 'Kramer'}, classes: "mediumNode"},
+                        {data: {id: 'g', name: 'George', parent: "e"}},
+                        {data: {id: 'qwe', name: 'qwe', parent: "e"}},
+                        {data: {id: 'asd', name: 'asd', parent: "e"}}
+                    ],
+                    edges: [
+                        {data: {source: 'j', target: 'e'}},
+                        {data: {source: 'j', target: 'k'}},
+                        {data: {source: 'j', target: 'g'}},
+                        {data: {source: 'e', target: 'j'}},
+                        {data: {source: 'e', target: 'k'}},
+                        {data: {source: 'k', target: 'j'}},
+                        {data: {source: 'k', target: 'e'}},
+                        {data: {source: 'k', target: 'g'}},
+                        {data: {source: 'g', target: 'j'}}
+                    ]
+                }
+            });
+
+            // demo your core ext
+            cy.snapToGrid({
+                guidelinesStyle: {
+                    strokeStyle: "red"
+                }
+            });
+
+
+            $(".modules div").click(function () {
+                var el = $(this);
+                var opt = {};
+                if (el.hasClass("enabled")) {
+                    el.children("b").text(" Off");
+                    el.removeClass("enabled");
+                    el.addClass("disabled");
+                    opt[el.attr("id")] = false;
+                } else {
+                    el.children("b").text(" On");
+                    el.addClass("enabled");
+                    el.removeClass("disabled");
+                    opt[el.attr("id")] = true;
+                }
+                cy.snapToGrid(opt);
+            });
+        });
+    </script>
+</head>
+
+<body>
+<h1>cytoscape-snap-to-grid demo</h1>
+
+<div id="cy"></div>
+<div id="config">
+
+    <h1>Modules</h1>
+
+    <div class="modules">
+        <div id="snapToGrid" class="enabled">
+            Snap to Grid <b> On </b>
+        </div>
+        <div id="drawGrid" class="enabled">
+            Draw Grid <b> On </b>
+        </div>
+        <div id="discreteDrag" class="enabled">
+            Discrete Drag <b> On </b>
+        </div>
+        <div id="guidelines" class="enabled">
+            Guidelines <b> On </b>
+        </div>
+        <div id="resize" class="enabled">
+            Resize <b> On </b>
+        </div>
+        <div id="parentPadding" class="enabled">
+            Parent Padding <b> On </b>
+        </div>
+    </div>
+    <br/>
+    <i>Click on modules to toggle.</i>
+</div>
+</body>
 
 </html>

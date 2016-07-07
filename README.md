@@ -17,11 +17,11 @@ Framework for grid interactions. Provides discrete dragging, grid background, gr
         var options = {
             // On/Off Modules
             snapToGrid: true, // Snap to grid functionality
+            drawGrid: true, // Draw grid background
             discreteDrag: true, // Discrete Drag
             guidelines: true, // Guidelines on dragging nodes
             resize: true, // Adjust node sizes to cell sizes
             parentPadding: true, // Adjust parent sizes to cell sizes by padding
-            drawGrid: true, // Draw grid background
 
             // Other settings
 

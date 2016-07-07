@@ -31,7 +31,7 @@
             // Guidelines
             guidelinesStackOrder: 4, // z-index of guidelines
             guidelinesTolerance: 0.08, // Tolerance distance for rendered positions of nodes' interaction.
-            guidelinesStyle: { // Set ctx properties of line. Properties are here: http://www.w3schools.com/tags/ref_canvas.asp
+            guidelinesStyle: { // Set ctx properties of line. Properties are here:
                 strokeStyle: "black"
             },
 
@@ -65,6 +65,7 @@
 
 
                 eventsController.init(options);
+                initialized = true;
             } else
                 eventsController.syncWithOptions(options)
 

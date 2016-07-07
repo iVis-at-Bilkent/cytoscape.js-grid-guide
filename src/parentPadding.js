@@ -1,17 +1,12 @@
 module.exports = function (opts, cy) {
 
     var options = opts;
+    var ppClass = "_gridParentPadding";
 
-    function changeOptions(opts) {
-        options = opts;
-    }
-
-    function setPaddings() {
+    function initPadding() {
         var padding = options.parentSpacing < 0 ? options.gridSpacing : options.parentSpacing;
-
-
         cy.style()
-            .selector(':parent')
+            .selector('.' + ppClass)
             .style("compound-sizing-wrt-labels", "exclude")
             .style("padding-left", padding)
             .style("padding-right", padding)
@@ -21,8 +16,21 @@ module.exports = function (opts, cy) {
 
     }
 
+    function changeOptions(opts) {
+        options = opts;
+        padding = options.parentSpacing < 0 ? options.gridSpacing : options.parentSpacing;
+        initPadding();
+    }
+
+    function setPaddingOfParent(node, enable) {
+        if (enable)
+            node.addClass(ppClass);
+        else
+            node.removeClass(ppClass);
+    }
+
     return {
         changeOptions: changeOptions,
-        setPaddings: setPaddings
+        setPaddingOfParent: setPaddingOfParent
     };
 };

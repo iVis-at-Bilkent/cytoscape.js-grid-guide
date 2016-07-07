@@ -1,4 +1,4 @@
-module.exports = function ( cy, snap, resize, discreteDrag, drawGrid, guidelines, parentPadding, $) {
+module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines, parentPadding, $) {
 
     var feature = function (func) {
         return function (enable) {
@@ -15,14 +15,14 @@ module.exports = function ( cy, snap, resize, discreteDrag, drawGrid, guidelines
         parentPadding: new feature(setParentPadding)
     };
 
-    
-    function applyToCyTarget(func) {
+
+    function applyToCyTarget(func, allowParent) {
         return function (e) {
-            if(!e.cyTarget.is(":parent"))
+            if (!e.cyTarget.is(":parent") || allowParent)
                 func(e.cyTarget);
         }
     }
-    
+
     function applyToAllNodes(func) {
         return function () {
             cy.nodes().not(":parent").each(function (i, ele) {
@@ -30,6 +30,7 @@ module.exports = function ( cy, snap, resize, discreteDrag, drawGrid, guidelines
             });
         };
     }
+
     function eventStatus(enable) {
         return enable ? "on" : "off";
     }
@@ -52,7 +53,7 @@ module.exports = function ( cy, snap, resize, discreteDrag, drawGrid, guidelines
     }
 
     // Snap To Grid
-    var snapAllNodes= applyToAllNodes(snap.snapNode);
+    var snapAllNodes = applyToAllNodes(snap.snapNode);
     var snapNode = applyToCyTarget(snap.snapNode);
 
     function setSnapToGrid(enable) {
@@ -67,23 +68,26 @@ module.exports = function ( cy, snap, resize, discreteDrag, drawGrid, guidelines
 
         }
     }
-    
+
     // Draw Grid
-    var drawGridOnZoom = function () { if( latestOptions.zoomDash ) drawGrid.drawGrid() };
-    var drawGridOnPan = function () { if( latestOptions.panGrid ) drawGrid.drawGrid() };
+    var drawGridOnZoom = function () {
+        if (currentOptions.zoomDash) drawGrid.drawGrid()
+    };
+    var drawGridOnPan = function () {
+        if (currentOptions.panGrid) drawGrid.drawGrid()
+    };
 
     function setDrawGrid(enable) {
+        cy[eventStatus(enable)]('zoom', drawGridOnZoom);
+        cy[eventStatus(enable)]('pan', drawGridOnPan);
 
-        cy[eventStatus(enable)]( 'zoom', drawGridOnZoom );
-        cy[eventStatus(enable)]( 'pan', drawGridOnPan );
-
-        if (enable){
+        if (enable) {
             drawGrid.changeOptions(currentOptions);
             drawGrid.initCanvas();
-            $( window ).on( 'resize', drawGrid.resizeCanvas );
+            $(window).on('resize', drawGrid.resizeCanvas);
         } else {
             drawGrid.clearCanvas();
-            $( window ).off( 'resize', drawGrid.resizeCanvas );
+            $(window).off('resize', drawGrid.resizeCanvas);
         }
     }
 
@@ -93,44 +97,46 @@ module.exports = function ( cy, snap, resize, discreteDrag, drawGrid, guidelines
         if (enable)
             guidelines.changeOptions(currentOptions);
 
-        cy[eventStatus(enable)]( 'zoom', guidelines.onZoom);
-        cy[eventStatus(enable)]( 'drag', "node", guidelines.onDragNode);
-        cy[eventStatus(enable)]( 'grab', "node", guidelines.onGrabNode);
-        cy[eventStatus(enable)]( 'free', "node", guidelines.onFreeNode);
-
+        cy[eventStatus(enable)]('zoom', guidelines.onZoom);
+        cy[eventStatus(enable)]('drag', "node", guidelines.onDragNode);
+        cy[eventStatus(enable)]('grab', "node", guidelines.onGrabNode);
+        cy[eventStatus(enable)]('free', "node", guidelines.onFreeNode);
 
     }
 
     // Parent Padding
+    var setAllParentPaddings = function (enable) {
+        parentPadding.setPaddingOfParent(cy.nodes(":parent"), enable);
+    };
+    var enableParentPadding = function (node) {
+        parentPadding.setPaddingOfParent(node, true);
+    };
+
 
     function setParentPadding(enable) {
-        if (enable) {
+        if (enable)
             parentPadding.changeOptions(currentOptions);
-            parentPadding.setPaddings();
-        }
 
-        cy[eventStatus(enable)]( 'ready', parentPadding.setPaddings);
+        setAllParentPaddings(enable);
+
+        cy[eventStatus(enable)]('ready', setAllParentPaddings);
+        cy[eventStatus(enable)]("add", "node:parent", applyToCyTarget(enableParentPadding, true));
     }
 
     // Sync with options: Enables/disables changed via options.
     var latestOptions = {};
     var currentOptions;
+
     function syncWithOptions(options) {
-        currentOptions = options;
+        currentOptions = $.extend(true, {}, options);
         for (var key in controller)
             if (latestOptions[key] != options[key])
                 controller[key](options[key]);
-        latestOptions = options;
+        latestOptions = $.extend(true, latestOptions, options);
     }
 
-    function init(options) {
-        currentOptions = options;
-        syncWithOptions(options);
-        latestOptions = options;
-    }
-    
     return {
-        init: init,
+        init: syncWithOptions,
         syncWithOptions: syncWithOptions
     };
 

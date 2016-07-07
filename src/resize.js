@@ -12,8 +12,8 @@ module.exports = function (gridSpacing) {
         var width = node.width();
         var height = node.height();
 
-        var newWidth = Math.round((width-gridSpacing) / (gridSpacing * 2)) * (gridSpacing * 2);
-        var newHeight = Math.round((height-gridSpacing) / (gridSpacing * 2)) * (gridSpacing * 2);
+        var newWidth = Math.round((width - gridSpacing) / (gridSpacing * 2)) * (gridSpacing * 2);
+        var newHeight = Math.round((height - gridSpacing) / (gridSpacing * 2)) * (gridSpacing * 2);
 
         newWidth = newWidth > 0 ? newWidth + gridSpacing : gridSpacing;
         newHeight = newHeight > 0 ? newHeight + gridSpacing : gridSpacing;
@@ -31,15 +31,15 @@ module.exports = function (gridSpacing) {
     }
 
     function recoverNodeDimensions(node) {
-        var oldSizes = getScratch(node);
-        if (oldSizes.resize)
+        var oldSizes = getScratch(node).resize;
+        if (oldSizes) {
             node.style({
-                "width": oldWidth,
-                "height": oldHeight
+                "width": oldSizes.oldWidth,
+                "height": oldSizes.oldHeight
             });
+        }
 
     }
-
 
 
     return {
