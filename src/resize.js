@@ -32,12 +32,12 @@ module.exports = function (gridSpacing) {
 
     function recoverNodeDimensions(node) {
         var oldSizes = getScratch(node).resize;
-        if (oldSizes) {
+        if (oldSizes) 
             node.style({
                 "width": oldSizes.oldWidth,
                 "height": oldSizes.oldHeight
             });
-        }
+
 
     }
 

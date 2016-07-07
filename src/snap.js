@@ -1,5 +1,11 @@
 module.exports = function (gridSpacing) {
 
+    var getScratch = function (node) {
+        if (!node.scratch("_snapToGrid"))
+            node.scratch("_snapToGrid", {});
+
+        return node.scratch("_snapToGrid");
+    };
 
     var snapPos = function (pos) {
         var newPos = {
@@ -11,20 +17,34 @@ module.exports = function (gridSpacing) {
     };
 
     var snapNode = function (node, toPos) {
-        var pos = node.position();
+        var pos = toPos ? toPos : node.position();
 
-        if (!toPos)
-            var newPos = snapPos(pos);
-        else
-            newPos = snapPos(toPos);
+        var newPos = snapPos(pos);
+
+        getScratch(node).snap = {
+            oldPos: pos
+        };
+
+        console.log(newPos, getScratch(node).snap.oldPos);
+
 
         return node.position(newPos);
+    };
 
+    var recoverSnapNode = function (node) {
+        var snapScratch = getScratch(node).snap;
+        if (snapScratch) {
+            console.log(node.position());
+            node.position(snapScratch.oldPos);
+            console.log(node.position());
+            console.log(snapScratch.oldPos);
+        }
     };
 
     return {
         snapPos: snapPos,
-        snapNode: snapNode
+        snapNode: snapNode,
+        recoverSnapNode: recoverSnapNode
     };
 
 };

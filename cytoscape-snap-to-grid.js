@@ -200,18 +200,19 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 
     // Snap To Grid
     var snapAllNodes = applyToAllNodes(snap.snapNode);
+    var recoverSnapAllNodes = applyToAllNodes(snap.recoverSnapNode);
     var snapNode = applyToCyTarget(snap.snapNode);
 
     function setSnapToGrid(enable) {
-        cy[eventStatus(enable)]("add", "node", snapNode);
-        cy[eventStatus(enable)]("ready", snapAllNodes);
+        //cy[eventStatus(enable)]("add", "node", snapNode);
+      //  cy[eventStatus(enable)]("ready", snapAllNodes);
 
-        cy[eventStatus(enable)]("free", "node", snapNode); // TODO: If discrete drag is disabled
+        cy[eventStatus(enable)]("free", "node", snapNode);
 
         if (enable) {
             snapAllNodes();
         } else {
-
+            recoverSnapAllNodes();
         }
     }
 
@@ -608,12 +609,12 @@ module.exports = function (gridSpacing) {
 
     function recoverNodeDimensions(node) {
         var oldSizes = getScratch(node).resize;
-        if (oldSizes) {
+        if (oldSizes) 
             node.style({
                 "width": oldSizes.oldWidth,
                 "height": oldSizes.oldHeight
             });
-        }
+
 
     }
 
@@ -627,6 +628,12 @@ module.exports = function (gridSpacing) {
 },{}],8:[function(require,module,exports){
 module.exports = function (gridSpacing) {
 
+    var getScratch = function (node) {
+        if (!node.scratch("_snapToGrid"))
+            node.scratch("_snapToGrid", {});
+
+        return node.scratch("_snapToGrid");
+    };
 
     var snapPos = function (pos) {
         var newPos = {
@@ -638,20 +645,34 @@ module.exports = function (gridSpacing) {
     };
 
     var snapNode = function (node, toPos) {
-        var pos = node.position();
+        var pos = toPos ? toPos : node.position();
 
-        if (!toPos)
-            var newPos = snapPos(pos);
-        else
-            newPos = snapPos(toPos);
+        var newPos = snapPos(pos);
+
+        getScratch(node).snap = {
+            oldPos: pos
+        };
+
+        console.log(newPos, getScratch(node).snap.oldPos);
+
 
         return node.position(newPos);
+    };
 
+    var recoverSnapNode = function (node) {
+        var snapScratch = getScratch(node).snap;
+        if (snapScratch) {
+            console.log(node.position());
+            node.position(snapScratch.oldPos);
+            console.log(node.position());
+            console.log(snapScratch.oldPos);
+        }
     };
 
     return {
         snapPos: snapPos,
-        snapNode: snapNode
+        snapNode: snapNode,
+        recoverSnapNode: recoverSnapNode
     };
 
 };

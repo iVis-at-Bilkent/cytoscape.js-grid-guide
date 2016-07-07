@@ -54,18 +54,19 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 
     // Snap To Grid
     var snapAllNodes = applyToAllNodes(snap.snapNode);
+    var recoverSnapAllNodes = applyToAllNodes(snap.recoverSnapNode);
     var snapNode = applyToCyTarget(snap.snapNode);
 
     function setSnapToGrid(enable) {
-        cy[eventStatus(enable)]("add", "node", snapNode);
-        cy[eventStatus(enable)]("ready", snapAllNodes);
+        //cy[eventStatus(enable)]("add", "node", snapNode);
+      //  cy[eventStatus(enable)]("ready", snapAllNodes);
 
-        cy[eventStatus(enable)]("free", "node", snapNode); // TODO: If discrete drag is disabled
+        cy[eventStatus(enable)]("free", "node", snapNode);
 
         if (enable) {
             snapAllNodes();
         } else {
-
+            recoverSnapAllNodes();
         }
     }
 
