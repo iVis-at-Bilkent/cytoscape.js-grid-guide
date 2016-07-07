@@ -24,15 +24,27 @@ Framework for grid interactions. Provides discrete dragging, grid background, gr
             drawGrid: true, // Draw grid background
 
             // Other settings
+
+            // General
+            gridSpacing: 40, // Distance between the lines of the grid.
+
+            // Draw Grid
             zoomDash: true, // Determines whether the size of the dashes should change when the drawing is zoomed in and out if grid is drawn.
             panGrid: true, // Determines whether the grid should move then the user moves the graph if grid is drawn.
-            gridSpacing: 40, // Distance between the lines of the grid.
             gridStackOrder: -1, // Namely z-index
             strokeStyle: '#CCCCCC', // Color of grid lines
             lineWidth: 1.0, // Width of grid lines
             lineDash: [5,8], // Defines style of dash. Read: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/setLineDash
+
+            // Guidelines
             guidelinesStackOrder: 4, // z-index of guidelines
-            guidelinesTolerance: 0.08 // Tolerance distance for rendered positions of nodes' interaction.
+            guidelinesTolerance: 0.08, // Tolerance distance for rendered positions of nodes' interaction.
+            guidelinesStyle: { // Set ctx properties of line. Properties are here: http://www.w3schools.com/tags/ref_canvas.asp
+                strokeStyle: "black"
+            },
+
+            // Parent Padding
+            parentSpacing: -1 // -1 to set paddings of parents to gridSpacing
         };
 ```
 
