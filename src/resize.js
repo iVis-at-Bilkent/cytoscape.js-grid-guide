@@ -18,7 +18,6 @@ module.exports = function (gridSpacing) {
 
         var newWidth = Math.round((width - gridSpacing) / (gridSpacing * 2)) * (gridSpacing * 2);
         var newHeight = Math.round((height - gridSpacing) / (gridSpacing * 2)) * (gridSpacing * 2);
-        console.log(newHeight);
         newWidth = newWidth > 0 ? newWidth + gridSpacing : gridSpacing;
         newHeight = newHeight > 0 ? newHeight + gridSpacing : gridSpacing;
 
