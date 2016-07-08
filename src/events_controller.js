@@ -48,7 +48,7 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 
     function setResize(enable) {
         cy[eventStatus(enable)]("ready", resizeAllNodes);
-        cy[eventStatus(enable)]("style", "node", resizeNode);
+      //  cy[eventStatus(enable)]("style", "node", resizeNode);
         enable ? resizeAllNodes() : recoverAllNodeDimensions();
     }
 
@@ -58,8 +58,8 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
     var snapNode = applyToCyTarget(snap.snapNode);
 
     function setSnapToGrid(enable) {
-        //cy[eventStatus(enable)]("add", "node", snapNode);
-      //  cy[eventStatus(enable)]("ready", snapAllNodes);
+        cy[eventStatus(enable)]("add", "node", snapNode);
+          cy[eventStatus(enable)]("ready", snapAllNodes);
 
         cy[eventStatus(enable)]("free", "node", snapNode);
 
@@ -83,7 +83,6 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
         cy[eventStatus(enable)]('pan', drawGridOnPan);
 
         if (enable) {
-            drawGrid.changeOptions(currentOptions);
             drawGrid.initCanvas();
             $(window).on('resize', drawGrid.resizeCanvas);
         } else {
@@ -95,9 +94,6 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
     // Guidelines
 
     function setGuidelines(enable) {
-        if (enable)
-            guidelines.changeOptions(currentOptions);
-
         cy[eventStatus(enable)]('zoom', guidelines.onZoom);
         cy[eventStatus(enable)]('drag', "node", guidelines.onDragNode);
         cy[eventStatus(enable)]('grab', "node", guidelines.onGrabNode);
@@ -115,8 +111,6 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 
 
     function setParentPadding(enable) {
-        if (enable)
-            parentPadding.changeOptions(currentOptions);
 
         setAllParentPaddings(enable);
 
@@ -128,11 +122,49 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
     var latestOptions = {};
     var currentOptions;
 
+    var specialOpts = {
+        drawGrid: ["gridSpacing", "zoomDash", "panGrid", "gridStackOrder", "strokeStyle", "lineWidth", "lineDash"],
+        guidelines: ["gridSpacing", "guidelinesStackOrder", "guidelinesTolerance", "guidelinesStyle"],
+        resize: ["gridSpacing"],
+        parentPadding: ["gridSpacing", "parentSpacing"],
+        snapToGrid: ["gridSpacing"]
+    };
+
     function syncWithOptions(options) {
         currentOptions = $.extend(true, {}, options);
-        for (var key in controller)
+        for (var key in options)
             if (latestOptions[key] != options[key])
-                controller[key](options[key]);
+                if (controller.hasOwnProperty(key)) {
+                    controller[key](options[key]);
+                } else {
+                    for (var optsKey in specialOpts) {
+                        var opts = specialOpts[optsKey];
+                        if (opts.indexOf(key) >= 0 && options[optsKey]) {
+                            if(optsKey == "drawGrid") {
+                                drawGrid.changeOptions(options);
+                                drawGrid.resizeCanvas();
+                            }
+
+                            if (optsKey == "snapToGrid"){
+                                snap.changeOptions(options);
+                                snapAllNodes();
+                            }
+
+                            if(optsKey == "guidelines")
+                                guidelines.changeOptions(options);
+
+                            if (optsKey == "resize") {
+                                resize.changeOptions(options);
+                                resizeAllNodes();
+                            }
+
+                            if (optsKey == "parentPadding")
+                                parentPadding.changeOptions(options);
+
+                                
+                        }
+                    }
+                }
         latestOptions = $.extend(true, latestOptions, options);
     }
 
