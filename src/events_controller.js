@@ -139,15 +139,17 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
                 } else {
                     for (var optsKey in specialOpts) {
                         var opts = specialOpts[optsKey];
-                        if (opts.indexOf(key) >= 0 && options[optsKey]) {
+                        if (opts.indexOf(key) >= 0) {
                             if(optsKey == "drawGrid") {
                                 drawGrid.changeOptions(options);
-                                drawGrid.resizeCanvas();
+                                if (options.drawGrid)
+                                    drawGrid.resizeCanvas();
                             }
 
                             if (optsKey == "snapToGrid"){
                                 snap.changeOptions(options);
-                                snapAllNodes();
+                                if (options.snapToGrid)
+                                    snapAllNodes();
                             }
 
                             if(optsKey == "guidelines")
@@ -155,7 +157,8 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 
                             if (optsKey == "resize") {
                                 resize.changeOptions(options);
-                                resizeAllNodes();
+                                if (options.resize)
+                                    resizeAllNodes();
                             }
 
                             if (optsKey == "parentPadding")
