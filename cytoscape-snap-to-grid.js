@@ -1,4 +1,85 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+module.exports = function (cytoscape) {
+    
+    // Needed because parent nodes cannot be moved!
+    function moveTopDown(children, dx, dy) {
+        for(var i = 0; i < children.length; i++){
+            var child = children[i];
+            child.position({
+                x: child.position('x') + dx,
+                y: child.position('y') + dy
+            });
+
+            moveTopDown(child.children(), dx, dy);
+        }
+    }
+
+    function getTopMostNodes(nodes) {
+        var nodesMap = {};
+        for (var i = 0; i < nodes.length; i++) {
+            nodesMap[nodes[i].id()] = true;
+        }
+        var roots = nodes.filter(function (i, ele) {
+            var parent = ele.parent()[0];
+            while(parent != null){
+                if(nodesMap[parent.id()]){
+                    return false;
+                }
+                parent = parent.parent()[0];
+            }
+            return true;
+        });
+
+        return roots;
+    }
+
+
+    cytoscape( "collection", "align", function (horizontal, vertical, alignTo) {
+
+        var eles = getTopMostNodes(this.nodes(":visible"));
+
+        var modelNode = alignTo ? alignTo : eles[0];
+
+        eles = eles.not(modelNode);
+
+        // 0 for center
+        var xFactor = 0;
+        var yFactor = 0;
+
+        if (vertical == "left")
+            xFactor = -1;
+        else if (vertical == "right")
+            xFactor = 1;
+
+        if (horizontal == "top")
+            yFactor = -1;
+        else if (horizontal == "bottom")
+            yFactor = 1;
+
+
+        for (var i = 0; i < eles.length; i++) {
+            var node = eles[i];
+            var oldPos = node.position();
+            var newPos = node.position();
+
+            if (vertical != "none")
+                newPos.x = modelNode.position("x") + xFactor * (modelNode.width() - node.width()) / 2;
+
+
+            if (horizontal != "none")
+                newPos.y = modelNode.position("y") + yFactor * (modelNode.height() - node.height()) / 2;
+
+
+            moveTopDown(node, newPos.x - oldPos.x, newPos.y - oldPos.y);
+        }
+
+
+    });
+
+
+
+};
+},{}],2:[function(require,module,exports){
 module.exports = function (cy, snap) {
 
     var attachedNode;
@@ -35,7 +116,7 @@ module.exports = function (cy, snap) {
     
 
 };
-},{}],2:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 module.exports = function (opts, cy, $) {
 
     var options = opts;
@@ -143,7 +224,7 @@ module.exports = function (opts, cy, $) {
         changeOptions: changeOptions
     };
 };
-},{}],3:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines, parentPadding, $) {
 
     var feature = function (func) {
@@ -323,7 +404,7 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
     };
 
 };
-},{}],4:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 module.exports = function (opts, cy, $) {
 
     var options = opts;
@@ -478,7 +559,7 @@ module.exports = function (opts, cy, $) {
     }
 
 };
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 ;(function(){ 'use strict';
 
     // registers the extension on a cytoscape lib ref
@@ -527,9 +608,11 @@ module.exports = function (opts, cy, $) {
         var _eventsController = require("./events_controller");
         var _guidelines = require("./guidelines");
         var _parentPadding = require("./parentPadding");
-        var snap, resize, discreteDrag, drawGrid, eventsController, guidelines, parentPadding;
+        var _alignment = require("./alignment");
+        var snap, resize, discreteDrag, drawGrid, eventsController, guidelines, parentPadding, alignment;
 
         var initialized = false;
+
         cytoscape( 'core', 'snapToGrid', function(opts){
             var cy = this;
             $.extend(true, options, opts);
@@ -544,15 +627,17 @@ module.exports = function (opts, cy, $) {
 
                 eventsController = _eventsController(cy, snap, resize, discreteDrag, drawGrid, guidelines, parentPadding, $);
 
+                alignment = _alignment(cytoscape);
 
                 eventsController.init(options);
                 initialized = true;
             } else
-                eventsController.syncWithOptions(options)
+                eventsController.syncWithOptions(options);
 
 
             return this; // chainability
         } ) ;
+
 
     };
 
@@ -572,7 +657,7 @@ module.exports = function (opts, cy, $) {
 
 })();
 
-},{"./discrete_drag":1,"./draw_grid":2,"./events_controller":3,"./guidelines":4,"./parentPadding":6,"./resize":7,"./snap":8}],6:[function(require,module,exports){
+},{"./alignment":1,"./discrete_drag":2,"./draw_grid":3,"./events_controller":4,"./guidelines":5,"./parentPadding":7,"./resize":8,"./snap":9}],7:[function(require,module,exports){
 module.exports = function (opts, cy) {
 
     var options = opts;
@@ -609,7 +694,7 @@ module.exports = function (opts, cy) {
         setPaddingOfParent: setPaddingOfParent
     };
 };
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 module.exports = function (gridSpacing) {
 
 
@@ -630,7 +715,6 @@ module.exports = function (gridSpacing) {
 
         var newWidth = Math.round((width - gridSpacing) / (gridSpacing * 2)) * (gridSpacing * 2);
         var newHeight = Math.round((height - gridSpacing) / (gridSpacing * 2)) * (gridSpacing * 2);
-        console.log(newHeight);
         newWidth = newWidth > 0 ? newWidth + gridSpacing : gridSpacing;
         newHeight = newHeight > 0 ? newHeight + gridSpacing : gridSpacing;
 
@@ -665,7 +749,7 @@ module.exports = function (gridSpacing) {
     };
 
 };
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 module.exports = function (gridSpacing) {
 
     var changeOptions = function (opts) {
@@ -716,4 +800,4 @@ module.exports = function (gridSpacing) {
     };
 
 };
-},{}]},{},[5]);
+},{}]},{},[6]);

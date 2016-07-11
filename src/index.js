@@ -46,9 +46,11 @@
         var _eventsController = require("./events_controller");
         var _guidelines = require("./guidelines");
         var _parentPadding = require("./parentPadding");
-        var snap, resize, discreteDrag, drawGrid, eventsController, guidelines, parentPadding;
+        var _alignment = require("./alignment");
+        var snap, resize, discreteDrag, drawGrid, eventsController, guidelines, parentPadding, alignment;
 
         var initialized = false;
+
         cytoscape( 'core', 'snapToGrid', function(opts){
             var cy = this;
             $.extend(true, options, opts);
@@ -63,15 +65,17 @@
 
                 eventsController = _eventsController(cy, snap, resize, discreteDrag, drawGrid, guidelines, parentPadding, $);
 
+                alignment = _alignment(cytoscape);
 
                 eventsController.init(options);
                 initialized = true;
             } else
-                eventsController.syncWithOptions(options)
+                eventsController.syncWithOptions(options);
 
 
             return this; // chainability
         } ) ;
+
 
     };
 
