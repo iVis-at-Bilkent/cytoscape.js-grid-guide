@@ -90,5 +90,7 @@ This project is set up to automatically be published to npm and bower.  To publi
 1. If publishing to bower for the first time, you'll need to run `bower register cytoscape-snap-to-grid https://github.com/iVis-at-Bilkent/cytoscape.js-snap-to-grid.git`
 
 
-## Credits
-Draw grid functionality is written by [guimeira](https://github.com/guimeira).
+## Team
+
+  * [Selim Firat Yilmaz](https://github.com/mrsfy), [Ugur Dogrusoz](https://github.com/ugurdogrusoz) of [i-Vis at Bilkent University](http://www.cs.bilkent.edu.tr/~ivis)
+  * Draw grid functionality is reused from [a Cytoscape.js extension](https://github.com/guimeira/cytoscape-snap-to-grid) by [guimeira](https://github.com/guimeira).
