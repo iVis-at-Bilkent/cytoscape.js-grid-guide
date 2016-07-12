@@ -9,22 +9,33 @@ module.exports = function (opts, cy, $) {
     function calcDistance(p1, p2) {
         return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
     }
+    
+    function getExtraDim(node, paddingDim) {
+
+    }
 
     var dims = function (node) {
 
         var pos = node.renderedPosition();
         var width = node.renderedWidth();
         var height = node.renderedHeight();
+        var padding = {
+            left: Number(node.renderedStyle("padding-left").replace("px", "")),
+            right: Number(node.renderedStyle("padding-right").replace("px", "")),
+            top: Number(node.renderedStyle("padding-top").replace("px", "")),
+            bottom: Number(node.renderedStyle("padding-bottom").replace("px", ""))
+        };
+
         this.horizontal = {
             center: pos.x,
-            left: pos.x - width / 2,
-            right: pos.x + width / 2
+            left: pos.x - (padding.left + width / 2),
+            right: pos.x + (padding.right + width / 2)
         };
 
         this.vertical = {
             center: pos.y,
-            top: pos.y - height / 2,
-            bot: pos.y + height / 2
+            top: pos.y - (padding.top + height / 2),
+            bottom: pos.y + (padding.bottom + height / 2)
         };
 
         return this;
@@ -86,7 +97,7 @@ module.exports = function (opts, cy, $) {
                 }
             };
 
-            cy.nodes(":visible").not(":parent").not(node).each(function (i, ele) {
+            cy.nodes(":visible").not(node.ancestors()).not(node.descendants()).not(node).each(function (i, ele) {
                 var nodeDims = new dims(ele);
 
 

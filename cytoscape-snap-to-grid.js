@@ -773,6 +773,24 @@ module.exports = function (gridSpacing) {
     var changeOptions = function (opts) {
         gridSpacing = opts.gridSpacing;
     };
+    function getTopMostNodes(nodes) {
+        var nodesMap = {};
+        for (var i = 0; i < nodes.length; i++) {
+            nodesMap[nodes[i].id()] = true;
+        }
+        var roots = nodes.filter(function (i, ele) {
+            var parent = ele.parent()[0];
+            while(parent != null){
+                if(nodesMap[parent.id()]){
+                    return false;
+                }
+                parent = parent.parent()[0];
+            }
+            return true;
+        });
+
+        return roots;
+    }
 
     function moveTopDown(children, dx, dy) {
         for(var i = 0; i < children.length; i++){
@@ -801,17 +819,22 @@ module.exports = function (gridSpacing) {
         return newPos;
     };
 
-    var snapNode = function (node, toPos) {
-        var pos = toPos ? toPos : node.position();
+    var snapNode = function (nodesToSnap, toPos) {
 
-        var newPos = snapPos(pos);
+        var nodes = getTopMostNodes(nodesToSnap);
 
-        getScratch(node).snap = {
-            oldPos: node.position()
-        };
+        for (var i = 0; i < nodes.length; i++){
+            var node = nodes[i];
+            
+            var pos = toPos ? toPos : node.position();
+            var newPos = snapPos(pos);
 
-        moveTopDown(node, newPos.x - node.position("x"), newPos.y - node.position("y"));
-        console.log("asdds");
+            getScratch(node).snap = {
+                oldPos: node.position()
+            };
+
+            moveTopDown(node, newPos.x - node.position("x"), newPos.y - node.position("y"));
+        }
     };
 
     var recoverSnapNode = function (node) {
