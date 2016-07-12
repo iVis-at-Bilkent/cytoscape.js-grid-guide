@@ -4,6 +4,17 @@ module.exports = function (gridSpacing) {
         gridSpacing = opts.gridSpacing;
     };
 
+    function moveTopDown(children, dx, dy) {
+        for(var i = 0; i < children.length; i++){
+            var child = children[i];
+            child.position({
+                x: child.position('x') + dx,
+                y: child.position('y') + dy
+            });
+            moveTopDown(child.children(), dx, dy);
+        }
+    }
+
     var getScratch = function (node) {
         if (!node.scratch("_snapToGrid"))
             node.scratch("_snapToGrid", {});
@@ -26,11 +37,11 @@ module.exports = function (gridSpacing) {
         var newPos = snapPos(pos);
 
         getScratch(node).snap = {
-            oldPos: pos
+            oldPos: node.position()
         };
 
-
-        return node.position(newPos);
+        moveTopDown(node, newPos.x - node.position("x"), newPos.y - node.position("y"));
+        console.log("asdds");
     };
 
     var recoverSnapNode = function (node) {

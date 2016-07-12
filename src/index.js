@@ -30,7 +30,7 @@
 
             // Guidelines
             guidelinesStackOrder: 4, // z-index of guidelines
-            guidelinesTolerance: 0.08, // Tolerance distance for rendered positions of nodes' interaction.
+            guidelinesTolerance: 2.08, // Tolerance distance for rendered positions of nodes' interaction.
             guidelinesStyle: { // Set ctx properties of line. Properties are here:
                 strokeStyle: "black"
             },

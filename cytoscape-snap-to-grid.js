@@ -84,26 +84,13 @@ module.exports = function (cy, snap) {
 
     var attachedNode;
 
-    function moveTopDown(children, dx, dy) {
-        for(var i = 0; i < children.length; i++){
-            var child = children[i];
-            child.position({
-                x: child.position('x') + dx,
-                y: child.position('y') + dy
-            });
-            snap.snapNode(child);
-
-            moveTopDown(child.children(), dx, dy);
-        }
-    }
 
     function tapDrag(e) {
         var nodePos = attachedNode.position();
         var mousePos = snap.snapPos(e.cyPosition);
         if (nodePos.x != mousePos.x || nodePos.y != mousePos.y){
             attachedNode.unlock();
-            moveTopDown(attachedNode, mousePos.x - nodePos.x, mousePos.y - nodePos.y);
-            //snap.snapNode(attachedNode, mousePos);
+            snap.snapNode(attachedNode, mousePos);
             attachedNode.lock();
             attachedNode.trigger("drag");
         }
@@ -256,7 +243,6 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
         parentPadding: new feature(setParentPadding)
     };
 
-
     function applyToCyTarget(func, allowParent) {
         return function (e) {
             if (!e.cyTarget.is(":parent") || allowParent)
@@ -264,9 +250,16 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
         }
     }
 
-    function applyToAllNodes(func) {
+    function applyToAllNodesButNoParent(func) {
         return function () {
             cy.nodes().not(":parent").each(function (i, ele) {
+                func(ele);
+            });
+        };
+    }
+    function applyToAllNodes(func) {
+        return function () {
+            cy.nodes().each(function (i, ele) {
                 func(ele);
             });
         };
@@ -283,9 +276,9 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
     }
 
     // Resize
-    var resizeAllNodes = applyToAllNodes(resize.resizeNode);
+    var resizeAllNodes = applyToAllNodesButNoParent(resize.resizeNode);
     var resizeNode = applyToCyTarget(resize.resizeNode);
-    var recoverAllNodeDimensions = applyToAllNodes(resize.recoverNodeDimensions);
+    var recoverAllNodeDimensions = applyToAllNodesButNoParent(resize.recoverNodeDimensions);
 
     function setResize(enable) {
         cy[eventStatus(enable)]("ready", resizeAllNodes);
@@ -296,11 +289,11 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
     // Snap To Grid
     var snapAllNodes = applyToAllNodes(snap.snapNode);
     var recoverSnapAllNodes = applyToAllNodes(snap.recoverSnapNode);
-    var snapNode = applyToCyTarget(snap.snapNode);
+    var snapNode = applyToCyTarget(snap.snapNode, true);
 
     function setSnapToGrid(enable) {
         cy[eventStatus(enable)]("add", "node", snapNode);
-          cy[eventStatus(enable)]("ready", snapAllNodes);
+        cy[eventStatus(enable)]("ready", snapAllNodes);
 
         cy[eventStatus(enable)]("free", "node", snapNode);
 
@@ -430,22 +423,33 @@ module.exports = function (opts, cy, $) {
     function calcDistance(p1, p2) {
         return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
     }
+    
+    function getExtraDim(node, paddingDim) {
+
+    }
 
     var dims = function (node) {
 
         var pos = node.renderedPosition();
         var width = node.renderedWidth();
         var height = node.renderedHeight();
+        var padding = {
+            left: Number(node.renderedStyle("padding-left").replace("px", "")),
+            right: Number(node.renderedStyle("padding-right").replace("px", "")),
+            top: Number(node.renderedStyle("padding-top").replace("px", "")),
+            bottom: Number(node.renderedStyle("padding-bottom").replace("px", ""))
+        };
+
         this.horizontal = {
             center: pos.x,
-            left: pos.x - width / 2,
-            right: pos.x + width / 2
+            left: pos.x - (padding.left + width / 2),
+            right: pos.x + (padding.right + width / 2)
         };
 
         this.vertical = {
             center: pos.y,
-            top: pos.y - height / 2,
-            bot: pos.y + height / 2
+            top: pos.y - (padding.top + height / 2),
+            bottom: pos.y + (padding.bottom + height / 2)
         };
 
         return this;
@@ -507,7 +511,7 @@ module.exports = function (opts, cy, $) {
                 }
             };
 
-            cy.nodes(":visible").not(":parent").not(node).each(function (i, ele) {
+            cy.nodes(":visible").not(node.ancestors()).not(node.descendants()).not(node).each(function (i, ele) {
                 var nodeDims = new dims(ele);
 
 
@@ -606,7 +610,7 @@ module.exports = function (opts, cy, $) {
 
             // Guidelines
             guidelinesStackOrder: 4, // z-index of guidelines
-            guidelinesTolerance: 0.08, // Tolerance distance for rendered positions of nodes' interaction.
+            guidelinesTolerance: 2.08, // Tolerance distance for rendered positions of nodes' interaction.
             guidelinesStyle: { // Set ctx properties of line. Properties are here:
                 strokeStyle: "black"
             },
@@ -770,6 +774,17 @@ module.exports = function (gridSpacing) {
         gridSpacing = opts.gridSpacing;
     };
 
+    function moveTopDown(children, dx, dy) {
+        for(var i = 0; i < children.length; i++){
+            var child = children[i];
+            child.position({
+                x: child.position('x') + dx,
+                y: child.position('y') + dy
+            });
+            moveTopDown(child.children(), dx, dy);
+        }
+    }
+
     var getScratch = function (node) {
         if (!node.scratch("_snapToGrid"))
             node.scratch("_snapToGrid", {});
@@ -792,11 +807,11 @@ module.exports = function (gridSpacing) {
         var newPos = snapPos(pos);
 
         getScratch(node).snap = {
-            oldPos: pos
+            oldPos: node.position()
         };
 
-
-        return node.position(newPos);
+        moveTopDown(node, newPos.x - node.position("x"), newPos.y - node.position("y"));
+        console.log("asdds");
     };
 
     var recoverSnapNode = function (node) {

@@ -15,7 +15,6 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
         parentPadding: new feature(setParentPadding)
     };
 
-
     function applyToCyTarget(func, allowParent) {
         return function (e) {
             if (!e.cyTarget.is(":parent") || allowParent)
@@ -23,9 +22,16 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
         }
     }
 
-    function applyToAllNodes(func) {
+    function applyToAllNodesButNoParent(func) {
         return function () {
             cy.nodes().not(":parent").each(function (i, ele) {
+                func(ele);
+            });
+        };
+    }
+    function applyToAllNodes(func) {
+        return function () {
+            cy.nodes().each(function (i, ele) {
                 func(ele);
             });
         };
@@ -42,9 +48,9 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
     }
 
     // Resize
-    var resizeAllNodes = applyToAllNodes(resize.resizeNode);
+    var resizeAllNodes = applyToAllNodesButNoParent(resize.resizeNode);
     var resizeNode = applyToCyTarget(resize.resizeNode);
-    var recoverAllNodeDimensions = applyToAllNodes(resize.recoverNodeDimensions);
+    var recoverAllNodeDimensions = applyToAllNodesButNoParent(resize.recoverNodeDimensions);
 
     function setResize(enable) {
         cy[eventStatus(enable)]("ready", resizeAllNodes);
@@ -55,11 +61,11 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
     // Snap To Grid
     var snapAllNodes = applyToAllNodes(snap.snapNode);
     var recoverSnapAllNodes = applyToAllNodes(snap.recoverSnapNode);
-    var snapNode = applyToCyTarget(snap.snapNode);
+    var snapNode = applyToCyTarget(snap.snapNode, true);
 
     function setSnapToGrid(enable) {
         cy[eventStatus(enable)]("add", "node", snapNode);
-          cy[eventStatus(enable)]("ready", snapAllNodes);
+        cy[eventStatus(enable)]("ready", snapAllNodes);
 
         cy[eventStatus(enable)]("free", "node", snapNode);
 
