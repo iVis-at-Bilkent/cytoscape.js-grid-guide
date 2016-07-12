@@ -1,13 +1,26 @@
 module.exports = function (gridSpacing) {
 
-    var changeOptions = function (opts) {
+    var snap = { };
+
+    snap.changeOptions = function (opts) {
         gridSpacing = opts.gridSpacing;
     };
+
+    var getScratch = function (node) {
+        if (!node.scratch("_snapToGrid"))
+            node.scratch("_snapToGrid", {});
+
+        return node.scratch("_snapToGrid");
+    };
+
+
     function getTopMostNodes(nodes) {
         var nodesMap = {};
+
         for (var i = 0; i < nodes.length; i++) {
             nodesMap[nodes[i].id()] = true;
         }
+
         var roots = nodes.filter(function (i, ele) {
             var parent = ele.parent()[0];
             while(parent != null){
@@ -22,25 +35,7 @@ module.exports = function (gridSpacing) {
         return roots;
     }
 
-    function moveTopDown(children, dx, dy) {
-        for(var i = 0; i < children.length; i++){
-            var child = children[i];
-            child.position({
-                x: child.position('x') + dx,
-                y: child.position('y') + dy
-            });
-            moveTopDown(child.children(), dx, dy);
-        }
-    }
-
-    var getScratch = function (node) {
-        if (!node.scratch("_snapToGrid"))
-            node.scratch("_snapToGrid", {});
-
-        return node.scratch("_snapToGrid");
-    };
-
-    var snapPos = function (pos) {
+    snap.snapPos = function (pos) {
         var newPos = {
             x: (Math.floor(pos.x / gridSpacing) + 0.5) * gridSpacing,
             y: (Math.floor(pos.y / gridSpacing) + 0.5) * gridSpacing
@@ -49,36 +44,53 @@ module.exports = function (gridSpacing) {
         return newPos;
     };
 
-    var snapNode = function (nodesToSnap, toPos) {
+    snap.snapNode = function (node) {
 
-        var nodes = getTopMostNodes(nodesToSnap);
+        var pos = node.position();
+        var newPos = snap.snapPos(pos);
 
-        for (var i = 0; i < nodes.length; i++){
-            var node = nodes[i];
-            
-            var pos = toPos ? toPos : node.position();
-            var newPos = snapPos(pos);
-
-            getScratch(node).snap = {
-                oldPos: node.position()
-            };
-
-            moveTopDown(node, newPos.x - node.position("x"), newPos.y - node.position("y"));
-        }
+        node.position(newPos);
     };
 
-    var recoverSnapNode = function (node) {
+    function snapTopDown(nodes) {
+        for (var i = 0; i < nodes.length; i++) {
+
+            if (!nodes[i].isParent())
+                snap.snapNode(nodes[i]);
+
+            snapTopDown(nodes.children());
+        }
+
+    }
+
+    snap.snapNodesTopDown = function (nodes) {
+        nodes = getTopMostNodes(nodes);
+        snapTopDown(nodes);
+    };
+
+    snap.onFreeNode = function (e) {
+        var nodes;
+        if (e.cyTarget.selected())
+            nodes = e.cy.$(":selected");
+        else
+            nodes = e.cyTarget;
+
+        snap.snapNodesTopDown(nodes);
+
+    };
+
+
+    snap.recoverSnapNode = function (node) {
         var snapScratch = getScratch(node).snap;
         if (snapScratch) {
             node.position(snapScratch.oldPos);
         }
     };
 
-    return {
-        snapPos: snapPos,
-        snapNode: snapNode,
-        recoverSnapNode: recoverSnapNode,
-        changeOptions: changeOptions
-    };
+    return snap;
+
+
+
+
 
 };

@@ -22,6 +22,16 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
         }
     }
 
+    function applyToActiveNodes(func, allowParent) {
+        return function (e) {
+            if (!e.cyTarget.is(":parent") || allowParent)
+                if (e.cyTarget.selected())
+                    func(e.cyTarget, e.cy.$(":selected"));
+                else
+                    func(e.cyTarget, e.cyTarget);
+        }
+    }
+
     function applyToAllNodesButNoParent(func) {
         return function () {
             cy.nodes().not(":parent").each(function (i, ele) {
@@ -44,7 +54,7 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 
     // Discrete Drag
     function setDiscreteDrag(enable) {
-        cy[eventStatus(enable)]("tapstart", "node", discreteDrag.tapStartNode);
+        cy[eventStatus(enable)]("tapstart", "node", discreteDrag.onTapStartNode);
     }
 
     // Resize
@@ -59,15 +69,16 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
     }
 
     // Snap To Grid
-    var snapAllNodes = applyToAllNodes(snap.snapNode);
+    var snapAllNodes = applyToAllNodes(snap.snapNodesTopDown);
     var recoverSnapAllNodes = applyToAllNodes(snap.recoverSnapNode);
-    var snapNode = applyToCyTarget(snap.snapNode, true);
+    var snapCyTarget = applyToCyTarget(snap.snapNode, true);
+    var snapMultipleNodes = applyToActiveNodes(snap.snapNodesSimultaneously, true);
 
     function setSnapToGrid(enable) {
-        cy[eventStatus(enable)]("add", "node", snapNode);
+        cy[eventStatus(enable)]("add", "node", snapCyTarget);
         cy[eventStatus(enable)]("ready", snapAllNodes);
 
-        cy[eventStatus(enable)]("free", "node", snapNode);
+        cy[eventStatus(enable)]("free", "node", snap.onFreeNode);
 
         if (enable) {
             snapAllNodes();

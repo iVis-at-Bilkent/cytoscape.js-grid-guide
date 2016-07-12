@@ -82,38 +82,108 @@ module.exports = function (cytoscape) {
 },{}],2:[function(require,module,exports){
 module.exports = function (cy, snap) {
 
+    var discreteDrag = { };
+
     var attachedNode;
+    var draggedNodes;
+
+    var startPos;
+    var endPos;
 
 
-    function tapDrag(e) {
-        var nodePos = attachedNode.position();
-        var mousePos = snap.snapPos(e.cyPosition);
-        if (nodePos.x != mousePos.x || nodePos.y != mousePos.y){
-            attachedNode.unlock();
-            snap.snapNode(attachedNode, mousePos);
-            attachedNode.lock();
-            attachedNode.trigger("drag");
-        }
-    }
+    discreteDrag.onTapStartNode = function(e) {
+        if (e.cyTarget.selected())
+            draggedNodes = e.cy.$(":selected");
+        else
+            draggedNodes = e.cyTarget;
 
-    function tapStartNode(e){
+        startPos = e.cyPosition;
+
         attachedNode = e.cyTarget;
         attachedNode.lock();
         attachedNode.trigger("grab");
-        cy.on("tapdrag", tapDrag);
-        cy.on("tapend", tapEnd);
-    }
+        cy.on("tapdrag", onTapDrag);
+        cy.on("tapend", onTapEndNode);
 
-    function tapEnd(e){
-        attachedNode.unlock();
-        attachedNode.trigger("free");
-        cy.off("tapdrag", tapDrag);
-        cy.off("tapend", tapEnd);
-    }
-
-    return {
-        tapStartNode: tapStartNode
     };
+
+    var onTapEndNode = function (e) {
+        //attachedNode.trigger("free");
+        cy.off("tapdrag", onTapDrag);
+        cy.off("tapend", onTapEndNode);
+        attachedNode.unlock();
+    };
+
+    var getDist = function () {
+        return {
+            x: endPos.x - startPos.x,
+            y: endPos.y - startPos.y
+        }
+    };
+
+    function getTopMostNodes(nodes) {
+        var nodesMap = {};
+
+        for (var i = 0; i < nodes.length; i++) {
+            nodesMap[nodes[i].id()] = true;
+        }
+
+        var roots = nodes.filter(function (i, ele) {
+            var parent = ele.parent()[0];
+            while(parent != null){
+                if(nodesMap[parent.id()]){
+                    return false;
+                }
+                parent = parent.parent()[0];
+            }
+            return true;
+        });
+
+        return roots;
+    }
+
+    var moveNodesTopDown = function (nodes, dx, dy) {
+
+        for (var i = 0; i < nodes.length; i++){
+            var node = nodes[i];
+            var pos = node.position();
+
+            node.position({
+                x: pos.x + dx,
+                y: pos.y + dy
+            });
+
+            moveNodesTopDown(nodes.children(), dx, dy);
+        }
+
+    };
+
+    onTapDrag = function (e) {
+
+        var nodePos = attachedNode.position();
+        endPos = e.cyPosition;
+        endPos = snap.snapPos(endPos);
+        if (nodePos.x != endPos.x || nodePos.y != endPos.y){
+            attachedNode.unlock();
+            var dist = getDist();
+            var topMostNodes = getTopMostNodes(draggedNodes);
+            moveNodesTopDown(topMostNodes, dist.x, dist.y);
+            snap.snapNodesTopDown(topMostNodes);
+            startPos = endPos;
+            attachedNode.lock();
+            attachedNode.trigger("drag");
+        }
+
+    };
+
+
+
+
+
+
+
+    return discreteDrag;
+
     
 
 };
@@ -250,6 +320,16 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
         }
     }
 
+    function applyToActiveNodes(func, allowParent) {
+        return function (e) {
+            if (!e.cyTarget.is(":parent") || allowParent)
+                if (e.cyTarget.selected())
+                    func(e.cyTarget, e.cy.$(":selected"));
+                else
+                    func(e.cyTarget, e.cyTarget);
+        }
+    }
+
     function applyToAllNodesButNoParent(func) {
         return function () {
             cy.nodes().not(":parent").each(function (i, ele) {
@@ -272,7 +352,7 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 
     // Discrete Drag
     function setDiscreteDrag(enable) {
-        cy[eventStatus(enable)]("tapstart", "node", discreteDrag.tapStartNode);
+        cy[eventStatus(enable)]("tapstart", "node", discreteDrag.onTapStartNode);
     }
 
     // Resize
@@ -287,15 +367,16 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
     }
 
     // Snap To Grid
-    var snapAllNodes = applyToAllNodes(snap.snapNode);
+    var snapAllNodes = applyToAllNodes(snap.snapNodesTopDown);
     var recoverSnapAllNodes = applyToAllNodes(snap.recoverSnapNode);
-    var snapNode = applyToCyTarget(snap.snapNode, true);
+    var snapCyTarget = applyToCyTarget(snap.snapNode, true);
+    var snapMultipleNodes = applyToActiveNodes(snap.snapNodesSimultaneously, true);
 
     function setSnapToGrid(enable) {
-        cy[eventStatus(enable)]("add", "node", snapNode);
+        cy[eventStatus(enable)]("add", "node", snapCyTarget);
         cy[eventStatus(enable)]("ready", snapAllNodes);
 
-        cy[eventStatus(enable)]("free", "node", snapNode);
+        cy[eventStatus(enable)]("free", "node", snap.onFreeNode);
 
         if (enable) {
             snapAllNodes();
@@ -610,7 +691,7 @@ module.exports = function (opts, cy, $) {
 
             // Guidelines
             guidelinesStackOrder: 4, // z-index of guidelines
-            guidelinesTolerance: 2.08, // Tolerance distance for rendered positions of nodes' interaction.
+            guidelinesTolerance: 2.00, // Tolerance distance for rendered positions of nodes' interaction.
             guidelinesStyle: { // Set ctx properties of line. Properties are here:
                 strokeStyle: "black"
             },
@@ -770,14 +851,27 @@ module.exports = function (gridSpacing) {
 },{}],9:[function(require,module,exports){
 module.exports = function (gridSpacing) {
 
-    var changeOptions = function (opts) {
+    var snap = { };
+
+    snap.changeOptions = function (opts) {
         gridSpacing = opts.gridSpacing;
     };
+
+    var getScratch = function (node) {
+        if (!node.scratch("_snapToGrid"))
+            node.scratch("_snapToGrid", {});
+
+        return node.scratch("_snapToGrid");
+    };
+
+
     function getTopMostNodes(nodes) {
         var nodesMap = {};
+
         for (var i = 0; i < nodes.length; i++) {
             nodesMap[nodes[i].id()] = true;
         }
+
         var roots = nodes.filter(function (i, ele) {
             var parent = ele.parent()[0];
             while(parent != null){
@@ -792,25 +886,7 @@ module.exports = function (gridSpacing) {
         return roots;
     }
 
-    function moveTopDown(children, dx, dy) {
-        for(var i = 0; i < children.length; i++){
-            var child = children[i];
-            child.position({
-                x: child.position('x') + dx,
-                y: child.position('y') + dy
-            });
-            moveTopDown(child.children(), dx, dy);
-        }
-    }
-
-    var getScratch = function (node) {
-        if (!node.scratch("_snapToGrid"))
-            node.scratch("_snapToGrid", {});
-
-        return node.scratch("_snapToGrid");
-    };
-
-    var snapPos = function (pos) {
+    snap.snapPos = function (pos) {
         var newPos = {
             x: (Math.floor(pos.x / gridSpacing) + 0.5) * gridSpacing,
             y: (Math.floor(pos.y / gridSpacing) + 0.5) * gridSpacing
@@ -819,37 +895,54 @@ module.exports = function (gridSpacing) {
         return newPos;
     };
 
-    var snapNode = function (nodesToSnap, toPos) {
+    snap.snapNode = function (node) {
 
-        var nodes = getTopMostNodes(nodesToSnap);
+        var pos = node.position();
+        var newPos = snap.snapPos(pos);
 
-        for (var i = 0; i < nodes.length; i++){
-            var node = nodes[i];
-            
-            var pos = toPos ? toPos : node.position();
-            var newPos = snapPos(pos);
-
-            getScratch(node).snap = {
-                oldPos: node.position()
-            };
-
-            moveTopDown(node, newPos.x - node.position("x"), newPos.y - node.position("y"));
-        }
+        node.position(newPos);
     };
 
-    var recoverSnapNode = function (node) {
+    function snapTopDown(nodes) {
+        for (var i = 0; i < nodes.length; i++) {
+
+            if (!nodes[i].isParent())
+                snap.snapNode(nodes[i]);
+
+            snapTopDown(nodes.children());
+        }
+
+    }
+
+    snap.snapNodesTopDown = function (nodes) {
+        nodes = getTopMostNodes(nodes);
+        snapTopDown(nodes);
+    };
+
+    snap.onFreeNode = function (e) {
+        var nodes;
+        if (e.cyTarget.selected())
+            nodes = e.cy.$(":selected");
+        else
+            nodes = e.cyTarget;
+
+        snap.snapNodesTopDown(nodes);
+
+    };
+
+
+    snap.recoverSnapNode = function (node) {
         var snapScratch = getScratch(node).snap;
         if (snapScratch) {
             node.position(snapScratch.oldPos);
         }
     };
 
-    return {
-        snapPos: snapPos,
-        snapNode: snapNode,
-        recoverSnapNode: recoverSnapNode,
-        changeOptions: changeOptions
-    };
+    return snap;
+
+
+
+
 
 };
 },{}]},{},[6]);
