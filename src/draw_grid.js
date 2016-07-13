@@ -1,10 +1,16 @@
-module.exports = function (opts, cy, $) {
+module.exports = function (opts, cy, $, debounce) {
 
     var options = opts;
 
     var changeOptions = function (opts) {
       options = opts;
     };
+
+
+    var $canvas = $( '<canvas></canvas>' );
+    var $container = $( cy.container() );
+    var ctx = $canvas[ 0 ].getContext( '2d' );
+    $container.append( $canvas );
 
     var drawGrid = function() {
         clearDrawing();
@@ -64,36 +70,34 @@ module.exports = function (opts, cy, $) {
         ctx.clearRect( 0, 0, width, height );
     };
 
-    var resizeCanvas = function() {
-        $canvas
-            .attr( 'height', $container.height() )
-            .attr( 'width', $container.width() )
-            .css( {
-                'position': 'absolute',
-                'top': 0,
-                'left': 0,
-                'z-index': options.gridStackOrder
-            } );
-
-        setTimeout( function() {
-            var canvasBb = $canvas.offset();
-            var containerBb = $container.offset();
-
+    var resizeCanvas = debounce(function() {
             $canvas
                 .attr( 'height', $container.height() )
                 .attr( 'width', $container.width() )
                 .css( {
-                    'top': -( canvasBb.top - containerBb.top ),
-                    'left': -( canvasBb.left - containerBb.left )
+                    'position': 'absolute',
+                    'top': 0,
+                    'left': 0,
+                    'z-index': options.gridStackOrder
                 } );
-            drawGrid();
-        }, 0 );
-    };
-    
-    var $canvas = $( '<canvas></canvas>' );
-    var $container = $( cy.container() );
-    var ctx = $canvas[ 0 ].getContext( '2d' );
-    $container.append( $canvas );
+
+            setTimeout( function() {
+                var canvasBb = $canvas.offset();
+                var containerBb = $container.offset();
+
+                console.log(canvasBb, containerBb);
+                $canvas
+                    .attr( 'height', $container.height() )
+                    .attr( 'width', $container.width() )
+                    .css( {
+                        'top': -( canvasBb.top - containerBb.top ),
+                        'left': -( canvasBb.left - containerBb.left )
+                    } );
+                drawGrid();
+            }, 0 );
+
+    }, 250);
+
 
 
 
@@ -102,6 +106,7 @@ module.exports = function (opts, cy, $) {
         resizeCanvas: resizeCanvas,
         clearCanvas: clearDrawing,
         drawGrid: drawGrid,
-        changeOptions: changeOptions
+        changeOptions: changeOptions,
+        sizeCanvas: drawGrid
     };
 };

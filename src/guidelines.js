@@ -1,4 +1,4 @@
-module.exports = function (opts, cy, $) {
+module.exports = function (opts, cy, $, debounce) {
 
     var options = opts;
 
@@ -81,7 +81,7 @@ module.exports = function (opts, cy, $) {
         onDragNode(e);
     }
 
-    function onDragNode(e) {
+    var onDragNode = debounce(function(e) {
         if (pickedNode) {
             var node = pickedNode;
 
@@ -129,7 +129,7 @@ module.exports = function (opts, cy, $) {
                         }
                     }
                 }
-            });
+            }, 50);
 
             clearDrawing();
             for (var key in nearests) {
@@ -147,7 +147,7 @@ module.exports = function (opts, cy, $) {
             }
 
         }
-    }
+    });
 
     function onFreeNode() {
         pickedNode = undefined;

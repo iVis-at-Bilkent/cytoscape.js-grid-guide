@@ -47,6 +47,7 @@
         var _guidelines = require("./guidelines");
         var _parentPadding = require("./parentPadding");
         var _alignment = require("./alignment");
+        var debounce = require("./debounce");
         var snap, resize, discreteDrag, drawGrid, eventsController, guidelines, parentPadding, alignment;
 
         var initialized = false;
@@ -59,8 +60,8 @@
                 snap = _snap(options.gridSpacing);
                 resize = _resize(options.gridSpacing);
                 discreteDrag = _discreteDrag(cy, snap);
-                drawGrid = _drawGrid(options, cy, $);
-                guidelines = _guidelines(options, cy, $);
+                drawGrid = _drawGrid(options, cy, $, debounce);
+                guidelines = _guidelines(options, cy, $, debounce);
                 parentPadding = _parentPadding(options, cy);
 
                 eventsController = _eventsController(cy, snap, resize, discreteDrag, drawGrid, guidelines, parentPadding, $);
