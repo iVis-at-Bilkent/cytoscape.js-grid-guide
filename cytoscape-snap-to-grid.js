@@ -878,7 +878,7 @@ module.exports = function (opts, cy, $, debounce) {
                         }
                     }
                 }
-            }, 50);
+            }, 60);
 
             clearDrawing();
             for (var key in nearests) {
@@ -947,7 +947,7 @@ module.exports = function (opts, cy, $, debounce) {
             guidelinesStackOrder: 4, // z-index of guidelines
             guidelinesTolerance: 2.00, // Tolerance distance for rendered positions of nodes' interaction.
             guidelinesStyle: { // Set ctx properties of line. Properties are here:
-                strokeStyle: "black"
+                strokeStyle: "#dddddd"
             },
 
             // Parent Padding
