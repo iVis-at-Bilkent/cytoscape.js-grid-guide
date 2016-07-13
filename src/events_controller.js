@@ -97,6 +97,7 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
     function setDrawGrid(enable) {
         cy[eventStatus(enable)]('zoom', drawGridOnZoom);
         cy[eventStatus(enable)]('pan', drawGridOnPan);
+        cy[eventStatus(enable)]('ready', drawGrid.resizeCanvas);
 
         if (enable) {
             drawGrid.initCanvas();
