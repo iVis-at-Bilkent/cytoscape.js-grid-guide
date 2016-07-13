@@ -72,7 +72,6 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
     var snapAllNodes = applyToAllNodes(snap.snapNodesTopDown);
     var recoverSnapAllNodes = applyToAllNodes(snap.recoverSnapNode);
     var snapCyTarget = applyToCyTarget(snap.snapNode, true);
-    var snapMultipleNodes = applyToActiveNodes(snap.snapNodesSimultaneously, true);
 
     function setSnapToGrid(enable) {
         cy[eventStatus(enable)]("add", "node", snapCyTarget);

@@ -53,19 +53,30 @@ module.exports = function (gridSpacing) {
     };
 
     function snapTopDown(nodes) {
+
+        nodes.union(nodes.descendants()).positions(function (i, node) {
+            var pos = node.position();
+            return snap.snapPos(pos);
+        });
+        /*
         for (var i = 0; i < nodes.length; i++) {
 
             if (!nodes[i].isParent())
                 snap.snapNode(nodes[i]);
 
             snapTopDown(nodes.children());
-        }
+        }*/
 
     }
 
     snap.snapNodesTopDown = function (nodes) {
-        nodes = getTopMostNodes(nodes);
-        snapTopDown(nodes);
+        // getTOpMostNodes -> nodes
+        cy.startBatch();
+        nodes.union(nodes.descendants()).positions(function (i, node) {
+            var pos = node.position();
+            return snap.snapPos(pos);
+        });
+        cy.endBatch();
     };
 
     snap.onFreeNode = function (e) {

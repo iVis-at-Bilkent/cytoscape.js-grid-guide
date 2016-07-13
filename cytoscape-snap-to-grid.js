@@ -82,7 +82,7 @@ module.exports = function (cytoscape) {
 },{}],2:[function(require,module,exports){
 module.exports = function (cy, snap) {
 
-    var discreteDrag = { };
+    var discreteDrag = {};
 
     var attachedNode;
     var draggedNodes;
@@ -91,7 +91,7 @@ module.exports = function (cy, snap) {
     var endPos;
 
 
-    discreteDrag.onTapStartNode = function(e) {
+    discreteDrag.onTapStartNode = function (e) {
         if (e.cyTarget.selected())
             draggedNodes = e.cy.$(":selected");
         else
@@ -112,6 +112,7 @@ module.exports = function (cy, snap) {
         cy.off("tapdrag", onTapDrag);
         cy.off("tapend", onTapEndNode);
         attachedNode.unlock();
+        e.preventDefault();
     };
 
     var getDist = function () {
@@ -130,8 +131,8 @@ module.exports = function (cy, snap) {
 
         var roots = nodes.filter(function (i, ele) {
             var parent = ele.parent()[0];
-            while(parent != null){
-                if(nodesMap[parent.id()]){
+            while (parent != null) {
+                if (nodesMap[parent.id()]) {
                     return false;
                 }
                 parent = parent.parent()[0];
@@ -144,31 +145,46 @@ module.exports = function (cy, snap) {
 
     var moveNodesTopDown = function (nodes, dx, dy) {
 
-        for (var i = 0; i < nodes.length; i++){
+/*
+        console.log(nodes.map(function (e) {
+            return e.id();
+        }));
+        for (var i = 0; i < nodes.length; i++) {
             var node = nodes[i];
             var pos = node.position();
 
-            node.position({
-                x: pos.x + dx,
-                y: pos.y + dy
-            });
+            if (!node.isParent()) {
+                node.position({
+                    x: pos.x + dx,
+                    y: pos.y + dy
+                });
+                console.log(node.id() + " " + dx + " " + dy);
+            }
 
             moveNodesTopDown(nodes.children(), dx, dy);
         }
-
+*/
     };
 
-    onTapDrag = function (e) {
+    var onTapDrag = function (e) {
 
         var nodePos = attachedNode.position();
         endPos = e.cyPosition;
         endPos = snap.snapPos(endPos);
-        if (nodePos.x != endPos.x || nodePos.y != endPos.y){
+        var dist = getDist();
+        if (dist.x != 0 || dist.y != 0) {
             attachedNode.unlock();
-            var dist = getDist();
-            var topMostNodes = getTopMostNodes(draggedNodes);
-            moveNodesTopDown(topMostNodes, dist.x, dist.y);
-            snap.snapNodesTopDown(topMostNodes);
+            //var topMostNodes = getTopMostNodes(draggedNodes);
+            var nodes = draggedNodes.union(draggedNodes.descendants());
+
+            nodes.positions(function (i, node) {
+                var pos = node.position();
+                return snap.snapPos({
+                    x: pos.x + dist.x,
+                    y: pos.y + dist.y
+                });
+            });
+
             startPos = endPos;
             attachedNode.lock();
             attachedNode.trigger("drag");
@@ -176,15 +192,8 @@ module.exports = function (cy, snap) {
 
     };
 
-
-
-
-
-
-
     return discreteDrag;
 
-    
 
 };
 },{}],3:[function(require,module,exports){
@@ -370,7 +379,6 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
     var snapAllNodes = applyToAllNodes(snap.snapNodesTopDown);
     var recoverSnapAllNodes = applyToAllNodes(snap.recoverSnapNode);
     var snapCyTarget = applyToCyTarget(snap.snapNode, true);
-    var snapMultipleNodes = applyToActiveNodes(snap.snapNodesSimultaneously, true);
 
     function setSnapToGrid(enable) {
         cy[eventStatus(enable)]("add", "node", snapCyTarget);
@@ -904,19 +912,30 @@ module.exports = function (gridSpacing) {
     };
 
     function snapTopDown(nodes) {
+
+        nodes.union(nodes.descendants()).positions(function (i, node) {
+            var pos = node.position();
+            return snap.snapPos(pos);
+        });
+        /*
         for (var i = 0; i < nodes.length; i++) {
 
             if (!nodes[i].isParent())
                 snap.snapNode(nodes[i]);
 
             snapTopDown(nodes.children());
-        }
+        }*/
 
     }
 
     snap.snapNodesTopDown = function (nodes) {
-        nodes = getTopMostNodes(nodes);
-        snapTopDown(nodes);
+        // getTOpMostNodes -> nodes
+        cy.startBatch();
+        nodes.union(nodes.descendants()).positions(function (i, node) {
+            var pos = node.position();
+            return snap.snapPos(pos);
+        });
+        cy.endBatch();
     };
 
     snap.onFreeNode = function (e) {
