@@ -129,7 +129,7 @@ module.exports = function (opts, cy, $, debounce) {
                         }
                     }
                 }
-            }, 60);
+            }, 30);
 
             clearDrawing();
             for (var key in nearests) {
