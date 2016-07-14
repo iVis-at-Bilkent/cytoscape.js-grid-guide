@@ -41,6 +41,10 @@ module.exports = function (cytoscape) {
 
         eles = eles.not(modelNode);
 
+        horizontal = horizontal ? horizontal : "none";
+        vertical = vertical ? vertical : "none";
+
+
         // 0 for center
         var xFactor = 0;
         var yFactor = 0;
@@ -72,8 +76,61 @@ module.exports = function (cytoscape) {
             moveTopDown(node, newPos.x - oldPos.x, newPos.y - oldPos.y);
         }
 
-
+        return eles;
     });
+
+    if (cy.undoRedo) {
+        function getNodePositions() {
+            var positionsAndSizes = {};
+            var nodes = cy.nodes();
+
+            for (var i = 0; i < nodes.length; i++) {
+                var ele = nodes[i];
+                positionsAndSizes[ele.id()] = {
+                    x: ele.position("x"),
+                    y: ele.position("y")
+                };
+            }
+
+            return positionsAndSizes;
+        }
+
+        function returnToPositions(nodesData) {
+            var currentPositions = {};
+            cy.nodes().positions(function (i, ele) {
+                currentPositions[ele.id()] = {
+                    x: ele.position("x"),
+                    y: ele.position("y")
+                };
+                var data = nodesData[ele.id()];
+                return {
+                    x: data.x,
+                    y: data.y
+                };
+            });
+
+            return currentPositions
+        }
+
+        var ur = cy.undoRedo();
+
+        ur.action("align", function (args) {
+
+            var nodesData;
+            if (args.firstTime){
+                nodesData = getNodePositions();
+                args.nodes.align(args.horizontal, args.vertical, args.alignTo);
+            }
+            else
+                nodesData = returnToPositions(args);
+
+            return nodesData;
+
+        }, function (nodesData) {
+            return returnToPositions(nodesData);
+        });
+
+    }
 
 
 
