@@ -75,7 +75,7 @@ gulp.task('npm', shell.task([
 ]));
 
 gulp.task('build', shell.task([
-    'browserify ./src/index.js -o cytoscape-snap-to-grid.js'
+    'browserify ./src/index.js -o cytoscape-grid-guide.js'
 ]));
 
 // http://www.jshint.com/docs/options/

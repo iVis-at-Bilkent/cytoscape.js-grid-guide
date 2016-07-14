@@ -1,4 +1,4 @@
-cytoscape-snap-to-grid
+cytoscape-grid-guide
 ================================================================================
 
 
@@ -58,8 +58,8 @@ Framework for grid interactions. Provides discrete dragging, grid background, gr
 ## Usage instructions
 
 Download the library:
- * via npm: `npm install cytoscape-snap-to-grid`,
- * via bower: `bower install cytoscape-snap-to-grid`, or
+ * via npm: `npm install cytoscape-grid-guide`,
+ * via bower: `bower install cytoscape-grid-guide`, or
  * via direct download in the repository (probably from a tag).
 
 `require()` the library as appropriate for your project:
@@ -67,15 +67,15 @@ Download the library:
 CommonJS:
 ```js
 var cytoscape = require('cytoscape');
-var snap-to-grid = require('cytoscape-snap-to-grid');
+var grid-guide = require('cytoscape-grid-guide');
 
-snap-to-grid( cytoscape, jquery ); // register extension
+grid-guide( cytoscape, jquery ); // register extension
 ```
 
 AMD:
 ```js
-require(['cytoscape', 'cytoscape-snap-to-grid'], function( cytoscape, snap-to-grid ){
-  snap-to-grid( cytoscape ); // register extension
+require(['cytoscape', 'cytoscape-grid-guide'], function( cytoscape, grid-guide ){
+  grid-guide( cytoscape ); // register extension
 });
 ```
 
@@ -88,10 +88,10 @@ This project is set up to automatically be published to npm and bower.  To publi
 
 1. Set the version number environment variable: `export VERSION=1.2.3`
 1. Publish: `gulp publish`
-1. If publishing to bower for the first time, you'll need to run `bower register cytoscape-snap-to-grid https://github.com/iVis-at-Bilkent/cytoscape.js-snap-to-grid.git`
+1. If publishing to bower for the first time, you'll need to run `bower register cytoscape-grid-guide https://github.com/iVis-at-Bilkent/cytoscape.js-grid-guide.git`
 
 
 ## Team
 
   * [Selim Firat Yilmaz](https://github.com/mrsfy), [Ugur Dogrusoz](https://github.com/ugurdogrusoz) of [i-Vis at Bilkent University](http://www.cs.bilkent.edu.tr/~ivis)
-  * Draw grid functionality is reused from [a Cytoscape.js extension](https://github.com/guimeira/cytoscape-snap-to-grid) by [guimeira](https://github.com/guimeira).
+  * Draw grid functionality is reused from [a Cytoscape.js extension](https://github.com/guimeira/cytoscape-grid-guide) by [guimeira](https://github.com/guimeira).

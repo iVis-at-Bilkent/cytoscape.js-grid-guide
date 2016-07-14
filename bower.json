@@ -1,10 +1,10 @@
 {
-  "name": "cytoscape-snap-to-grid",
-  "description": "Framework for snap-to-grid interactions.",
-  "main": "cytoscape-snap-to-grid.js",
+  "name": "cytoscape-grid-guide",
+  "description": "Framework for grid-guide interactions.",
+  "main": "cytoscape-grid-guide.js",
   "repository": {
     "type": "git",
-    "url": "https://github.com/iVis-at-Bilkent/cytoscape.js-snap-to-grid.git"
+    "url": "https://github.com/iVis-at-Bilkent/cytoscape.js-grid-guide.git"
   },
   "ignore": [
     "**/.*",

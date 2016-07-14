@@ -1058,7 +1058,7 @@ module.exports = function (opts, cy, $, debounce) {
     }
 
     if( typeof define !== 'undefined' && define.amd ){ // expose as an amd/requirejs module
-        define('cytoscape-snap-to-grid', function(){
+        define('cytoscape-grid-guide', function(){
             return register;
         });
     }
