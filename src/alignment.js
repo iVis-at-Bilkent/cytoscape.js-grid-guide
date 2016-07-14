@@ -1,16 +1,16 @@
-module.exports = function (cytoscape) {
+module.exports = function (cytoscape, $) {
     
     // Needed because parent nodes cannot be moved!
-    function moveTopDown(children, dx, dy) {
-        for(var i = 0; i < children.length; i++){
-            var child = children[i];
-            child.position({
-                x: child.position('x') + dx,
-                y: child.position('y') + dy
-            });
+    function moveTopDown(node, dx, dy) {
+        var nodes = node.union(node.descendants());
 
-            moveTopDown(child.children(), dx, dy);
-        }
+        nodes.positions(function (i, node) {
+            var pos = node.position();
+            return {
+                x: pos.x + dx,
+                y: pos.y + dy
+            };
+        });
     }
 
     function getTopMostNodes(nodes) {
@@ -62,8 +62,8 @@ module.exports = function (cytoscape) {
 
         for (var i = 0; i < eles.length; i++) {
             var node = eles[i];
-            var oldPos = node.position();
-            var newPos = node.position();
+            var oldPos = $.extend({}, node.position());
+            var newPos = $.extend({}, node.position());
 
             if (vertical != "none")
                 newPos.x = modelNode.position("x") + xFactor * (modelNode.width() - node.width()) / 2;
@@ -72,11 +72,11 @@ module.exports = function (cytoscape) {
             if (horizontal != "none")
                 newPos.y = modelNode.position("y") + yFactor * (modelNode.height() - node.height()) / 2;
 
-
+            console.log(node, newPos, oldPos);
             moveTopDown(node, newPos.x - oldPos.x, newPos.y - oldPos.y);
         }
 
-        return eles;
+        return this;
     });
 
     if (cy.undoRedo) {

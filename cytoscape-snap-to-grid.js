@@ -1,17 +1,17 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-module.exports = function (cytoscape) {
+module.exports = function (cytoscape, $) {
     
     // Needed because parent nodes cannot be moved!
-    function moveTopDown(children, dx, dy) {
-        for(var i = 0; i < children.length; i++){
-            var child = children[i];
-            child.position({
-                x: child.position('x') + dx,
-                y: child.position('y') + dy
-            });
+    function moveTopDown(node, dx, dy) {
+        var nodes = node.union(node.descendants());
 
-            moveTopDown(child.children(), dx, dy);
-        }
+        nodes.positions(function (i, node) {
+            var pos = node.position();
+            return {
+                x: pos.x + dx,
+                y: pos.y + dy
+            };
+        });
     }
 
     function getTopMostNodes(nodes) {
@@ -63,8 +63,8 @@ module.exports = function (cytoscape) {
 
         for (var i = 0; i < eles.length; i++) {
             var node = eles[i];
-            var oldPos = node.position();
-            var newPos = node.position();
+            var oldPos = $.extend({}, node.position());
+            var newPos = $.extend({}, node.position());
 
             if (vertical != "none")
                 newPos.x = modelNode.position("x") + xFactor * (modelNode.width() - node.width()) / 2;
@@ -73,11 +73,11 @@ module.exports = function (cytoscape) {
             if (horizontal != "none")
                 newPos.y = modelNode.position("y") + yFactor * (modelNode.height() - node.height()) / 2;
 
-
+            console.log(node, newPos, oldPos);
             moveTopDown(node, newPos.x - oldPos.x, newPos.y - oldPos.y);
         }
 
-        return eles;
+        return this;
     });
 
     if (cy.undoRedo) {
@@ -1039,7 +1039,7 @@ module.exports = function (opts, cy, $, debounce) {
 
                 eventsController = _eventsController(cy, snap, resize, discreteDrag, drawGrid, guidelines, parentPadding, $);
 
-                alignment = _alignment(cytoscape);
+                alignment = _alignment(cytoscape, $);
 
                 eventsController.init(options);
                 initialized = true;

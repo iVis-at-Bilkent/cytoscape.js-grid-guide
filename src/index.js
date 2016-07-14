@@ -67,7 +67,7 @@
 
                 eventsController = _eventsController(cy, snap, resize, discreteDrag, drawGrid, guidelines, parentPadding, $);
 
-                alignment = _alignment(cytoscape);
+                alignment = _alignment(cytoscape, $);
 
                 eventsController.init(options);
                 initialized = true;
