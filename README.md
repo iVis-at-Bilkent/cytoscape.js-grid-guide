@@ -17,7 +17,7 @@ Framework for grid interactions. Provides discrete dragging, grid background, gr
  
  For example the code below aligns selected nodes to top left of first selected node.
 ```js
-      cy.nodes(":selected").alignTo("top", "left")
+      cy.nodes(":selected").align("top", "left")
 ```
  
 # Default Undo/Redo Actions
