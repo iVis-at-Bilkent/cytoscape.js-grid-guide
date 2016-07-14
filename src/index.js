@@ -18,21 +18,22 @@
             // Other settings
 
             // General
-            gridSpacing: 40, // Distance between the lines of the grid.
+            gridSpacing: 20, // Distance between the lines of the grid.
 
             // Draw Grid
             zoomDash: true, // Determines whether the size of the dashes should change when the drawing is zoomed in and out if grid is drawn.
             panGrid: true, // Determines whether the grid should move then the user moves the graph if grid is drawn.
             gridStackOrder: -1, // Namely z-index
-            strokeStyle: '#CCCCCC', // Color of grid lines
+            strokeStyle: '#dedede', // Color of grid lines
             lineWidth: 1.0, // Width of grid lines
-            lineDash: [5,8], // Defines style of dash. Read: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/setLineDash
+            lineDash: [2.5, 4], // Defines style of dash. Read: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/setLineDash
 
             // Guidelines
             guidelinesStackOrder: 4, // z-index of guidelines
             guidelinesTolerance: 2.00, // Tolerance distance for rendered positions of nodes' interaction.
             guidelinesStyle: { // Set ctx properties of line. Properties are here:
-                strokeStyle: "#dddddd"
+                strokeStyle: "#8b7d6b",
+                lineDash: [3, 5]
             },
 
             // Parent Padding

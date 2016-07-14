@@ -129,7 +129,7 @@ module.exports = function (opts, cy, $, debounce) {
                         }
                     }
                 }
-            }, 30);
+            });
 
             clearDrawing();
             for (var key in nearests) {
@@ -139,6 +139,7 @@ module.exports = function (opts, cy, $, debounce) {
                     ctx.moveTo(item.fromPos.x, item.fromPos.y);
                     ctx.lineTo(item.toPos.x, item.toPos.y);
 
+                    ctx.setLineDash(options.guidelinesStyle.lineDash);
                     for (var styleKey in options.guidelinesStyle)
                         ctx[styleKey] = options.guidelinesStyle[styleKey];
 
@@ -147,7 +148,7 @@ module.exports = function (opts, cy, $, debounce) {
             }
 
         }
-    });
+    }, 0, true);
 
     function onFreeNode() {
         pickedNode = undefined;

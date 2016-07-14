@@ -152,7 +152,6 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
         for (var key in options)
             if (latestOptions[key] != options[key])
                 if (controller.hasOwnProperty(key)) {
-                    console.log(key);
                     controller[key](options[key]);
                 } else {
                     for (var optsKey in specialOpts) {
