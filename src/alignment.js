@@ -72,7 +72,6 @@ module.exports = function (cytoscape, $) {
             if (horizontal != "none")
                 newPos.y = modelNode.position("y") + yFactor * (modelNode.height() - node.height()) / 2;
 
-            console.log(node, newPos, oldPos);
             moveTopDown(node, newPos.x - oldPos.x, newPos.y - oldPos.y);
         }
 
