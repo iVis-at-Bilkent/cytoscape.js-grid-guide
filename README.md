@@ -12,6 +12,25 @@ Framework for grid interactions. Provides discrete dragging, grid background, gr
 
  * `cy.gridGuide(options)` Sets stated options any time wanted.
  
+ * `eles.align(horizontal, vertical, alignTo)` Aligns vertically/horizontally dimensions of eles to first element of eles
+ ( or if alignTo is specified aligns to it). `horizontal` param may get `top`, `center`, `bottom` and `vertical` param may get `left`, `center`, `right` and `horizontal.
+ 
+ For example the code below aligns selected nodes to top left of first selected node.
+```js
+      cy.nodes(":selected").alignTo("top", "left")
+```
+ 
+# Default Undo/Redo Actions
+```js
+      ur.do("align", {
+          nodes: cy.nodes(":selected"),
+          vertical: "left",
+          horizontal: "top",
+          alignTo: cy.nodes(":selected")[0],
+       })
+```
+ 
+ 
 ## Default Options
 ```js
         var options = {
