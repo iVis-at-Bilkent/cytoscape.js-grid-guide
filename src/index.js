@@ -53,7 +53,7 @@
 
         var initialized = false;
 
-        cytoscape( 'core', 'snapToGrid', function(opts){
+        cytoscape( 'core', 'gridGuide', function(opts){
             var cy = this;
             $.extend(true, options, opts);
 

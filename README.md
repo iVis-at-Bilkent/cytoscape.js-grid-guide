@@ -10,7 +10,7 @@ Framework for grid interactions. Provides discrete dragging, grid background, gr
 
 ## API
 
- * `cy.snapToGrid(options)` Sets stated options any time wanted.
+ * `cy.gridGuide(options)` Sets stated options any time wanted.
  
 ## Default Options
 ```js

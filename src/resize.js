@@ -6,10 +6,10 @@ module.exports = function (gridSpacing) {
     };
 
     var getScratch = function (node) {
-        if (!node.scratch("_snapToGrid"))
-            node.scratch("_snapToGrid", {});
+        if (!node.scratch("_gridGuide"))
+            node.scratch("_gridGuide", {});
 
-        return node.scratch("_snapToGrid");
+        return node.scratch("_gridGuide");
     };
 
     function resizeNode(node) {
