@@ -51,13 +51,19 @@
         var debounce = require("./debounce");
         var snap, resize, discreteDrag, drawGrid, eventsController, guidelines, parentPadding, alignment;
 
-        var initialized = false;
+        function getScratch() {
+            if (!cy.scratch("_gridGuide")) {
+                cy.scratch("_gridGuide", { });
+
+            }
+            return cy.scratch("_gridGuide");
+        }
 
         cytoscape( 'core', 'gridGuide', function(opts){
             var cy = this;
             $.extend(true, options, opts);
 
-            if (!initialized) {
+            if (!getScratch().initialized) {
                 snap = _snap(options.gridSpacing);
                 resize = _resize(options.gridSpacing);
                 discreteDrag = _discreteDrag(cy, snap);
@@ -70,7 +76,7 @@
                 alignment = _alignment(cytoscape, $);
 
                 eventsController.init(options);
-                initialized = true;
+                getScratch().initialized = true;
             } else
                 eventsController.syncWithOptions(options);
 

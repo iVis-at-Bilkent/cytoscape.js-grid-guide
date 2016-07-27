@@ -73,7 +73,6 @@ module.exports = function (cytoscape, $) {
             if (horizontal != "none")
                 newPos.y = modelNode.position("y") + yFactor * (modelNode.height() - node.height()) / 2;
 
-            console.log(node, newPos, oldPos);
             moveTopDown(node, newPos.x - oldPos.x, newPos.y - oldPos.y);
         }
 
@@ -580,7 +579,6 @@ module.exports = function (opts, cy, $, debounce) {
                 var canvasBb = $canvas.offset();
                 var containerBb = $container.offset();
 
-                console.log(canvasBb, containerBb);
                 $canvas
                     .attr( 'height', $container.height() )
                     .attr( 'width', $container.width() )
@@ -1023,13 +1021,19 @@ module.exports = function (opts, cy, $, debounce) {
         var debounce = require("./debounce");
         var snap, resize, discreteDrag, drawGrid, eventsController, guidelines, parentPadding, alignment;
 
-        var initialized = false;
+        function getScratch() {
+            if (!cy.scratch("_gridGuide")) {
+                cy.scratch("_gridGuide", { });
+
+            }
+            return cy.scratch("_gridGuide");
+        }
 
         cytoscape( 'core', 'gridGuide', function(opts){
             var cy = this;
             $.extend(true, options, opts);
 
-            if (!initialized) {
+            if (!getScratch().initialized) {
                 snap = _snap(options.gridSpacing);
                 resize = _resize(options.gridSpacing);
                 discreteDrag = _discreteDrag(cy, snap);
@@ -1042,7 +1046,7 @@ module.exports = function (opts, cy, $, debounce) {
                 alignment = _alignment(cytoscape, $);
 
                 eventsController.init(options);
-                initialized = true;
+                getScratch().initialized = true;
             } else
                 eventsController.syncWithOptions(options);
 
