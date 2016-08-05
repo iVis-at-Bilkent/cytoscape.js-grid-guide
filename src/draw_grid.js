@@ -85,7 +85,6 @@ module.exports = function (opts, cy, $, debounce) {
                 var canvasBb = $canvas.offset();
                 var containerBb = $container.offset();
 
-                console.log(canvasBb, containerBb);
                 $canvas
                     .attr( 'height', $container.height() )
                     .attr( 'width', $container.width() )

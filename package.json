@@ -1,6 +1,6 @@
 {
   "name": "cytoscape-grid-guide",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Framework for grid-guide interactions.",
   "main": "cytoscape-grid-guide.js",
   "spm": {
@@ -30,5 +30,8 @@
     "gulp-shell": "^0.2.9",
     "jshint-stylish": "^1.0.0",
     "run-sequence": "^1.0.0"
+  },
+  "dependencies": {
+    "collections": "^5.0.4"
   }
 }

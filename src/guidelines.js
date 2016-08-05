@@ -1,5 +1,8 @@
 module.exports = function (opts, cy, $, debounce) {
 
+
+    var SortedMap = require("collections/sorted-map");
+
     var options = opts;
 
     var changeOptions = function (opts) {
