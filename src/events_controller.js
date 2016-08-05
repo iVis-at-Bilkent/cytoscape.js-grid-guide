@@ -111,11 +111,7 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
     // Guidelines
 
     function setGuidelines(enable) {
-        cy[eventStatus(enable)]('zoom', guidelines.onZoom);
-        cy[eventStatus(enable)]('drag', "node", guidelines.onDragNode);
-        cy[eventStatus(enable)]('grab', "node", guidelines.onGrabNode);
-        cy[eventStatus(enable)]('free', "node", guidelines.onFreeNode);
-
+        
     }
 
     // Parent Padding
