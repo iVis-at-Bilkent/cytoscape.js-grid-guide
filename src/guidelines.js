@@ -64,7 +64,7 @@ module.exports = function (opts, cy, $, debounce) {
                 } );
         }, 0);
     };
-    
+
     var clearDrawing = function () {
         var width = $container.width();
         var height = $container.height();
@@ -77,13 +77,33 @@ module.exports = function (opts, cy, $, debounce) {
     var ctx = $canvas[0].getContext('2d');
     $container.append($canvas);
     resizeCanvas();
+
+
+    var hashIt = function (val) {
+        var newVal = Math.floor(val);
+        return newVal - (newVal % options.guidelinesTolerance);
+    };
+
+    var SMap = null;
+
+    var onInitGuidelines = function () {
+        if (!currentSMap) {
+            SMap = new SortedMap();
+
+            var nodes = cy.nodes();
+            nodes.each(function (i, node) {
+                dims(node).forEach(function (val) {
+                    if(SMap.has(val))
+                        SMap.get(val).push(node);
+                     else
+                        SMap.add(node, key);
+                });
+            });
+        }
+    };
     
 
     return {
-        onDragNode: onDragNode,
-        onZoom: onDragNode,
-        onGrabNode: onGrabNode,
-        onFreeNode: onFreeNode,
         changeOptions: changeOptions
     }
 
