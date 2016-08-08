@@ -6989,11 +6989,7 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
     // Guidelines
 
     function setGuidelines(enable) {
-        cy[eventStatus(enable)]('zoom', guidelines.onZoom);
-        cy[eventStatus(enable)]('drag', "node", guidelines.onDragNode);
-        cy[eventStatus(enable)]('grab', "node", guidelines.onGrabNode);
-        cy[eventStatus(enable)]('free', "node", guidelines.onFreeNode);
-
+        
     }
 
     // Parent Padding
@@ -7084,15 +7080,62 @@ module.exports = function (opts, cy, $, debounce) {
         options = opts;
     };
 
-    function calcDistance(p1, p2) {
-        return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
-    }
-    
-    function getExtraDim(node, paddingDim) {
+    var getCyScratch = function () {
+        var sc = cy.scratch("_guidelines");
+        if (!sc)
+            sc = cy.scratch("_guidelines", { });
 
-    }
+        return sc;
+    };
 
-    var dims = function (node) {
+    var resizeCanvas = function () {
+        clearDrawing();
+        $canvas
+            .attr('height', $container.height())
+            .attr('width', $container.width())
+            .css({
+                'position': 'absolute',
+                'top': 0,
+                'left': 0,
+                'z-index': options.guidelinesStackOrder
+            });
+        setTimeout(function () {
+            var canvasBb = $canvas.offset();
+            var containerBb = $container.offset();
+
+            $canvas
+                .attr( 'height', $container.height() )
+                .attr( 'width', $container.width() )
+                .css( {
+                    'top': -( canvasBb.top - containerBb.top ),
+                    'left': -( canvasBb.left - containerBb.left )
+                } );
+        }, 0);
+    };
+
+    var clearDrawing = function () {
+        var width = $container.width();
+        var height = $container.height();
+
+        ctx.clearRect(0, 0, width, height);
+    };
+
+    var $canvas = $('<canvas></canvas>');
+    var $container = $(cy.container());
+    var ctx = $canvas[0].getContext('2d');
+    $container.append($canvas);
+    resizeCanvas();
+
+
+    var hashIt = function (val) {
+        return val;
+    };
+
+
+    var SMap = null;
+    var lines = { };
+
+    lines.getDims = function (node) {
 
         var pos = node.renderedPosition();
         var width = node.renderedWidth();
@@ -7104,140 +7147,93 @@ module.exports = function (opts, cy, $, debounce) {
             bottom: Number(node.renderedStyle("padding-bottom").replace("px", ""))
         };
 
-        this.horizontal = {
-            center: pos.x,
-            left: pos.x - (padding.left + width / 2),
-            right: pos.x + (padding.right + width / 2)
+        // v for vertical, h for horizontal
+        return {
+            hcenter: pos.x,
+            hleft: pos.x - (padding.left + width / 2),
+            hright: pos.x + (padding.right + width / 2),
+            vcenter: pos.y,
+            vtop: pos.y - (padding.top + height / 2),
+            vbottom: pos.y + (padding.bottom + height / 2)
         };
 
-        this.vertical = {
-            center: pos.y,
-            top: pos.y - (padding.top + height / 2),
-            bottom: pos.y + (padding.bottom + height / 2)
-        };
-
-        return this;
     };
 
-    var $canvas = $('<canvas></canvas>');
-    var $container = $(cy.container());
-    var ctx = $canvas[0].getContext('2d');
-    $container.append($canvas);
-
-    $canvas
-        .attr('height', $container.height())
-        .attr('width', $container.width())
-        .css({
-            'position': 'absolute',
-            'top': 0,
-            'left': 0,
-            'z-index': options.guidelinesStackOrder
-        });
-
-    var canvasBb = $canvas.offset();
-    var containerBb = $container.offset();
-
-    $canvas
-        .attr( 'height', $container.height() )
-        .attr( 'width', $container.width() )
-        .css( {
-            'top': -( canvasBb.top - containerBb.top ),
-            'left': -( canvasBb.left - containerBb.left )
-        } );
-    var clearDrawing = function () {
-        var width = $container.width();
-        var height = $container.height();
-
-        ctx.clearRect(0, 0, width, height);
+    lines.calcDistance = function (p1, p2) {
+        return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
     };
 
+    lines.init = function (activeNodes) {
+        SMap = new SortedMap();
 
-    var pickedNode;
-
-    function onGrabNode(e) {
-        pickedNode = e.cyTarget;
-        onDragNode(e);
-    }
-
-    var onDragNode = debounce(function(e) {
-        if (pickedNode) {
-            var node = pickedNode;
-
-            var mainDims = new dims(node);
-
-            var cy = e.cy;
-            var nearests = {
-                horizontal: {
-                    distance: Number.MAX_VALUE
-                },
-                vertical: {
-                    distance: Number.MAX_VALUE
-                }
-            };
-
-            cy.nodes(":visible").not(node.ancestors()).not(node.descendants()).not(node).each(function (i, ele) {
-                var nodeDims = new dims(ele);
-
-
-                for (var dim in mainDims) {
-                    var mainDim = mainDims[dim];
-                    var nodeDim = nodeDims[dim];
-                    var otherDim = dim == "horizontal" ? "y" : "x";
-                    var eitherDim = otherDim == "x" ? "y" : "x";
-                    for (var key in mainDim) {
-                        for (var key2 in nodeDim) {
-                            if (Math.abs(mainDim[key] - nodeDim[key2]) < options.guidelinesTolerance) {
-                                var distance = calcDistance(node.renderedPosition(), ele.renderedPosition());
-                                if (nearests[dim].distance > distance) {
-
-                                    nearests[dim] = {
-                                        to: ele.id(),
-                                        toPos: {},
-                                        from: node.id(),
-                                        fromPos: {},
-                                        distance: distance
-                                    };
-                                    nearests[dim].fromPos[eitherDim] = mainDim[key];
-                                    nearests[dim].fromPos[otherDim] = node.renderedPosition(otherDim);
-                                    nearests[dim].toPos[eitherDim] = nodeDim[key2];
-                                    nearests[dim].toPos[otherDim] = ele.renderedPosition(otherDim);
-                                }
-                            }
-                            // console.log(key + " of " + node.id() + " -> " + key2 + " of " + ele.id())
-                        }
-                    }
-                }
-            });
-
-            clearDrawing();
-            for (var key in nearests) {
-                var item = nearests[key];
-                if (item.from) {
-                    ctx.beginPath();
-                    ctx.moveTo(item.fromPos.x, item.fromPos.y);
-                    ctx.lineTo(item.toPos.x, item.toPos.y);
-
-                    ctx.setLineDash(options.guidelinesStyle.lineDash);
-                    for (var styleKey in options.guidelinesStyle)
-                        ctx[styleKey] = options.guidelinesStyle[styleKey];
-
-                    ctx.stroke();
-                }
+        var nodes = cy.nodes();
+        nodes.not(activeNodes).each(function (i, node) {
+            var dims = lines.getDims(node);
+            for (var dimKey in dims) {
+                var val = dims[dimKey];
+                var key = hashIt(val);
+                if(SMap.has(key))
+                    SMap.get(key).push(node);
+                else
+                    SMap.add(node, key);
             }
 
-        }
-    }, 0, true);
+        });
+        this.update(activeNodes);
+    };
 
-    function onFreeNode() {
-        pickedNode = undefined;
-        clearDrawing();
-    }
+    lines.destroy = function () {
+        SMap = null;
+    };
+
+    lines.clear = clearDrawing;
+
+    lines.renderPos = function (pos) {
+        return pos*cy.zoom() + cy.pan();
+    };
+
+    lines.drawLine = function (fromNode, toNode) {
+        var from = this.renderPos(fromNode.position());
+        var to = this.renderPos(toNode.position());
+        ctx.beginPath();
+        ctx.moveTo(from.x,from.y);
+        ctx.lineTo(to.x,to.y);
+        ctx.stroke();
+    };
+
+    lines.update = function (activeNodes) {
+        this.clear();
+
+        activeNodes.each(function (i, node) {
+            lines.getDims(node).forEach(function (val) {
+                var key = hashIt(val);
+
+                if ( SMap.has(key) )
+                    lines.drawLine(node, SMap.get(key));
+
+            });
+
+        });
+    };
+
+    lines.resize = function () {
+        resizeCanvas();
+        this.update();
+    };
+
+
+    cy.on("grab", function (e) {
+        lines.init(e.cyTarget);
+    });
+
+    cy.on("drag", function (e) {
+        lines.update(e.cyTarget);
+    });
+
+    cy.on("free", lines.destroy);
+
 
     return {
-        onDragNode: onDragNode,
-        onZoom: onDragNode,
-        onGrabNode: onGrabNode,
-        onFreeNode: onFreeNode,
         changeOptions: changeOptions
     }
 
