@@ -32,6 +32,6 @@
     "run-sequence": "^1.0.0"
   },
   "dependencies": {
-    "collections": "^5.0.4"
+    "functional-red-black-tree": "^1.0.1"
   }
 }

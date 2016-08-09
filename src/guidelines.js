@@ -1,7 +1,7 @@
 module.exports = function (opts, cy, $, debounce) {
 
 
-    var SortedMap = require("collections/sorted-map");
+    var RBTree = require("functional-red-black-tree");
 
     var options = opts;
 
@@ -55,13 +55,7 @@ module.exports = function (opts, cy, $, debounce) {
     $container.append($canvas);
     resizeCanvas();
 
-
-    var hashIt = function (val) {
-        return val;
-    };
-
-
-    var SMap = null;
+    var Tree = null;
     var lines = { };
 
     lines.getDims = function (node) {
@@ -93,26 +87,26 @@ module.exports = function (opts, cy, $, debounce) {
     };
 
     lines.init = function (activeNodes) {
-        SMap = new SortedMap();
+        Tree = RBTree();
 
         var nodes = cy.nodes();
         nodes.not(activeNodes).each(function (i, node) {
             var dims = lines.getDims(node);
             for (var dimKey in dims) {
-                var val = dims[dimKey];
-                var key = hashIt(val);
-                if(SMap.has(key))
-                    SMap.get(key).push(node);
+                var key = dims[dimKey];
+                if(Tree.get(key))
+                    Tree.get(key).push(node);
                 else
-                    SMap.add(node, key);
+                    Tree = Tree.insert(key, [node]);
+
             }
 
         });
-        this.update(activeNodes);
+        lines.update(activeNodes);
     };
 
     lines.destroy = function () {
-        SMap = null;
+        Tree = null;
     };
 
     lines.clear = clearDrawing;
@@ -122,8 +116,8 @@ module.exports = function (opts, cy, $, debounce) {
     };
 
     lines.drawLine = function (fromNode, toNode) {
-        var from = this.renderPos(fromNode.position());
-        var to = this.renderPos(toNode.position());
+        var from = fromNode.renderedPosition();
+        var to = toNode.renderedPosition();
         ctx.beginPath();
         ctx.moveTo(from.x,from.y);
         ctx.lineTo(to.x,to.y);
@@ -131,18 +125,18 @@ module.exports = function (opts, cy, $, debounce) {
     };
 
     lines.update = function (activeNodes) {
-        this.clear();
+        lines.clear();
 
         activeNodes.each(function (i, node) {
-            lines.getDims(node).forEach(function (val) {
-                var key = hashIt(val);
-
-                if ( SMap.has(key) )
-                    lines.drawLine(node, SMap.get(key));
-
-            });
-
+            var dims = lines.getDims(node);
+            for (var dimKey in dims) {
+                var key = dims[dimKey];
+                var target = Tree.get(key);
+                if (target)
+                    lines.drawLine(node, target[0]);
+            }
         });
+
     };
 
     lines.resize = function () {
@@ -150,14 +144,15 @@ module.exports = function (opts, cy, $, debounce) {
         this.update();
     };
 
+    var applyToActiveNodes = function (f) {
+        return function (e) {
+            var nodes = e.cyTarget.selected() ? e.cy.$(":selected") : e.cyTarget;
+            f(nodes);
+        };
+    };
+    cy.on("grab", applyToActiveNodes(lines.init));
 
-    cy.on("grab", function (e) {
-        lines.init(e.cyTarget);
-    });
-
-    cy.on("drag", function (e) {
-        lines.update(e.cyTarget);
-    });
+    cy.on("drag", applyToActiveNodes(lines.update));
 
     cy.on("free", lines.destroy);
 
