@@ -1808,7 +1808,7 @@ module.exports = function (opts, cy, $, debounce) {
     var getCyScratch = function () {
         var sc = cy.scratch("_guidelines");
         if (!sc)
-            sc = cy.scratch("_guidelines", { });
+            sc = cy.scratch("_guidelines", {});
 
         return sc;
     };
@@ -1829,12 +1829,12 @@ module.exports = function (opts, cy, $, debounce) {
             var containerBb = $container.offset();
 
             $canvas
-                .attr( 'height', $container.height() )
-                .attr( 'width', $container.width() )
-                .css( {
+                .attr('height', $container.height())
+                .attr('width', $container.width())
+                .css({
                     'top': -( canvasBb.top - containerBb.top ),
                     'left': -( canvasBb.left - containerBb.left )
-                } );
+                });
         }, 0);
     };
 
@@ -1851,29 +1851,35 @@ module.exports = function (opts, cy, $, debounce) {
     $container.append($canvas);
     resizeCanvas();
 
-    var Tree = null;
-    var lines = { };
+    var VTree = null;
+    var HTree = null;
+    var excludedNodes;
+    var lines = {};
 
     lines.getDims = function (node) {
 
-        var pos = lines.renderPos(node.position());
-        var width = lines.renderDim(node.width());
-        var height = lines.renderDim(node.height());
+        var pos = lines.renderPos(node.renderedPosition());
+        var width = lines.renderDim(node.renderedWidth());
+        var height = lines.renderDim(node.renderedHeight());
         var padding = {
-            left: Number(lines.renderDim(node.style("padding-left").replace("px", ""))),
-            right: Number(lines.renderDim(node.style("padding-right").replace("px", ""))),
-            top: Number(lines.renderDim(node.style("padding-top").replace("px", ""))),
-            bottom: Number(lines.renderDim(node.style("padding-bottom").replace("px", "")))
+            left: lines.renderDim(Number(node.renderedStyle("padding-left").replace("px", ""))),
+            right: lines.renderDim(Number(node.renderedStyle("padding-right").replace("px", ""))),
+            top: lines.renderDim(Number(node.renderedStyle("padding-top").replace("px", ""))),
+            bottom: lines.renderDim(Number(node.renderedStyle("padding-bottom").replace("px", "")))
         };
 
         // v for vertical, h for horizontal
         return {
-            hcenter: pos.x,
-            hleft: pos.x - (padding.left + width / 2),
-            hright: pos.x + (padding.right + width / 2),
-            vcenter: pos.y,
-            vtop: pos.y - (padding.top + height / 2),
-            vbottom: pos.y + (padding.bottom + height / 2)
+            horizontal: {
+                center: pos.x,
+                left: pos.x - (padding.left + width / 2),
+                right: pos.x + (padding.right + width / 2)
+            },
+            vertical: {
+                center: pos.y,
+                top: pos.y - (padding.top + height / 2),
+                bottom: pos.y + (padding.bottom + height / 2)
+            }
         };
 
     };
@@ -1883,62 +1889,138 @@ module.exports = function (opts, cy, $, debounce) {
     };
 
     lines.init = function (activeNodes) {
-        Tree = RBTree();
+        VTree = RBTree();
+        HTree = RBTree();
 
         var nodes = cy.nodes();
-        nodes.not(activeNodes).each(function (i, node) {
+        excludedNodes = activeNodes.union(activeNodes.ancestors());
+        nodes.not(excludedNodes).each(function (i, node) {
             var dims = lines.getDims(node);
-            for (var dimKey in dims) {
-                var key = dims[dimKey];
-                if(Tree.get(key))
-                    Tree.get(key).push(node);
+            ["left", "center", "right"].forEach(function (val) {
+                var hKey = dims.horizontal[val];
+                if (HTree.get(hKey))
+                    HTree.get(hKey).push(node);
                 else
-                    Tree = Tree.insert(key, [node]);
-
-            }
+                    HTree = HTree.insert(hKey, [node]);
+            });
+            ["top", "center", "bottom"].forEach(function (val) {
+                var vKey = dims.vertical[val];
+                if (VTree.get(vKey))
+                    VTree.get(vKey).push(node);
+                else
+                    VTree = VTree.insert(vKey, [node]);
+            });
 
         });
         lines.update(activeNodes);
     };
 
     lines.destroy = function () {
-        Tree = null;
+        VTree = null;
+        HTree = null;
         lines.clear();
     };
 
     lines.clear = clearDrawing;
 
     lines.renderDim = function (val) {
-        return val * cy.zoom();
+        return val;// * cy.zoom();
     };
     lines.renderPos = function (pos) {
-        var pan = cy.pan();
+        return pos;/*var pan = cy.pan();
         return {
             x: lines.renderDim(pos.x) + pan.x,
             y: lines.renderDim(pos.y) + pan.y
-        };
+        };*/
     };
 
-    lines.drawLine = function (fromNode, toNode) {
-        var from = lines.renderPos(fromNode.position());
-        var to = lines.renderPos(toNode.position());
+    lines.drawLine = function (from, to) {
+        from = lines.renderPos(from);
+        to = lines.renderPos(to);
         ctx.beginPath();
-        ctx.moveTo(from.x,from.y);
-        ctx.lineTo(to.x,to.y);
+        ctx.moveTo(from.x, from.y);
+        ctx.lineTo(to.x, to.y);
         ctx.stroke();
+    };
+
+    var locked = { horizontal: false, vertical: false };
+    lines.searchForLine = function (type, node) {
+        var dims = lines.getDims(node)[type];
+        var target;
+        var minDist = Number.MAX_SAFE_INTEGER;
+        var targetKey;
+        for (var dimKey in dims) {
+            var key = dims[dimKey];
+            (type == "horizontal" ? HTree : VTree).forEach(function (exKey, nodes) {
+                nodes.forEach(function (targetNode) {
+                    var dist = lines.calcDistance(node.renderedPosition(), targetNode.renderedPosition());
+                    if (dist < minDist) { // TODO: AND node is in viewport AND if does not overlap with node
+                        target = targetNode;
+                        minDist = dist;
+                        targetKey = exKey;
+                    }
+
+                });
+            }, key - options.guidelinesTolerance, key + options.guidelinesTolerance);
+        }
+        if (target) {
+            if (type == "horizontal") {
+                lines.drawLine({
+                    x: targetKey,
+                    y: node.renderedPosition("y")
+                }, {
+                    x: targetKey,
+                    y: target.renderedPosition("y")
+                });/*
+                if (!locked.horizontal){
+                    node.position("x", targetKey + (node.renderedPosition("x") < targetKey ? -1 : 1) * node.renderedWidth()/2);
+                    locked.horizontal = true;
+                    var onTapDrag;
+                    cy.on("tapdrag", onTapDrag = function (e) {
+                        var ePos = e.cyRenderedPosition;
+                        if (Math.abs(ePos.x - targetKey) <= options.guidelinesTolerance) {
+                            node.renderedPosition("x", targetKey + (node.renderedPosition("x") < targetKey ? -1 : 1) * node.renderedWidth()/2);
+                        }else {
+                            locked.horizontal = false;
+                            node.renderedPosition("x", ePos.x);
+                            cy.off("tapdrag", onTapDrag);
+                        }
+                    });
+                }*/
+            } else {
+                lines.drawLine({
+                    x: node.renderedPosition("x"),
+                    y: targetKey
+                }, {
+                    x: target.renderedPosition("x"),
+                    y: targetKey
+                });
+            }
+        }
+    };
+
+    lines.searchForDistances = function (type, node) {
+        if (cy.nodes().not(excludedNodes).length < 2)
+            return;
+
+        var dims = lines.getDims(node)[type];
+
+        var cur = HTree.le(dims.left);
+
+        // TODO
+
+
+
     };
 
     lines.update = function (activeNodes) {
         lines.clear();
 
         activeNodes.each(function (i, node) {
-            var dims = lines.getDims(node);
-            for (var dimKey in dims) {
-                var key = dims[dimKey];
-                var target = Tree.get(key);
-                if (target)
-                    lines.drawLine(node, target[0]);
-            }
+            lines.searchForLine("horizontal", node);
+            lines.searchForLine("vertical", node);
+            lines.searchForDistances("horizontal", node);
+            lines.searchForDistances("vertical", node);
         });
 
     };
