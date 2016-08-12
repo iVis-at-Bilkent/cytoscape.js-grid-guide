@@ -209,9 +209,27 @@ module.exports = function (opts, cy, $, debounce) {
 
         var dims = lines.getDims(node)[type];
 
+        var lastNode;
+        var lastDistance;
         var cur = HTree.le(dims.left);
 
-        // TODO
+
+        while (cur) {
+            var curNode = cur.value();
+            if (Math.abs(curNode.position("x") - node.position("x")) > options.distanceLinesTolerance) {
+                cur = cur.prev();
+                continue;
+            }
+
+            if (!curNode.is(node) && Math.abs(curNode.position("x") - node.position("x")) <= options.guidelinesTolerance) { // todo: maybe new option
+
+            }
+
+
+            lastNode = curNode;
+            cur = cur.prev();
+        }
+
 
 
 

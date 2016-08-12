@@ -36,6 +36,8 @@
                 lineDash: [3, 5]
             },
 
+            distanceLinesTolerance: 20, // Horizontal tolerance for verticals and vertical tolerance for horizontals
+
             // Parent Padding
             parentSpacing: -1 // -1 to set paddings of parents to gridSpacing
         };
