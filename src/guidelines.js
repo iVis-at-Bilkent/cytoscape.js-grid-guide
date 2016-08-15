@@ -209,30 +209,51 @@ module.exports = function (opts, cy, $, debounce) {
 
         var dims = lines.getDims(node)[type];
 
-        var lastNode;
-        var lastDistance;
-        var cur = HTree.le(dims.left);
+
+        var DH = [];
+        var nodePos = node.position();
+
+        var cur =  HTree.begin();
+        while (cur.hasNext() && cur != HTree.end()) {
+            bef = cur;
+            cur = bef.next();
+
+            var befKey = bef.key(),
+                curKey = cur.key();
+
+            var diff = Math.abs(curKey - befKey);
+
+            if (Math.abs(diff-options.guidelinesTolerance) > 0) {
+                bef.forEach(function (befNode) {
+                    befPos = befNode.position();
+                    if (Math.abs(befPos.y - nodePos.y) > options.distancelinesTolerance) // TODO: and if in viewport
+                        return;
+
+                    cur.forEach(function (curNode) {
+                        var curPos = curNode.position();
+                        if (Math.abs(curPos.x - nodePos.x) > options.distancelinesTolerance) // TODO: and if in viewport
+                            return;
+
+                        DH.push({
+                            from: {
+                                x: befKey,
+                                y: befPos.y
+                            },
+                            to: {
+                                x: curKey,
+                                y: curPos.y
+                            }
+                        });
 
 
-        while (cur) {
-            var curNode = cur.value();
-            if (Math.abs(curNode.position("x") - node.position("x")) > options.distanceLinesTolerance) {
-                cur = cur.prev();
-                continue;
+                    });
+                });
+
+
+
             }
 
-            if (!curNode.is(node) && Math.abs(curNode.position("x") - node.position("x")) <= options.guidelinesTolerance) { // todo: maybe new option
-
-            }
-
-
-            lastNode = curNode;
-            cur = cur.prev();
         }
-
-
-
-
     };
 
     lines.update = function (activeNodes) {
