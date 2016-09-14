@@ -4,9 +4,7 @@ cytoscape-grid-guide
 
 ## Description
 
-Framework for grid interactions. Provides discrete dragging, grid background, gridlines on dragging, resizing nodes 
-& compounds to fit cells.
-
+This Cytoscape.js extension provides a framework for grid interactions, distributed under [The MIT License](https://opensource.org/licenses/MIT). It specifically provides discrete dragging, grid background, gridlines on dragging, resizing simple and compound nodes to fit cells.
 
 ## API
 
