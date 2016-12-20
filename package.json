@@ -1,6 +1,6 @@
 {
   "name": "cytoscape-grid-guide",
-  "version": "1.0.1",
+  "version": "1.0.4",
   "description": "Framework for grid-guide interactions.",
   "main": "src/index.js",
   "spm": {
