@@ -51,7 +51,7 @@
         var debounce = require("./debounce");
         var snap, resize, discreteDrag, drawGrid, eventsController, guidelines, parentPadding, alignment;
 
-        function getScratch() {
+        function getScratch(cy) {
             if (!cy.scratch("_gridGuide")) {
                 cy.scratch("_gridGuide", { });
 
@@ -63,8 +63,8 @@
             var cy = this;
             $.extend(true, options, opts);
 
-            if (!getScratch().initialized) {
-                snap = _snap(options.gridSpacing);
+            if (!getScratch(cy).initialized) {
+                snap = _snap(cy, options.gridSpacing);
                 resize = _resize(options.gridSpacing);
                 discreteDrag = _discreteDrag(cy, snap);
                 drawGrid = _drawGrid(options, cy, $, debounce);
@@ -73,10 +73,10 @@
 
                 eventsController = _eventsController(cy, snap, resize, discreteDrag, drawGrid, guidelines, parentPadding, $);
 
-                alignment = _alignment(cytoscape, $);
+                alignment = _alignment(cytoscape, cy, $);
 
                 eventsController.init(options);
-                getScratch().initialized = true;
+                getScratch(cy).initialized = true;
             } else
                 eventsController.syncWithOptions(options);
 

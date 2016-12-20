@@ -1,5 +1,5 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-module.exports = function (cytoscape, $) {
+module.exports = function (cytoscape, cy, $) {
     
     // Needed because parent nodes cannot be moved!
     function moveTopDown(node, dx, dy) {
@@ -579,6 +579,7 @@ module.exports = function (opts, cy, $, debounce) {
                 var canvasBb = $canvas.offset();
                 var containerBb = $container.offset();
 
+                console.log(canvasBb, containerBb);
                 $canvas
                     .attr( 'height', $container.height() )
                     .attr( 'width', $container.width() )
@@ -1021,7 +1022,7 @@ module.exports = function (opts, cy, $, debounce) {
         var debounce = require("./debounce");
         var snap, resize, discreteDrag, drawGrid, eventsController, guidelines, parentPadding, alignment;
 
-        function getScratch() {
+        function getScratch(cy) {
             if (!cy.scratch("_gridGuide")) {
                 cy.scratch("_gridGuide", { });
 
@@ -1033,8 +1034,8 @@ module.exports = function (opts, cy, $, debounce) {
             var cy = this;
             $.extend(true, options, opts);
 
-            if (!getScratch().initialized) {
-                snap = _snap(options.gridSpacing);
+            if (!getScratch(cy).initialized) {
+                snap = _snap(cy, options.gridSpacing);
                 resize = _resize(options.gridSpacing);
                 discreteDrag = _discreteDrag(cy, snap);
                 drawGrid = _drawGrid(options, cy, $, debounce);
@@ -1043,10 +1044,10 @@ module.exports = function (opts, cy, $, debounce) {
 
                 eventsController = _eventsController(cy, snap, resize, discreteDrag, drawGrid, guidelines, parentPadding, $);
 
-                alignment = _alignment(cytoscape, $);
+                alignment = _alignment(cytoscape, cy, $);
 
                 eventsController.init(options);
-                getScratch().initialized = true;
+                getScratch(cy).initialized = true;
             } else
                 eventsController.syncWithOptions(options);
 
@@ -1166,7 +1167,7 @@ module.exports = function (gridSpacing) {
 
 };
 },{}],10:[function(require,module,exports){
-module.exports = function (gridSpacing) {
+module.exports = function (cy, gridSpacing) {
 
     var snap = { };
 
