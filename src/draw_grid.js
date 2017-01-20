@@ -13,8 +13,6 @@ module.exports = function (opts, cy, $, debounce) {
     $container.append( $canvas );
 
     var drawGrid = function() {
-        clearDrawing();
-
         var zoom = cy.zoom();
         var canvasWidth = $container.width();
         var canvasHeight = $container.height();
@@ -26,43 +24,33 @@ module.exports = function (opts, cy, $, debounce) {
         ctx.strokeStyle = options.strokeStyle;
         ctx.lineWidth = options.lineWidth;
 
-        if(options.zoomDash) {
-            var zoomedDash = options.lineDash.slice();
+        var data = '\t<svg width="'+ canvasWidth + '" height="'+ canvasHeight + '" xmlns="http://www.w3.org/2000/svg">\n\
+            <defs>\n\
+                <pattern id="horizontalLines" width="' + increment + '" height="' + increment + '" patternUnits="userSpaceOnUse">\n\
+                    <path d="M ' + increment + ' 0 L 0 0 0 ' + 0 + '" fill="none" stroke="' + options.strokeStyle + '" stroke-width="' + options.lineWidth + '" />\n\
+                </pattern>\n\
+                <pattern id="verticalLines" width="' + increment + '" height="' + increment + '" patternUnits="userSpaceOnUse">\n\
+                    <path d="M ' + 0 + ' 0 L 0 0 0 ' + increment + '" fill="none" stroke="' + options.strokeStyle + '" stroke-width="' + options.lineWidth + '" />\n\
+                </pattern>\n\
+            </defs>\n\
+            <rect width="100%" height="100%" fill="url(#horizontalLines)" transform="translate('+ 0 + ', ' + initialValueY + ')" />\n\
+            <rect width="100%" height="100%" fill="url(#verticalLines)" transform="translate('+ initialValueX + ', ' + 0 + ')" />\n\
+        </svg>\n';
 
-            for(var i = 0; i < zoomedDash.length; i++) {
-                zoomedDash[ i ] = options.lineDash[ i ]*zoom;
-            }
-            ctx.setLineDash( zoomedDash );
-        } else {
-            ctx.setLineDash( options.lineDash );
-        }
-
-        if(options.panGrid) {
-            ctx.lineDashOffset = -pan.y;
-        } else {
-            ctx.lineDashOffset = 0;
-        }
-
-        for(var i = initialValueX; i < canvasWidth; i += increment) {
-            ctx.beginPath();
-            ctx.moveTo( i, 0 );
-            ctx.lineTo( i, canvasHeight );
-            ctx.stroke();
-        }
-
-        if(options.panGrid) {
-            ctx.lineDashOffset = -pan.x;
-        } else {
-            ctx.lineDashOffset = 0;
-        }
-
-        for(var i = initialValueY; i < canvasHeight; i += increment) {
-            ctx.beginPath();
-            ctx.moveTo( 0, i );
-            ctx.lineTo( canvasWidth, i );
-            ctx.stroke();
-        }
+        var DOMURL = window.URL || window.webkitURL || window;
+        var img = new Image();
+        var svg = new Blob([data], {type: 'image/svg+xml'});
+        var url = DOMURL.createObjectURL(svg);
+        
+        img.onload = function () {
+            clearDrawing();
+            ctx.drawImage(img, 0, 0);
+            DOMURL.revokeObjectURL(url);
+        };
+        
+        img.src = url;
     };
+    
     var clearDrawing = function() {
         var width = $container.width();
         var height = $container.height();
