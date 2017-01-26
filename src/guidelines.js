@@ -148,57 +148,58 @@ module.exports = function (opts, cy, $, debounce) {
     };
 
     var locked = { horizontal: false, vertical: false };
+    
+    /**
+     * Find geometric alignment lines and draw them
+     * @param type: horizontal or vertical
+     * @param node: the node to be aligned
+     */
     lines.searchForLine = function (type, node) {
+        
+        // variables
         var dims = lines.getDims(node)[type];
-        var target;
-        var minDist = Number.MAX_SAFE_INTEGER;
-        var targetKey;
-        for (var dimKey in dims) {
-            var key = dims[dimKey];
-            (type == "horizontal" ? HTree : VTree).forEach(function (exKey, nodes) {
-                nodes.forEach(function (targetNode) {
-                    var dist = lines.calcDistance(node.renderedPosition(), targetNode.renderedPosition());
-                    if (dist < minDist) { // TODO: AND node is in viewport AND if does not overlap with node
-                        target = targetNode;
-                        minDist = dist;
-                        targetKey = exKey;
-                    }
-
-                });
-            }, key - options.guidelinesTolerance, key + options.guidelinesTolerance);
+        var key, target, targetKey;
+        var Tree;
+        
+        // initialize Tree
+        if ( type == "horizontal"){
+            Tree = HTree;
+        } else{
+            Tree = VTree;
         }
-        if (target) {
-            if (type == "horizontal") {
-                lines.drawLine({
-                    x: targetKey,
-                    y: node.renderedPosition("y")
-                }, {
-                    x: targetKey,
-                    y: target.renderedPosition("y")
-                });/*
-                if (!locked.horizontal){
-                    node.position("x", targetKey + (node.renderedPosition("x") < targetKey ? -1 : 1) * node.renderedWidth()/2);
-                    locked.horizontal = true;
-                    var onTapDrag;
-                    cy.on("tapdrag", onTapDrag = function (e) {
-                        var ePos = e.cyRenderedPosition;
-                        if (Math.abs(ePos.x - targetKey) <= options.guidelinesTolerance) {
-                            node.renderedPosition("x", targetKey + (node.renderedPosition("x") < targetKey ? -1 : 1) * node.renderedWidth()/2);
-                        }else {
-                            locked.horizontal = false;
-                            node.renderedPosition("x", ePos.x);
-                            cy.off("tapdrag", onTapDrag);
-                        }
+        
+        // check if node aligned in any dimension:
+        // {center, left, right} or {center, top, bottom}
+        for (var dimKey in dims) {
+            key = dims[dimKey];
+            
+            target = Tree.get(key);
+
+            // if alignment found, draw lines and break
+            if (target) {
+                target = target[0];
+                targetKey = lines.getDims(node)[type][dimKey];
+                
+                // Draw horizontal or vertical alignment line
+                if (type == "horizontal") {
+                    lines.drawLine({
+                        x: targetKey,
+                        y: node.renderedPosition("y")
+                    }, {
+                        x: targetKey,
+                        y: target.renderedPosition("y")
                     });
-                }*/
-            } else {
-                lines.drawLine({
-                    x: node.renderedPosition("x"),
-                    y: targetKey
-                }, {
-                    x: target.renderedPosition("x"),
-                    y: targetKey
-                });
+                } else {
+                    lines.drawLine({
+                        x: node.renderedPosition("x"),
+                        y: targetKey
+                    }, {
+                        x: target.renderedPosition("x"),
+                        y: targetKey
+                    });
+                }
+            
+                break;
             }
         }
     };
@@ -262,8 +263,8 @@ module.exports = function (opts, cy, $, debounce) {
         activeNodes.each(function (i, node) {
             lines.searchForLine("horizontal", node);
             lines.searchForLine("vertical", node);
-            lines.searchForDistances("horizontal", node);
-            lines.searchForDistances("vertical", node);
+            //lines.searchForDistances("horizontal", node);
+            //lines.searchForDistances("vertical", node);
         });
 
     };
@@ -273,21 +274,12 @@ module.exports = function (opts, cy, $, debounce) {
         this.update();
     };
 
-    var applyToActiveNodes = function (f) {
-        return function (e) {
-            var nodes = e.cyTarget.selected() ? e.cy.$(":selected") : e.cyTarget;
-            f(nodes);
-        };
-    };
-    cy.on("grab", applyToActiveNodes(lines.init));
 
-    cy.on("drag", applyToActiveNodes(lines.update));
-
-    cy.on("free", lines.destroy);
 
 
     return {
-        changeOptions: changeOptions
+        changeOptions: changeOptions,
+        lines: lines
     }
 
 };

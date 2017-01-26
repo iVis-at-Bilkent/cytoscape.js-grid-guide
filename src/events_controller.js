@@ -21,15 +21,12 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
                 func(e.cyTarget);
         }
     }
-
-    function applyToActiveNodes(func, allowParent) {
+    
+    function applyToActiveNodes(func) {
         return function (e) {
-            if (!e.cyTarget.is(":parent") || allowParent)
-                if (e.cyTarget.selected())
-                    func(e.cyTarget, e.cy.$(":selected"));
-                else
-                    func(e.cyTarget, e.cyTarget);
-        }
+            var nodes = e.cyTarget.selected() ? e.cy.$(":selected") : e.cyTarget;
+            func(nodes);
+        };
     }
 
     function applyToAllNodesButNoParent(func) {
@@ -111,7 +108,16 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
     // Guidelines
 
     function setGuidelines(enable) {
-        
+       if (enable){
+            cy.on("grab", applyToActiveNodes(guidelines.lines.init));
+            cy.on("drag", applyToActiveNodes(guidelines.lines.update));
+            cy.on("free", guidelines.lines.destroy);
+       }
+        else{
+            cy.off("grab");
+            cy.off("drag");
+            cy.off("free");
+        }
     }
 
     // Parent Padding
