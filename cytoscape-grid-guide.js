@@ -1504,8 +1504,6 @@ module.exports = function (opts, cy, $, debounce) {
     $container.append( $canvas );
 
     var drawGrid = function() {
-        clearDrawing();
-
         var zoom = cy.zoom();
         var canvasWidth = $container.width();
         var canvasHeight = $container.height();
@@ -1517,43 +1515,33 @@ module.exports = function (opts, cy, $, debounce) {
         ctx.strokeStyle = options.strokeStyle;
         ctx.lineWidth = options.lineWidth;
 
-        if(options.zoomDash) {
-            var zoomedDash = options.lineDash.slice();
+        var data = '\t<svg width="'+ canvasWidth + '" height="'+ canvasHeight + '" xmlns="http://www.w3.org/2000/svg">\n\
+            <defs>\n\
+                <pattern id="horizontalLines" width="' + increment + '" height="' + increment + '" patternUnits="userSpaceOnUse">\n\
+                    <path d="M ' + increment + ' 0 L 0 0 0 ' + 0 + '" fill="none" stroke="' + options.strokeStyle + '" stroke-width="' + options.lineWidth + '" />\n\
+                </pattern>\n\
+                <pattern id="verticalLines" width="' + increment + '" height="' + increment + '" patternUnits="userSpaceOnUse">\n\
+                    <path d="M ' + 0 + ' 0 L 0 0 0 ' + increment + '" fill="none" stroke="' + options.strokeStyle + '" stroke-width="' + options.lineWidth + '" />\n\
+                </pattern>\n\
+            </defs>\n\
+            <rect width="100%" height="100%" fill="url(#horizontalLines)" transform="translate('+ 0 + ', ' + initialValueY + ')" />\n\
+            <rect width="100%" height="100%" fill="url(#verticalLines)" transform="translate('+ initialValueX + ', ' + 0 + ')" />\n\
+        </svg>\n';
 
-            for(var i = 0; i < zoomedDash.length; i++) {
-                zoomedDash[ i ] = options.lineDash[ i ]*zoom;
-            }
-            ctx.setLineDash( zoomedDash );
-        } else {
-            ctx.setLineDash( options.lineDash );
-        }
-
-        if(options.panGrid) {
-            ctx.lineDashOffset = -pan.y;
-        } else {
-            ctx.lineDashOffset = 0;
-        }
-
-        for(var i = initialValueX; i < canvasWidth; i += increment) {
-            ctx.beginPath();
-            ctx.moveTo( i, 0 );
-            ctx.lineTo( i, canvasHeight );
-            ctx.stroke();
-        }
-
-        if(options.panGrid) {
-            ctx.lineDashOffset = -pan.x;
-        } else {
-            ctx.lineDashOffset = 0;
-        }
-
-        for(var i = initialValueY; i < canvasHeight; i += increment) {
-            ctx.beginPath();
-            ctx.moveTo( 0, i );
-            ctx.lineTo( canvasWidth, i );
-            ctx.stroke();
-        }
+        var DOMURL = window.URL || window.webkitURL || window;
+        var img = new Image();
+        var svg = new Blob([data], {type: 'image/svg+xml'});
+        var url = DOMURL.createObjectURL(svg);
+        
+        img.onload = function () {
+            clearDrawing();
+            ctx.drawImage(img, 0, 0);
+            DOMURL.revokeObjectURL(url);
+        };
+        
+        img.src = url;
     };
+    
     var clearDrawing = function() {
         var width = $container.width();
         var height = $container.height();
@@ -1600,6 +1588,7 @@ module.exports = function (opts, cy, $, debounce) {
         sizeCanvas: drawGrid
     };
 };
+
 },{}],6:[function(require,module,exports){
 module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines, parentPadding, $) {
 
@@ -1624,15 +1613,12 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
                 func(e.cyTarget);
         }
     }
-
-    function applyToActiveNodes(func, allowParent) {
+    
+    function applyToActiveNodes(func) {
         return function (e) {
-            if (!e.cyTarget.is(":parent") || allowParent)
-                if (e.cyTarget.selected())
-                    func(e.cyTarget, e.cy.$(":selected"));
-                else
-                    func(e.cyTarget, e.cyTarget);
-        }
+            var nodes = e.cyTarget.selected() ? e.cy.$(":selected") : e.cyTarget;
+            func(nodes);
+        };
     }
 
     function applyToAllNodesButNoParent(func) {
@@ -1714,7 +1700,16 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
     // Guidelines
 
     function setGuidelines(enable) {
-        
+       if (enable){
+            cy.on("grab", applyToActiveNodes(guidelines.lines.init));
+            cy.on("drag", applyToActiveNodes(guidelines.lines.update));
+            cy.on("free", guidelines.lines.destroy);
+       }
+        else{
+            cy.off("grab");
+            cy.off("drag");
+            cy.off("free");
+        }
     }
 
     // Parent Padding
@@ -1793,6 +1788,7 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
     };
 
 };
+
 },{}],7:[function(require,module,exports){
 module.exports = function (opts, cy, $, debounce) {
 
@@ -1944,57 +1940,65 @@ module.exports = function (opts, cy, $, debounce) {
     };
 
     var locked = { horizontal: false, vertical: false };
+    
+    /**
+     * Find geometric alignment lines and draw them
+     * @param type: horizontal or vertical
+     * @param node: the node to be aligned
+     */
     lines.searchForLine = function (type, node) {
+        
+        // variables
+        var position, target, Tree;
         var dims = lines.getDims(node)[type];
-        var target;
-        var minDist = Number.MAX_SAFE_INTEGER;
-        var targetKey;
+        var targetKey = Number.MAX_SAFE_INTEGER;
+        
+        // initialize Tree
+        if ( type == "horizontal"){
+            Tree = HTree;
+        } else{
+            Tree = VTree;
+        }
+        
+        // check if node aligned in any dimension:
+        // {center, left, right} or {center, top, bottom}
         for (var dimKey in dims) {
-            var key = dims[dimKey];
-            (type == "horizontal" ? HTree : VTree).forEach(function (exKey, nodes) {
-                nodes.forEach(function (targetNode) {
-                    var dist = lines.calcDistance(node.renderedPosition(), targetNode.renderedPosition());
-                    if (dist < minDist) { // TODO: AND node is in viewport AND if does not overlap with node
-                        target = targetNode;
-                        minDist = dist;
+            position = dims[dimKey];
+            // find the closest alignment in range of tolerance
+            Tree.forEach(function (exKey, nodes) {
+    
+                    if (exKey < targetKey) {
+                        target = nodes;
                         targetKey = exKey;
                     }
 
-                });
-            }, key - options.guidelinesTolerance, key + options.guidelinesTolerance);
-        }
-        if (target) {
-            if (type == "horizontal") {
-                lines.drawLine({
-                    x: targetKey,
-                    y: node.renderedPosition("y")
-                }, {
-                    x: targetKey,
-                    y: target.renderedPosition("y")
-                });/*
-                if (!locked.horizontal){
-                    node.position("x", targetKey + (node.renderedPosition("x") < targetKey ? -1 : 1) * node.renderedWidth()/2);
-                    locked.horizontal = true;
-                    var onTapDrag;
-                    cy.on("tapdrag", onTapDrag = function (e) {
-                        var ePos = e.cyRenderedPosition;
-                        if (Math.abs(ePos.x - targetKey) <= options.guidelinesTolerance) {
-                            node.renderedPosition("x", targetKey + (node.renderedPosition("x") < targetKey ? -1 : 1) * node.renderedWidth()/2);
-                        }else {
-                            locked.horizontal = false;
-                            node.renderedPosition("x", ePos.x);
-                            cy.off("tapdrag", onTapDrag);
-                        }
+            }, position - options.guidelinesTolerance, position + options.guidelinesTolerance);
+
+            // if alignment found, draw lines and break
+            if (target) {
+                target = target[0];
+                targetKey = lines.getDims(node)[type][dimKey];
+                
+                // Draw horizontal or vertical alignment line
+                if (type == "horizontal") {
+                    lines.drawLine({
+                        x: targetKey,
+                        y: node.renderedPosition("y")
+                    }, {
+                        x: targetKey,
+                        y: target.renderedPosition("y")
                     });
-                }*/
-            } else {
-                lines.drawLine({
-                    x: node.renderedPosition("x"),
-                    y: targetKey
-                }, {
-                    x: target.renderedPosition("x"),
-                    y: targetKey
-                });
+                } else {
+                    lines.drawLine({
+                        x: node.renderedPosition("x"),
+                        y: targetKey
+                    }, {
+                        x: target.renderedPosition("x"),
+                        y: targetKey
+                    });
+                }
+            
+                break;
             }
         }
     };
@@ -2005,12 +2009,51 @@ module.exports = function (opts, cy, $, debounce) {
 
         var dims = lines.getDims(node)[type];
 
-        var cur = HTree.le(dims.left);
 
-        // TODO
+        var DH = [];
+        var nodePos = node.position();
+
+        var cur =  HTree.begin();
+        while (cur.hasNext() && cur != HTree.end()) {
+            bef = cur;
+            cur = bef.next();
+
+            var befKey = bef.key(),
+                curKey = cur.key();
+
+            var diff = Math.abs(curKey - befKey);
+
+            if (Math.abs(diff-options.guidelinesTolerance) > 0) {
+                bef.forEach(function (befNode) {
+                    befPos = befNode.position();
+                    if (Math.abs(befPos.y - nodePos.y) > options.distancelinesTolerance) // TODO: and if in viewport
+                        return;
+
+                    cur.forEach(function (curNode) {
+                        var curPos = curNode.position();
+                        if (Math.abs(curPos.x - nodePos.x) > options.distancelinesTolerance) // TODO: and if in viewport
+                            return;
+
+                        DH.push({
+                            from: {
+                                x: befKey,
+                                y: befPos.y
+                            },
+                            to: {
+                                x: curKey,
+                                y: curPos.y
+                            }
+                        });
+
+
+                    });
+                });
 
 
 
+            }
+
+        }
     };
 
     lines.update = function (activeNodes) {
@@ -2019,8 +2062,8 @@ module.exports = function (opts, cy, $, debounce) {
         activeNodes.each(function (i, node) {
             lines.searchForLine("horizontal", node);
             lines.searchForLine("vertical", node);
-            lines.searchForDistances("horizontal", node);
-            lines.searchForDistances("vertical", node);
+            //lines.searchForDistances("horizontal", node);
+            //lines.searchForDistances("vertical", node);
         });
 
     };
@@ -2030,24 +2073,16 @@ module.exports = function (opts, cy, $, debounce) {
         this.update();
     };
 
-    var applyToActiveNodes = function (f) {
-        return function (e) {
-            var nodes = e.cyTarget.selected() ? e.cy.$(":selected") : e.cyTarget;
-            f(nodes);
-        };
-    };
-    cy.on("grab", applyToActiveNodes(lines.init));
 
-    cy.on("drag", applyToActiveNodes(lines.update));
-
-    cy.on("free", lines.destroy);
 
 
     return {
-        changeOptions: changeOptions
+        changeOptions: changeOptions,
+        lines: lines
     }
 
 };
+
 },{"functional-red-black-tree":1}],8:[function(require,module,exports){
 ;(function(){ 'use strict';
 
@@ -2086,6 +2121,8 @@ module.exports = function (opts, cy, $, debounce) {
                 strokeStyle: "#8b7d6b",
                 lineDash: [3, 5]
             },
+
+            distancelinesTolerance: 20, // Horizontal tolerance for verticals and vertical tolerance for horizontals
 
             // Parent Padding
             parentSpacing: -1 // -1 to set paddings of parents to gridSpacing

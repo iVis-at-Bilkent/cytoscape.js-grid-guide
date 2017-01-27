@@ -157,9 +157,9 @@ module.exports = function (opts, cy, $, debounce) {
     lines.searchForLine = function (type, node) {
         
         // variables
+        var position, target, Tree;
         var dims = lines.getDims(node)[type];
-        var key, target, targetKey;
-        var Tree;
+        var targetKey = Number.MAX_SAFE_INTEGER;
         
         // initialize Tree
         if ( type == "horizontal"){
@@ -171,9 +171,16 @@ module.exports = function (opts, cy, $, debounce) {
         // check if node aligned in any dimension:
         // {center, left, right} or {center, top, bottom}
         for (var dimKey in dims) {
-            key = dims[dimKey];
-            
-            target = Tree.get(key);
+            position = dims[dimKey];
+            // find the closest alignment in range of tolerance
+            Tree.forEach(function (exKey, nodes) {
+    
+                    if (exKey < targetKey) {
+                        target = nodes;
+                        targetKey = exKey;
+                    }
+
+            }, position - options.guidelinesTolerance, position + options.guidelinesTolerance);
 
             // if alignment found, draw lines and break
             if (target) {
