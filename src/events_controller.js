@@ -116,6 +116,11 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
         cy[eventStatus(enable)]('grab', "node", guidelines.onGrabNode);
         cy[eventStatus(enable)]('free', "node", guidelines.onFreeNode);
 
+        if (enable) {
+            $(window).on('resize', guidelines.resizeCanvas);
+        } else {
+            $(window).off('resize', guidelines.resizeCanvas);
+        }
     }
 
     // Parent Padding

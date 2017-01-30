@@ -154,13 +154,40 @@ module.exports = function (opts, cy, $, debounce) {
         pickedNode = undefined;
         clearDrawing();
     }
+    var resizeCanvas = debounce(function() {
+	    $canvas
+	    .attr( 'height', $container.height() )
+	    .attr( 'width', $container.width() )
+	    .css( {
+		    'position': 'absolute',
+		    'top': 0,
+		    'left': 0,
+		    'z-index': options.guidelinesStackOrder
+	    } );
+
+	    setTimeout( function() {
+		    var canvasBb = $canvas.offset();
+		    var containerBb = $container.offset();
+
+		    console.log(canvasBb, containerBb);
+		    $canvas
+		    .attr( 'height', $container.height() )
+		    .attr( 'width', $container.width() )
+		    .css( {
+			    'top': -( canvasBb.top - containerBb.top ),
+			    'left': -( canvasBb.left - containerBb.left )
+		    } );
+	    }, 0 );
+
+    }, 250);
 
     return {
-        onDragNode: onDragNode,
-        onZoom: onDragNode,
-        onGrabNode: onGrabNode,
-        onFreeNode: onFreeNode,
-        changeOptions: changeOptions
+	    onDragNode: onDragNode,
+		    onZoom: onDragNode,
+		    onGrabNode: onGrabNode,
+		    onFreeNode: onFreeNode,
+		    changeOptions: changeOptions,
+		    resizeCanvas: resizeCanvas
     }
 
 };
