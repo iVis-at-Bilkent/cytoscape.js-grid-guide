@@ -7,6 +7,11 @@ module.exports = function (opts, cy, $, debounce) {
 
     var changeOptions = function (opts) {
         options = opts;
+
+	// RBTree always returns null, when low == high
+	// to avoid this:
+	if (options.guidelinesTolerance == 0)
+		options.guidelinesTolerance = 0.001;
     };
 
     var getCyScratch = function () {
