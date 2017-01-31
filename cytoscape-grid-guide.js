@@ -1972,7 +1972,7 @@ module.exports = function (opts, cy, $, debounce) {
                         targetKey = exKey;
                     }
 
-            }, position - options.guidelinesTolerance, position + options.guidelinesTolerance);
+            }, position - Number(options.guidelinesTolerance), position + Number(options.guidelinesTolerance));
 
             // if alignment found, draw lines and break
             if (target) {
