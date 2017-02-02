@@ -125,7 +125,6 @@ module.exports = function (opts, cy, $, debounce) {
                                     nearests[dim].toPos[otherDim] = ele.renderedPosition(otherDim);
                                 }
                             }
-                            // console.log(key + " of " + node.id() + " -> " + key2 + " of " + ele.id())
                         }
                     }
                 }
@@ -169,7 +168,6 @@ module.exports = function (opts, cy, $, debounce) {
 		    var canvasBb = $canvas.offset();
 		    var containerBb = $container.offset();
 
-		    console.log(canvasBb, containerBb);
 		    $canvas
 		    .attr( 'height', $container.height() )
 		    .attr( 'width', $container.width() )
@@ -180,6 +178,8 @@ module.exports = function (opts, cy, $, debounce) {
 	    }, 0 );
 
     }, 250);
+
+    resizeCanvas();
 
     return {
 	    onDragNode: onDragNode,
