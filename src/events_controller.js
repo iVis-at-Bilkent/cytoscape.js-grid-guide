@@ -112,6 +112,7 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
             cy.on("grab", applyToActiveNodes(guidelines.lines.init));
             cy.on("drag", applyToActiveNodes(guidelines.lines.update));
             cy.on("free", guidelines.lines.destroy);
+			$(window).on("resize", guidelines.lines.resize);
        }
         else{
             cy.off("grab");
