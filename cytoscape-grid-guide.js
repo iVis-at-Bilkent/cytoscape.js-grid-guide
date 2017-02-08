@@ -1704,7 +1704,7 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
             cy.on("grab", applyToActiveNodes(guidelines.lines.init));
             cy.on("drag", applyToActiveNodes(guidelines.lines.update));
             cy.on("free", guidelines.lines.destroy);
-			$(window).on("resize", guidelines.lines.resize);
+	    $(window).on("resize", guidelines.lines.resize);
        }
         else{
             cy.off("grab");
@@ -1736,7 +1736,7 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 
     var specialOpts = {
         drawGrid: ["gridSpacing", "zoomDash", "panGrid", "gridStackOrder", "strokeStyle", "lineWidth", "lineDash"],
-        guidelines: ["gridSpacing", "guidelinesStackOrder", "guidelinesTolerance", "guidelinesStyle"],
+        guidelines: ["gridSpacing", "guidelinesStackOrder", "guidelinesTolerance", "guidelinesStyle", "distributionGuidelines"],
         resize: ["gridSpacing"],
         parentPadding: ["gridSpacing", "parentSpacing"],
         snapToGrid: ["gridSpacing"]
@@ -1744,6 +1744,7 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 
     function syncWithOptions(options) {
         currentOptions = $.extend(true, {}, options);
+		options.guidelines = options.distributionGuidelines || options.geometricGuideline;
         for (var key in options)
             if (latestOptions[key] != options[key])
                 if (controller.hasOwnProperty(key)) {
@@ -1945,7 +1946,6 @@ module.exports = function (opts, cy, $, debounce) {
 		var nodeDim = lines.getDims(node);
 		var Xcenter = nodeDim["horizontal"]["center"];
 		var Ycenter = nodeDim["vertical"]["center"];
-
 		// Find nodes in range and check if they align
 		HTree.forEach(function(key, nodes){
 
@@ -1954,22 +1954,22 @@ module.exports = function (opts, cy, $, debounce) {
 				if (Math.abs(leftDim["vertical"]["center"] - nodeDim["vertical"]["center"]) < 100){
 					if ((leftDim["horizontal"]["right"]) == key && 
 						leftDim["horizontal"]["right"] < nodeDim["horizontal"]["left"]){
-
-							rightNodes = HTree.get(Math.round(2*Xcenter)-key);
-							if (rightNodes){
+							var ripo = Math.round(2*Xcenter)-key;
+							HTree.forEach(function($, rightNodes){
+							//if (rightNodes){
 								for (right of rightNodes){
 									if (Math.abs(lines.getDims(right)["vertical"]["center"] - Ycenter) < 100){
-										var leftPos = lines.getDims(right)["horizontal"]["left"];
-										if (Math.round(2*Xcenter)-key == lines.getDims(right)["horizontal"]["left"]){
+										if (Math.abs(ripo - lines.getDims(right)["horizontal"]["left"]) < 2*options.guidelinesTolerance){
 											leftNode = left; rightNode = right;
 										}
 									}
 								}
-							}
+							//}
+							}, ripo - options.guidelinesTolerance, ripo + options.guidelinesTolerance);
 						}
 				}
 			}
-		}, Xcenter - 100, Xcenter);
+		}, Xcenter - 120, Xcenter);
 
 		// Draw the lines
 		if (leftNode){
@@ -2020,16 +2020,18 @@ module.exports = function (opts, cy, $, debounce) {
 				if (Math.abs(belowDim["horizontal"]["center"] - nodeDim["horizontal"]["center"]) < 100){
 					if (belowDim["vertical"]["bottom"] == key &&
 						belowDim["vertical"]["bottom"] < nodeDim["vertical"]["top"]){
-							aboveNodes = VTree.get(Math.round((2*Ycenter)-key));
-							if (aboveNodes){
+							var abpo = Math.round((2*Ycenter)-key);
+							VTree.forEach(function($, aboveNodes){
+							//if (aboveNodes){
 								for (above of aboveNodes){
 									if (Math.abs(lines.getDims(above)["horizontal"]["center"] - Xcenter) < 100){
-										if (Math.round(2*Ycenter)-key == lines.getDims(above)["vertical"]["top"]){
+										if (Math.abs(abpo - lines.getDims(above)["vertical"]["top"]) < 2*options.guidelinesTolerance){
 											belowNode = below; aboveNode = above;
 										}
 									}
 								}
-							}
+							//}
+							}, abpo - options.guidelinesTolerance, abpo + options.guidelinesTolerance);
 						}
 				}
 			}
@@ -2073,17 +2075,20 @@ module.exports = function (opts, cy, $, debounce) {
 	lines.searchForLine = function (type, node) {
 
 		// variables
-		var position, target, Tree;
+		var position, target, center, axis, Tree;
 		var dims = lines.getDims(node)[type];
 		var targetKey = Number.MAX_SAFE_INTEGER;
 
 		// initialize Tree
 		if ( type == "horizontal"){
 			Tree = HTree;
+			axis = "y";
 		} else{
 			Tree = VTree;
+			axis = "x";
 		}
 
+		center = node.renderedPosition(axis);
 		// check if node aligned in any dimension:
 		// {center, left, right} or {center, top, bottom}
 		for (var dimKey in dims) {
@@ -2091,17 +2096,18 @@ module.exports = function (opts, cy, $, debounce) {
 
 			// find the closest alignment in range of tolerance
 			Tree.forEach(function (exKey, nodes) {
-
-				if (exKey < targetKey) {
-					target = nodes;
-					targetKey = exKey;
+				for (n of nodes){
+					var pos = n.renderedPosition(axis);
+					if ( Math.abs(pos - center) < targetKey){
+						target = n;
+						targetKey = Math.abs(pos - center);
+					}
 				}
 
 			}, position - Number(options.guidelinesTolerance), position + Number(options.guidelinesTolerance));
 
 			// if alignment found, draw lines and break
 			if (target) {
-				target = target[0];
 				targetKey = lines.getDims(node)[type][dimKey];
 
 				// Draw horizontal or vertical alignment line
@@ -2128,67 +2134,242 @@ module.exports = function (opts, cy, $, debounce) {
 		}
 	};
 
-	lines.searchForDistances = function (type, node) {
-		if (cy.nodes().not(excludedNodes).length < 2)
-			return;
+	lines.horizontalDistributionNext = function(node, type){
 
-		var dims = lines.getDims(node)[type];
-
-
-		var DH = [];
-		var nodePos = node.position();
-
-		var cur =  HTree.begin();
-		while (cur.hasNext() && cur != HTree.end()) {
-			bef = cur;
-			cur = bef.next();
-
-			var befKey = bef.key(),
-				curKey = cur.key();
-
-			var diff = Math.abs(curKey - befKey);
-
-			if (Math.abs(diff-options.guidelinesTolerance) > 0) {
-				bef.forEach(function (befNode) {
-					befPos = befNode.position();
-					if (Math.abs(befPos.y - nodePos.y) > options.distancelinesTolerance) // TODO: and if in viewport
-					return;
-
-				cur.forEach(function (curNode) {
-					var curPos = curNode.position();
-					if (Math.abs(curPos.x - nodePos.x) > options.distancelinesTolerance) // TODO: and if in viewport
-					return;
-
-				DH.push({
-					from: {
-						x: befKey,
-					y: befPos.y
-					},
-					to: {
-						x: curKey,
-					y: curPos.y
-					}
-				});
-
-
-				});
-				});
-
-
-
-			}
-
+		// variables
+		var leftNode = null, rightNode = null;
+		var nodeDim = lines.getDims(node);
+		var Xcenter = nodeDim["horizontal"]["center"];
+		var Ycenter = nodeDim["vertical"]["center"];
+		var side = "right", otherSide = "left";
+		var lowerBound = Xcenter;
+		if (type == "left"){
+			side = "left"; otherSide = "right";
+			var lowerBound = Xcenter - 200;
 		}
-	};
 
+
+		var compare = {
+			    "left": function (x, y) { return x < y },
+				"right": function (x, y) { return x > y }
+		}
+
+
+
+		// Find nodes in range and check if they align
+		HTree.forEach(function(key, nodes){
+
+			for (left of nodes){
+				var leftDim = lines.getDims(left);
+				if (Math.abs(leftDim["vertical"]["center"] - nodeDim["vertical"]["center"]) < 200){
+					if ((leftDim["horizontal"][otherSide]) == key && 
+						compare[type](leftDim["horizontal"][otherSide], nodeDim["horizontal"][side])){
+							var ll = leftDim["horizontal"][side]-(nodeDim["horizontal"][side] - key);
+							rightNodes = HTree.get(ll);
+							if (rightNodes){
+								for (right of rightNodes){
+									if (Math.abs(lines.getDims(right)["vertical"]["center"] - Ycenter) < 200){
+										if (ll == lines.getDims(right)["horizontal"][otherSide]){
+											leftNode = left; rightNode = right;
+										}
+									}
+								}
+							}
+						}
+				}
+			}
+		}, lowerBound, lowerBound + 200);
+
+		// Draw the lines
+		if (leftNode)
+		{ lines.drawDH(node, leftNode, rightNode, type);}
+
+
+	}
+
+
+	
+    lines.drawDH = function(node, leftNode, rightNode, type){
+    var Ycenter = lines.getDims(node)["vertical"]["center"];
+    var side = "right", otherSide = "left";
+    if (type == "left"){
+        side = "left"; otherSide = "right";
+    }
+
+        lines.drawLine({
+            x: lines.getDims(leftNode)["horizontal"][otherSide],
+            y: Ycenter
+        }, {
+            x: lines.getDims(node)["horizontal"][side],
+            y: Ycenter
+        }, "#2345ed");
+
+        lines.drawLine({
+            x: lines.getDims(node)["horizontal"][side],
+            y: Ycenter
+        }, {
+            x: lines.getDims(node)["horizontal"][side],
+            y: lines.getDims(leftNode)["vertical"]["center"]
+        }, "#2345ed");
+
+        lines.drawLine({
+            x: lines.getDims(rightNode)["horizontal"][otherSide],
+            y: Ycenter
+        }, {
+            x: lines.getDims(leftNode)["horizontal"][side],
+            y: Ycenter
+        }, "#2345ed");
+        lines.drawLine({
+            x: lines.getDims(rightNode)["horizontal"][otherSide],
+            y: Ycenter
+        }, {
+            x: lines.getDims(rightNode)["horizontal"][otherSide],
+            y: lines.getDims(rightNode)["vertical"]["center"]
+        }, "#2345ed");
+
+        lines.drawLine({
+            x: lines.getDims(leftNode)["horizontal"][otherSide],
+            y: Ycenter
+        }, {
+            x: lines.getDims(leftNode)["horizontal"][otherSide],
+            y: lines.getDims(leftNode)["vertical"]["center"]
+        }, "#2345ed");
+
+        lines.drawLine({
+            x: lines.getDims(leftNode)["horizontal"][side],
+            y: Ycenter
+        }, {
+            x: lines.getDims(leftNode)["horizontal"][side],
+            y: lines.getDims(leftNode)["vertical"]["center"]
+        }, "#2345ed");
+    }
+
+	lines.verticalDistributionNext = function(node, type){
+		// variables
+		var belowNode = null, aboveNode = null;
+		var nodeDim = lines.getDims(node);
+		var Xcenter = nodeDim["horizontal"]["center"];
+		var Ycenter = nodeDim["vertical"]["center"];
+		var side = "top", otherSide = "bottom";
+		var lowerBound = Ycenter - 200;
+		if (type == "above"){
+			side = "bottom"; otherSide = "top";
+			lowerBound = Ycenter;
+		}
+
+		var compare = {
+			    "below": function (x, y) { return x < y },
+				"above": function (x, y) { return x > y }
+		}
+		// Find nodes in range and check if they align
+		VTree.forEach(function(key, nodes){
+
+			for (below of nodes){
+				var belowDim = lines.getDims(below);
+				if (Math.abs(belowDim["horizontal"]["center"] - nodeDim["horizontal"]["center"]) < 200){
+					if (belowDim["vertical"][otherSide] == key &&
+						compare[type](belowDim["vertical"][otherSide], nodeDim["vertical"][side])){
+							var ll = belowDim["vertical"][side]-(nodeDim["vertical"][side]-key);
+							aboveNodes = VTree.get(ll);
+							if (aboveNodes){
+								for (above of aboveNodes){
+									if (Math.abs(lines.getDims(above)["horizontal"]["center"] - Xcenter) < 200){
+										if (ll == lines.getDims(above)["vertical"][otherSide]){
+											belowNode = below; aboveNode = above;
+										}
+									}
+								}
+							}
+						}
+				}
+			}
+		}, lowerBound, lowerBound+200);
+
+		if (belowNode)
+			lines.drawDV(node, belowNode, aboveNode, type);
+	}
+	
+
+	
+	lines.drawDV = function(node, belowNode, aboveNode, type){
+		var nodeDim = lines.getDims(node);
+		var Xcenter = nodeDim["horizontal"]["center"];
+		var side = "top", otherSide = "bottom";
+		if (type == "above"){
+			side = "bottom"; otherSide = "top";
+		}
+
+			lines.drawLine({
+				x: Xcenter,
+				y: nodeDim["vertical"][side]
+			}, {
+				x: Xcenter,
+				y: lines.getDims(belowNode)["vertical"][otherSide]
+			}, "#f44242");
+
+			lines.drawLine({
+				x: Xcenter,
+				y: lines.getDims(belowNode)["vertical"][side]
+			}, {
+				x: Xcenter,
+				y: lines.getDims(aboveNode)["vertical"][otherSide]
+			}, "#f44242");
+
+
+			lines.drawLine({
+				x: lines.getDims(belowNode)["horizontal"]["center"],
+				y: nodeDim["vertical"][side]
+			}, {
+				x: Xcenter,
+				y: nodeDim["vertical"][side]
+			}, "#f44242");
+
+
+			lines.drawLine({
+				x: lines.getDims(belowNode)["horizontal"]["center"],
+				y: lines.getDims(belowNode)["vertical"][otherSide]
+			}, {
+				x: Xcenter,
+				y: lines.getDims(belowNode)["vertical"][otherSide]
+			}, "#f44242");
+
+
+			lines.drawLine({
+				x: lines.getDims(belowNode)["horizontal"]["center"],
+				y: lines.getDims(belowNode)["vertical"][side]
+			}, {
+				x: Xcenter,
+				y: lines.getDims(belowNode)["vertical"][side]
+			}, "#f44242");
+
+
+			lines.drawLine({
+				x: Xcenter,//lines.getDims(aboveNode)["horizontal"]["center"],
+				y: lines.getDims(aboveNode)["vertical"][otherSide]
+			}, {
+				x: lines.getDims(aboveNode)["horizontal"]["center"],
+				y: lines.getDims(aboveNode)["vertical"][otherSide]
+			}, "#f44242");
+		
+		}
 	lines.update = function (activeNodes) {
 		lines.clear();
 
 		activeNodes.each(function (i, node) {
-			lines.searchForLine("horizontal", node);
-			lines.searchForLine("vertical", node);
-			lines.horizontalDistribution(node);
-			lines.verticalDistribution(node);
+			if (options.geometricGuideline){
+				lines.searchForLine("horizontal", node);
+				lines.searchForLine("vertical", node);
+			}
+			if (options.distributionGuidelines){
+				lines.horizontalDistribution(node);
+				lines.verticalDistribution(node);
+
+				lines.horizontalDistributionNext(node,"left" );
+				lines.horizontalDistributionNext(node,"right" );
+
+				lines.verticalDistributionNext(node, "below");
+				lines.verticalDistributionNext(node, "above");
+			}
 		});
 
 	};
@@ -2221,7 +2402,9 @@ module.exports = function (opts, cy, $, debounce) {
             // On/Off Modules
             snapToGrid: true, // Snap to grid functionality
             discreteDrag: true, // Discrete Drag
-            guidelines: true, // Guidelines on dragging nodes
+			distributionGuidelines: true,
+			geometricGuideline: true,
+            //guidelines: true,// || geometricGuideline, // Guidelines on dragging nodes
             resize: true, // Adjust node sizes to cell sizes
             parentPadding: true, // Adjust parent sizes to cell sizes by padding
             drawGrid: true, // Draw grid background
@@ -2252,7 +2435,7 @@ module.exports = function (opts, cy, $, debounce) {
             // Parent Padding
             parentSpacing: -1 // -1 to set paddings of parents to gridSpacing
         };
-
+		console.log(options.guidelines);
         var _snap = require("./snap");
         var _discreteDrag = require("./discrete_drag");
         var _drawGrid = require("./draw_grid");
