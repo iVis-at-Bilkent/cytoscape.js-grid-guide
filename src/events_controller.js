@@ -112,7 +112,7 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
             cy.on("grab", applyToActiveNodes(guidelines.lines.init));
             cy.on("drag", applyToActiveNodes(guidelines.lines.update));
             cy.on("free", guidelines.lines.destroy);
-			$(window).on("resize", guidelines.lines.resize);
+	    $(window).on("resize", guidelines.lines.resize);
        }
         else{
             cy.off("grab");
@@ -144,7 +144,7 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 
     var specialOpts = {
         drawGrid: ["gridSpacing", "zoomDash", "panGrid", "gridStackOrder", "strokeStyle", "lineWidth", "lineDash"],
-        guidelines: ["gridSpacing", "guidelinesStackOrder", "guidelinesTolerance", "guidelinesStyle"],
+        guidelines: ["gridSpacing", "guidelinesStackOrder", "guidelinesTolerance", "guidelinesStyle", "distributionGuidelines"],
         resize: ["gridSpacing"],
         parentPadding: ["gridSpacing", "parentSpacing"],
         snapToGrid: ["gridSpacing"]
@@ -152,6 +152,7 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 
     function syncWithOptions(options) {
         currentOptions = $.extend(true, {}, options);
+		options.guidelines = options.distributionGuidelines || options.geometricGuideline;
         for (var key in options)
             if (latestOptions[key] != options[key])
                 if (controller.hasOwnProperty(key)) {

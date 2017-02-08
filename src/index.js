@@ -10,7 +10,9 @@
             // On/Off Modules
             snapToGrid: true, // Snap to grid functionality
             discreteDrag: true, // Discrete Drag
-            guidelines: true, // Guidelines on dragging nodes
+			distributionGuidelines: true,
+			geometricGuideline: true,
+            //guidelines: true,// || geometricGuideline, // Guidelines on dragging nodes
             resize: true, // Adjust node sizes to cell sizes
             parentPadding: true, // Adjust parent sizes to cell sizes by padding
             drawGrid: true, // Draw grid background
@@ -41,7 +43,7 @@
             // Parent Padding
             parentSpacing: -1 // -1 to set paddings of parents to gridSpacing
         };
-
+		console.log(options.guidelines);
         var _snap = require("./snap");
         var _discreteDrag = require("./discrete_drag");
         var _drawGrid = require("./draw_grid");
