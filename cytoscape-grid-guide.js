@@ -1997,6 +1997,12 @@ module.exports = function (opts, cy, $, debounce) {
 				y: lines.getDims(rightNode)["vertical"]["center"]
 			}, "#ff0000");
 		}
+		else{
+			var state = lines.horizontalDistributionNext(node,"left" );
+
+			if (!state)  
+				lines.horizontalDistributionNext(node,"right" );
+		}
 
 
 
@@ -2118,7 +2124,7 @@ module.exports = function (opts, cy, $, debounce) {
 					}, {
 						x: targetKey,
 						y: target.renderedPosition("y")
-					}, "#000000");
+					}, options.guidelinesStyle.strokeStyle);
 				} else {
 					lines.drawLine({
 						x: node.renderedPosition("x"),
@@ -2126,7 +2132,7 @@ module.exports = function (opts, cy, $, debounce) {
 					}, {
 						x: target.renderedPosition("x"),
 						y: targetKey
-					}, "#000000");
+					}, options.guidelinesStyle.strokeStyle);
 				}
 
 				break;
@@ -2182,8 +2188,12 @@ module.exports = function (opts, cy, $, debounce) {
 
 		// Draw the lines
 		if (leftNode)
-		{ lines.drawDH(node, leftNode, rightNode, type);}
-
+		{
+			lines.drawDH(node, leftNode, rightNode, type);
+			return true;
+		}
+		else
+			return false;
 
 	}
 
@@ -2305,7 +2315,7 @@ module.exports = function (opts, cy, $, debounce) {
 			}, {
 				x: Xcenter,
 				y: lines.getDims(belowNode)["vertical"][otherSide]
-			}, "#f44242");
+			}, "#2345ed");
 
 			lines.drawLine({
 				x: Xcenter,
@@ -2313,7 +2323,7 @@ module.exports = function (opts, cy, $, debounce) {
 			}, {
 				x: Xcenter,
 				y: lines.getDims(aboveNode)["vertical"][otherSide]
-			}, "#f44242");
+			}, "#2345ed");
 
 
 			lines.drawLine({
@@ -2322,7 +2332,7 @@ module.exports = function (opts, cy, $, debounce) {
 			}, {
 				x: Xcenter,
 				y: nodeDim["vertical"][side]
-			}, "#f44242");
+			}, "#2345ed");
 
 
 			lines.drawLine({
@@ -2331,7 +2341,7 @@ module.exports = function (opts, cy, $, debounce) {
 			}, {
 				x: Xcenter,
 				y: lines.getDims(belowNode)["vertical"][otherSide]
-			}, "#f44242");
+			}, "#2345ed");
 
 
 			lines.drawLine({
@@ -2340,7 +2350,7 @@ module.exports = function (opts, cy, $, debounce) {
 			}, {
 				x: Xcenter,
 				y: lines.getDims(belowNode)["vertical"][side]
-			}, "#f44242");
+			}, "#2345ed");
 
 
 			lines.drawLine({
@@ -2349,7 +2359,7 @@ module.exports = function (opts, cy, $, debounce) {
 			}, {
 				x: lines.getDims(aboveNode)["horizontal"]["center"],
 				y: lines.getDims(aboveNode)["vertical"][otherSide]
-			}, "#f44242");
+			}, "#2345ed");
 		
 		}
 	lines.update = function (activeNodes) {
@@ -2364,8 +2374,8 @@ module.exports = function (opts, cy, $, debounce) {
 				lines.horizontalDistribution(node);
 				lines.verticalDistribution(node);
 
-				lines.horizontalDistributionNext(node,"left" );
-				lines.horizontalDistributionNext(node,"right" );
+//				lines.horizontalDistributionNext(node,"left" );
+//				lines.horizontalDistributionNext(node,"right" );
 
 				lines.verticalDistributionNext(node, "below");
 				lines.verticalDistributionNext(node, "above");
