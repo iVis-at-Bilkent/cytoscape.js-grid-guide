@@ -45,7 +45,6 @@
             // Parent Padding
             parentSpacing: -1 // -1 to set paddings of parents to gridSpacing
         };
-		console.log(options.guidelines);
         var _snap = require("./snap");
         var _discreteDrag = require("./discrete_drag");
         var _drawGrid = require("./draw_grid");
