@@ -142,6 +142,43 @@ module.exports = function (opts, cy, $, debounce) {
 		ctx.stroke();
 	};
 
+	lines.drawArrow = function(position, type){
+		if (type == "right"){
+			// right arrow
+			ctx.beginPath();
+			ctx.moveTo(position.x-5, position.y-5);
+			ctx.lineTo(position.x, position.y);
+			ctx.lineTo(position.x-5, position.y+5);
+			//ctx.strokeStyle = "red";
+			ctx.stroke();
+		}
+		else if (type == "left"){
+			// left arrow
+			ctx.beginPath();
+			ctx.moveTo(position.x+5, position.y-5);
+			ctx.lineTo(position.x, position.y);
+			ctx.lineTo(position.x+5, position.y+5);
+			ctx.stroke();
+		}
+		else if (type == "top"){
+			// up arrow
+			ctx.beginPath();
+			ctx.moveTo(position.x-5, position.y+5);
+			ctx.lineTo(position.x, position.y);
+			ctx.lineTo(position.x+5, position.y+5);
+			ctx.stroke();
+		}
+		else if (type == "bottom"){
+			// down arrow
+			ctx.beginPath();
+			ctx.moveTo(position.x-5, position.y-5);
+			ctx.lineTo(position.x, position.y);
+			ctx.lineTo(position.x+5, position.y-5);
+			ctx.stroke();
+		}
+
+	}
+
 
 	/** Guidelines for horizontally distributed alignment
 	 * @param: node the node to be aligned
@@ -162,7 +199,7 @@ module.exports = function (opts, cy, $, debounce) {
 						leftDim["horizontal"]["right"] < nodeDim["horizontal"]["left"]){
 							var ripo = Math.round(2*Xcenter)-key;
 							HTree.forEach(function($, rightNodes){
-							//if (rightNodes){
+								//if (rightNodes){
 								for (right of rightNodes){
 									if (Math.abs(lines.getDims(right)["vertical"]["center"] - Ycenter) < 100){
 										if (Math.abs(ripo - lines.getDims(right)["horizontal"]["left"]) < 2*options.guidelinesTolerance){
@@ -170,7 +207,7 @@ module.exports = function (opts, cy, $, debounce) {
 										}
 									}
 								}
-							//}
+								//}
 							}, ripo - options.guidelinesTolerance, ripo + options.guidelinesTolerance);
 						}
 				}
@@ -185,7 +222,7 @@ module.exports = function (opts, cy, $, debounce) {
 			}, {
 				x: lines.getDims(rightNode)["horizontal"]["left"],
 				y: Ycenter
-			}, "#ff0000");
+			}, options.guidelinesStyle.horizontalDistColor);
 
 			lines.drawLine({
 				x: lines.getDims(leftNode)["horizontal"]["right"],
@@ -193,7 +230,7 @@ module.exports = function (opts, cy, $, debounce) {
 			}, {
 				x: lines.getDims(leftNode)["horizontal"]["right"],
 				y: lines.getDims(leftNode)["vertical"]["center"]
-			}, "#ff0000");
+			}, options.guidelinesStyle.horizontalDistColor);
 
 			lines.drawLine({
 				x: lines.getDims(rightNode)["horizontal"]["left"],
@@ -201,7 +238,7 @@ module.exports = function (opts, cy, $, debounce) {
 			}, {
 				x: lines.getDims(rightNode)["horizontal"]["left"],
 				y: lines.getDims(rightNode)["vertical"]["center"]
-			}, "#ff0000");
+			}, options.guidelinesStyle.horizontalDistColor);
 		}
 		else{
 			var state = lines.horizontalDistributionNext(node,"left" );
@@ -234,7 +271,7 @@ module.exports = function (opts, cy, $, debounce) {
 						belowDim["vertical"]["bottom"] < nodeDim["vertical"]["top"]){
 							var abpo = Math.round((2*Ycenter)-key);
 							VTree.forEach(function($, aboveNodes){
-							//if (aboveNodes){
+								//if (aboveNodes){
 								for (above of aboveNodes){
 									if (Math.abs(lines.getDims(above)["horizontal"]["center"] - Xcenter) < 100){
 										if (Math.abs(abpo - lines.getDims(above)["vertical"]["top"]) < 2*options.guidelinesTolerance){
@@ -242,7 +279,7 @@ module.exports = function (opts, cy, $, debounce) {
 										}
 									}
 								}
-							//}
+								//}
 							}, abpo - options.guidelinesTolerance, abpo + options.guidelinesTolerance);
 						}
 				}
@@ -257,7 +294,7 @@ module.exports = function (opts, cy, $, debounce) {
 			}, {
 				y: lines.getDims(aboveNode)["vertical"]["top"],
 				x: Xcenter
-			}, "#00ff00");
+			}, options.guidelinesStyle.verticalDistColor);
 
 			lines.drawLine({
 				y: lines.getDims(belowNode)["vertical"]["bottom"],//renderedPosition("x"),
@@ -265,7 +302,7 @@ module.exports = function (opts, cy, $, debounce) {
 			}, {
 				y: lines.getDims(belowNode)["vertical"]["bottom"],
 				x: lines.getDims(belowNode)["horizontal"]["center"]
-			}, "#00ff00");
+			}, options.guidelinesStyle.verticalDistColor);
 
 			lines.drawLine({
 				y: lines.getDims(aboveNode)["vertical"]["top"],//renderedPosition("x"),
@@ -273,7 +310,13 @@ module.exports = function (opts, cy, $, debounce) {
 			}, {
 				y: lines.getDims(aboveNode)["vertical"]["top"],
 				x: lines.getDims(aboveNode)["horizontal"]["center"]
-			}, "#00ff00");
+			}, options.guidelinesStyle.verticalDistColor);
+		}
+		else{
+			var state = lines.verticalDistributionNext(node,"below" );
+
+			if (!state)  
+				lines.verticalDistributionNext(node,"above" );
 		}
 
 
@@ -362,8 +405,8 @@ module.exports = function (opts, cy, $, debounce) {
 
 
 		var compare = {
-			    "left": function (x, y) { return x < y },
-				"right": function (x, y) { return x > y }
+			"left": function (x, y) { return x < y },
+			"right": function (x, y) { return x > y }
 		}
 
 
@@ -404,61 +447,87 @@ module.exports = function (opts, cy, $, debounce) {
 	}
 
 
-	
-    lines.drawDH = function(node, leftNode, rightNode, type){
-    var Ycenter = lines.getDims(node)["vertical"]["center"];
-    var side = "right", otherSide = "left";
-    if (type == "left"){
-        side = "left"; otherSide = "right";
-    }
 
-        lines.drawLine({
-            x: lines.getDims(leftNode)["horizontal"][otherSide],
-            y: Ycenter
-        }, {
-            x: lines.getDims(node)["horizontal"][side],
-            y: Ycenter
-        }, "#2345ed");
+	lines.drawDH = function(node, leftNode, rightNode, type){
+		var Ycenter = lines.getDims(node)["vertical"]["center"];
+		var side = "right", otherSide = "left";
+		if (type == "left"){
+			side = "left"; otherSide = "right";
+		}
 
-        lines.drawLine({
-            x: lines.getDims(node)["horizontal"][side],
-            y: Ycenter
-        }, {
-            x: lines.getDims(node)["horizontal"][side],
-            y: lines.getDims(leftNode)["vertical"]["center"]
-        }, "#2345ed");
+		lines.drawLine({
+			x: lines.getDims(leftNode)["horizontal"][otherSide],
+			y: Ycenter
+		}, {
+			x: lines.getDims(node)["horizontal"][side],
+			y: Ycenter
+		}, options.guidelinesStyle.horizontalDistColor);
 
-        lines.drawLine({
-            x: lines.getDims(rightNode)["horizontal"][otherSide],
-            y: Ycenter
-        }, {
-            x: lines.getDims(leftNode)["horizontal"][side],
-            y: Ycenter
-        }, "#2345ed");
-        lines.drawLine({
-            x: lines.getDims(rightNode)["horizontal"][otherSide],
-            y: Ycenter
-        }, {
-            x: lines.getDims(rightNode)["horizontal"][otherSide],
-            y: lines.getDims(rightNode)["vertical"]["center"]
-        }, "#2345ed");
+		lines.drawLine({
+			x: lines.getDims(node)["horizontal"][side],
+			y: Ycenter
+		}, {
+			x: lines.getDims(node)["horizontal"][side],
+			y: lines.getDims(leftNode)["vertical"]["center"]
+		}, options.guidelinesStyle.horizontalDistColor);
 
-        lines.drawLine({
-            x: lines.getDims(leftNode)["horizontal"][otherSide],
-            y: Ycenter
-        }, {
-            x: lines.getDims(leftNode)["horizontal"][otherSide],
-            y: lines.getDims(leftNode)["vertical"]["center"]
-        }, "#2345ed");
+		lines.drawLine({
+			x: lines.getDims(rightNode)["horizontal"][otherSide],
+			y: Ycenter
+		}, {
+			x: lines.getDims(leftNode)["horizontal"][side],
+			y: Ycenter
+		}, options.guidelinesStyle.horizontalDistColor);
+		lines.drawLine({
+			x: lines.getDims(rightNode)["horizontal"][otherSide],
+			y: Ycenter
+		}, {
+			x: lines.getDims(rightNode)["horizontal"][otherSide],
+			y: lines.getDims(rightNode)["vertical"]["center"]
+		}, options.guidelinesStyle.horizontalDistColor);
 
-        lines.drawLine({
-            x: lines.getDims(leftNode)["horizontal"][side],
-            y: Ycenter
-        }, {
-            x: lines.getDims(leftNode)["horizontal"][side],
-            y: lines.getDims(leftNode)["vertical"]["center"]
-        }, "#2345ed");
-    }
+		lines.drawLine({
+			x: lines.getDims(leftNode)["horizontal"][otherSide],
+			y: Ycenter
+		}, {
+			x: lines.getDims(leftNode)["horizontal"][otherSide],
+			y: lines.getDims(leftNode)["vertical"]["center"]
+		}, options.guidelinesStyle.horizontalDistColor);
+
+		lines.drawLine({
+			x: lines.getDims(leftNode)["horizontal"][side],
+			y: Ycenter
+		}, {
+			x: lines.getDims(leftNode)["horizontal"][side],
+			y: lines.getDims(leftNode)["vertical"]["center"]
+		}, options.guidelinesStyle.horizontalDistColor);
+
+		lines.drawLine({
+			x: lines.getDims(leftNode)["horizontal"][side],
+			y: Ycenter
+		}, {
+			x: lines.getDims(leftNode)["horizontal"][side],
+			y: lines.getDims(leftNode)["vertical"]["center"]
+		}, options.guidelinesStyle.horizontalDistColor);
+
+
+		lines.drawArrow({
+			x: lines.getDims(node)["horizontal"][side],
+			y: Ycenter}, otherSide);
+
+		lines.drawArrow({
+			x: lines.getDims(leftNode)["horizontal"][otherSide],
+			y: Ycenter}, side);
+
+		lines.drawArrow({
+			x: lines.getDims(leftNode)["horizontal"][side],
+			y: Ycenter}, otherSide);
+
+		lines.drawArrow({
+			x: lines.getDims(rightNode)["horizontal"][otherSide],
+			y: Ycenter}, side);
+
+	}
 
 	lines.verticalDistributionNext = function(node, type){
 		// variables
@@ -474,8 +543,8 @@ module.exports = function (opts, cy, $, debounce) {
 		}
 
 		var compare = {
-			    "below": function (x, y) { return x < y },
-				"above": function (x, y) { return x > y }
+			"below": function (x, y) { return x < y },
+			"above": function (x, y) { return x > y }
 		}
 		// Find nodes in range and check if they align
 		VTree.forEach(function(key, nodes){
@@ -501,12 +570,16 @@ module.exports = function (opts, cy, $, debounce) {
 			}
 		}, lowerBound, lowerBound+200);
 
-		if (belowNode)
+		if (belowNode){
 			lines.drawDV(node, belowNode, aboveNode, type);
+			return true;
+		}
+		else
+			return false;
 	}
-	
 
-	
+
+
 	lines.drawDV = function(node, belowNode, aboveNode, type){
 		var nodeDim = lines.getDims(node);
 		var Xcenter = nodeDim["horizontal"]["center"];
@@ -515,59 +588,75 @@ module.exports = function (opts, cy, $, debounce) {
 			side = "bottom"; otherSide = "top";
 		}
 
-			lines.drawLine({
-				x: Xcenter,
-				y: nodeDim["vertical"][side]
-			}, {
-				x: Xcenter,
-				y: lines.getDims(belowNode)["vertical"][otherSide]
-			}, "#2345ed");
+		lines.drawLine({
+			x: Xcenter,
+			y: nodeDim["vertical"][side]
+		}, {
+			x: Xcenter,
+			y: lines.getDims(belowNode)["vertical"][otherSide]
+		}, options.guidelinesStyle.verticalDistColor);
 
-			lines.drawLine({
-				x: Xcenter,
-				y: lines.getDims(belowNode)["vertical"][side]
-			}, {
-				x: Xcenter,
-				y: lines.getDims(aboveNode)["vertical"][otherSide]
-			}, "#2345ed");
-
-
-			lines.drawLine({
-				x: lines.getDims(belowNode)["horizontal"]["center"],
-				y: nodeDim["vertical"][side]
-			}, {
-				x: Xcenter,
-				y: nodeDim["vertical"][side]
-			}, "#2345ed");
+		lines.drawLine({
+			x: Xcenter,
+			y: lines.getDims(belowNode)["vertical"][side]
+		}, {
+			x: Xcenter,
+			y: lines.getDims(aboveNode)["vertical"][otherSide]
+		}, options.guidelinesStyle.verticalDistColor);
 
 
-			lines.drawLine({
-				x: lines.getDims(belowNode)["horizontal"]["center"],
-				y: lines.getDims(belowNode)["vertical"][otherSide]
-			}, {
-				x: Xcenter,
-				y: lines.getDims(belowNode)["vertical"][otherSide]
-			}, "#2345ed");
+		lines.drawLine({
+			x: lines.getDims(belowNode)["horizontal"]["center"],
+			y: nodeDim["vertical"][side]
+		}, {
+			x: Xcenter,
+			y: nodeDim["vertical"][side]
+		}, options.guidelinesStyle.verticalDistColor);
 
 
-			lines.drawLine({
-				x: lines.getDims(belowNode)["horizontal"]["center"],
-				y: lines.getDims(belowNode)["vertical"][side]
-			}, {
-				x: Xcenter,
-				y: lines.getDims(belowNode)["vertical"][side]
-			}, "#2345ed");
+		lines.drawLine({
+			x: lines.getDims(belowNode)["horizontal"]["center"],
+			y: lines.getDims(belowNode)["vertical"][otherSide]
+		}, {
+			x: Xcenter,
+			y: lines.getDims(belowNode)["vertical"][otherSide]
+		}, options.guidelinesStyle.verticalDistColor);
 
 
-			lines.drawLine({
-				x: Xcenter,//lines.getDims(aboveNode)["horizontal"]["center"],
-				y: lines.getDims(aboveNode)["vertical"][otherSide]
-			}, {
-				x: lines.getDims(aboveNode)["horizontal"]["center"],
-				y: lines.getDims(aboveNode)["vertical"][otherSide]
-			}, "#2345ed");
-		
-		}
+		lines.drawLine({
+			x: lines.getDims(belowNode)["horizontal"]["center"],
+			y: lines.getDims(belowNode)["vertical"][side]
+		}, {
+			x: Xcenter,
+			y: lines.getDims(belowNode)["vertical"][side]
+		}, options.guidelinesStyle.verticalDistColor);
+
+
+		lines.drawLine({
+			x: Xcenter,//lines.getDims(aboveNode)["horizontal"]["center"],
+			y: lines.getDims(aboveNode)["vertical"][otherSide]
+		}, {
+			x: lines.getDims(aboveNode)["horizontal"]["center"],
+			y: lines.getDims(aboveNode)["vertical"][otherSide]
+		}, options.guidelinesStyle.verticalDistColor);
+
+		lines.drawArrow({
+			x: Xcenter,
+			y: nodeDim["vertical"][side]}, otherSide);
+
+		lines.drawArrow({
+			x: Xcenter,
+			y: lines.getDims(belowNode)["vertical"][otherSide]}, side);
+
+		lines.drawArrow({
+			x: Xcenter,
+			y: lines.getDims(belowNode)["vertical"][side]}, otherSide);
+
+		lines.drawArrow({
+			x: Xcenter,
+			y: lines.getDims(aboveNode)["vertical"][otherSide]}, side);
+
+	}
 	lines.update = function (activeNodes) {
 		lines.clear();
 
@@ -580,11 +669,11 @@ module.exports = function (opts, cy, $, debounce) {
 				lines.horizontalDistribution(node);
 				lines.verticalDistribution(node);
 
-//				lines.horizontalDistributionNext(node,"left" );
-//				lines.horizontalDistributionNext(node,"right" );
+				//				lines.horizontalDistributionNext(node,"left" );
+				//				lines.horizontalDistributionNext(node,"right" );
 
-				lines.verticalDistributionNext(node, "below");
-				lines.verticalDistributionNext(node, "above");
+				//				lines.verticalDistributionNext(node, "below");
+				//				lines.verticalDistributionNext(node, "above");
 			}
 		});
 
@@ -592,7 +681,7 @@ module.exports = function (opts, cy, $, debounce) {
 
 	lines.resize = function () {
 		resizeCanvas();
-//		lines.update();
+		//		lines.update();
 	};
 
 
