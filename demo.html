@@ -27,11 +27,11 @@
         }
 
         .modules div.enabled b {
-            color: darkblue;
+            color: #00ffff
         }
 
         .modules div.disabled b {
-            color: darkred;
+            color: #ff0000;
         }
 
         #config {
@@ -39,8 +39,8 @@
             right: 0;
             top: 0;
             bottom: 0;
-            width: 15em;
-            background: darksalmon;
+            width: 16em;
+            background: #17423B;
             padding: 0.5em;
             color: #fff;
             overflow: auto;
@@ -51,7 +51,7 @@
             left: 0;
             top: 0;
             bottom: 0;
-            right: 16em;
+            right: 17em;
             z-index: 999;
         }
 
@@ -60,6 +60,13 @@
             font-size: 1em;
             font-weight: bold;
         }
+        .div1 {
+            width: 14em;
+            border: 1px solid black;
+            padding: 1px;
+            margin: 1em;
+}
+
     </style>
 
     <script>
@@ -199,56 +206,70 @@
 
 <div id="cy"></div>
 <div id="config">
-
-    <h1>Modules</h1>
-
+ <div class="div1">
     <div class="modules">
-        <div id="snapToGrid" class="enabled">
-            Snap to Grid <b> On </b>
-        </div>
+   
+        <h1> Grid Options</h1>
         <div id="drawGrid" class="enabled">
-            Draw Grid <b> On </b>
+            Show Grid <b> On </b>
         </div>
+         
+         <div>
+            <label for="gridSpacing" > Grid Spacing: </label>
+            <input style="width: 5em" type="number" id="gridSpacing" value="20" min="1">
+        </div>
+        
+        <div id="resize" class="enabled">
+           Auto Resize <b> On </b>
+        </div>
+    </div>
+    </div>
+     <div class="div1">
+    <div class="modules">
+        <h1> Snap Policy</h1>
         <div id="discreteDrag" class="enabled">
             Discrete Drag <b> On </b>
         </div>
+        <div id="snapToGrid" class="enabled">
+            Snap to Grid <b> On </b>
+        </div>
+        <div id="parentPadding" class="enabled">
+            Parent Padding <b> On </b>
+        </div>
+    </div>
+    </div>
+  
+    <div class="div1">
+      <div class="modules">
+        <h1>Alignment Options</h1>
         <div id="geometricGuideline" class="enabled">
             Geometric Guidelines <b> On </b>
         </div>
         <div id="distributionGuidelines" class="enabled">
             Distribution Guidelines <b> On </b>
         </div>
-        <div id="resize" class="enabled">
-            Resize <b> On </b>
-        </div>
-        <div id="parentPadding" class="enabled">
-            Parent Padding <b> On </b>
+        <div>
+            <label for="guidelinesTolerance" >Guidelines Tolerance: </label>
+            <input style="width: 5em" type="number" id="guidelinesTolerance" step="0.01" value="2.00" min="0">
         </div>
     </div>
-    <br/>
-    <i>Click on modules to toggle.</i>
-    <br/>
-    <div style="font-weight: bold; padding-top: 2em">
-        <label for="gridSpacing" style="color: darkred">Grid Spacing: </label>
-        <input style="width: 5em" type="number" id="gridSpacing" value="20" min="1">
     </div>
-    <div style="font-weight: bold; padding-top: 2em">
-        <label for="guidelinesTolerance" style="color: darkred">Guidelines Tolerance: </label>
-        <input style="width: 5em" type="number" id="guidelinesTolerance" step="0.01" value="2.00" min="0">
-    </div>
+   
+    <div  class="div1">
+        <h1>Guideline Color Options</h1>
 
-    <div style="font-weight: bold; padding-top: 2em">
-        <label for="geometricGuidelineColor" style="color: darkred">Geometric Alignment Color: </label>
+    <div style="padding-top: 0em">
+        <label for="geometricGuidelineColor" >Geometric Alignment Color: </label>
 		<input style="width: 5em" type="color" id="geometricGuidelineColor"  value="#000000" >
     </div>
 
-    <div style="font-weight: bold; padding-top: 2em">
-        <label for="horizontalDistColor" style="color: darkred">Horizontal Alignment Color: </label>
+    <div style="padding-top: 1em">
+        <label for="horizontalDistColor" >Horizontal Alignment Color: </label>
 		<input style="width: 5em" type="color" id="horizontalDistColor"  value="#ff0000" >
     </div>
 
-    <div style="font-weight: bold; padding-top: 2em">
-        <label for="verticalDistColor" style="color: darkred">Vertical Alignment Color: </label>
+    <div style="padding-top: 1em">
+        <label for="verticalDistColor" >Vertical Alignment Color: </label>
 		<input style="width: 5em" type="color" id="verticalDistColor"  value="#00ff00" >
     </div>
 </div>
