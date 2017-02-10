@@ -113,4 +113,3 @@ This project is set up to automatically be published to npm and bower.  To publi
 ## Team
 
   * [Selim Firat Yilmaz](https://github.com/mrsfy), [Ugur Dogrusoz](https://github.com/ugurdogrusoz) of [i-Vis at Bilkent University](http://www.cs.bilkent.edu.tr/~ivis)
-  * Draw grid functionality is reused from [a Cytoscape.js extension](https://github.com/guimeira/cytoscape-grid-guide) by [guimeira](https://github.com/guimeira).
