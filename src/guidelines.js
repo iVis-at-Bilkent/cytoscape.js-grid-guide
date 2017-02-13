@@ -681,7 +681,7 @@ module.exports = function (opts, cy, $, debounce) {
 
 	lines.resize = function () {
 		resizeCanvas();
-		//		lines.update();
+		lines.update();
 	};
 
 
