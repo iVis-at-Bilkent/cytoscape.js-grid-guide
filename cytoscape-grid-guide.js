@@ -1393,7 +1393,7 @@ module.exports = function (cy, snap) {
 
         attachedNode = e.cyTarget;
         attachedNode.lock();
-        attachedNode.trigger("grab");
+        //attachedNode.trigger("grab");
         cy.on("tapdrag", onTapDrag);
         cy.on("tapend", onTapEndNode);
 
@@ -1488,6 +1488,7 @@ module.exports = function (cy, snap) {
 
 
 };
+
 },{}],5:[function(require,module,exports){
 module.exports = function (opts, cy, $, debounce) {
 
