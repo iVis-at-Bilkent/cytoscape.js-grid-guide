@@ -94,10 +94,10 @@ module.exports = function (opts, cy, $, debounce) {
 	};
 
 
-	lines.init = function (activeNodes) {
+	lines.init = function (_activeNodes) {
 		VTree = RBTree();
 		HTree = RBTree();
-
+		var activeNodes = _activeNodes.nodes(); 
 		var nodes = cy.nodes();
 		excludedNodes = activeNodes.union(activeNodes.ancestors());
 		nodes.not(excludedNodes).each(function (i, node) {
@@ -657,8 +657,9 @@ module.exports = function (opts, cy, $, debounce) {
 			y: lines.getDims(aboveNode)["vertical"][otherSide]}, side);
 
 	}
-	lines.update = function (activeNodes) {
+	lines.update = function (_activeNodes) {
 		lines.clear();
+		var activeNodes = _activeNodes.nodes();
 
 		activeNodes.each(function (i, node) {
 			if (options.geometricGuideline){
