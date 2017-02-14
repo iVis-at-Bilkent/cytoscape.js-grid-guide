@@ -197,6 +197,15 @@
                 };
                 cy.gridGuide(opt);
 			});
+
+            $("#range").change(function () {
+                var el = $(this);
+                var opt = {
+					guidelinesStyle: {
+						range: el.val()}
+                };
+                cy.gridGuide(opt);
+			});
         });
     </script>
 </head>
@@ -270,8 +279,13 @@
 
     <div style="margin: 1em">
         <label for="verticalDistColor" >Vertical Alignment Color: </label>
-		<input style="width: 5em" type="color" id="verticalDistColor"  value="#00ff00" >
+	<input style="width: 5em" type="color" id="verticalDistColor"  value="#00ff00" >
     </div>
+
+	<div style="margin: 1em">
+		<label for="range" >Distribution Alignment Range: </label>
+		<input style="width: 5em" type="number" id="range" step="1" value="100" min="0">
+	</div>
 </div>
 </body>
 
