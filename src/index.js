@@ -36,6 +36,7 @@
             guidelinesStyle: { // Set ctx properties of line. Properties are here:
                 strokeStyle: "#8b7d6b",
                 lineDash: [3, 5],
+				range: 100,
 				horizontalDistColor: "#ff0000", // color of horizontal distribution alignment
 				verticalDistColor: "#00ff00" // color of vertical distribution alignment
             },

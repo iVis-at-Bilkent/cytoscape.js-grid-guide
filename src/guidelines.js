@@ -194,14 +194,14 @@ module.exports = function (opts, cy, $, debounce) {
 
 			for (left of nodes){
 				var leftDim = lines.getDims(left);
-				if (Math.abs(leftDim["vertical"]["center"] - nodeDim["vertical"]["center"]) < 100){
+				if (Math.abs(leftDim["vertical"]["center"] - nodeDim["vertical"]["center"]) < options.guidelinesStyle.range*2.5*cy.zoom()){
 					if ((leftDim["horizontal"]["right"]) == key && 
 						leftDim["horizontal"]["right"] < nodeDim["horizontal"]["left"]){
 							var ripo = Math.round(2*Xcenter)-key;
 							HTree.forEach(function($, rightNodes){
 								//if (rightNodes){
 								for (right of rightNodes){
-									if (Math.abs(lines.getDims(right)["vertical"]["center"] - Ycenter) < 100){
+									if (Math.abs(lines.getDims(right)["vertical"]["center"] - Ycenter) < options.guidelinesStyle.range*2.5*cy.zoom()){
 										if (Math.abs(ripo - lines.getDims(right)["horizontal"]["left"]) < 2*options.guidelinesTolerance){
 											leftNode = left; rightNode = right;
 										}
@@ -212,7 +212,7 @@ module.exports = function (opts, cy, $, debounce) {
 						}
 				}
 			}
-		}, Xcenter - 120, Xcenter);
+		}, Xcenter - options.guidelinesStyle.range*2.5*cy.zoom(), Xcenter);
 
 		// Draw the lines
 		if (leftNode){
@@ -266,14 +266,14 @@ module.exports = function (opts, cy, $, debounce) {
 
 			for (below of nodes){
 				var belowDim = lines.getDims(below);
-				if (Math.abs(belowDim["horizontal"]["center"] - nodeDim["horizontal"]["center"]) < 100){
+				if (Math.abs(belowDim["horizontal"]["center"] - nodeDim["horizontal"]["center"]) < options.guidelinesStyle.range*2.5*cy.zoom()){
 					if (belowDim["vertical"]["bottom"] == key &&
 						belowDim["vertical"]["bottom"] < nodeDim["vertical"]["top"]){
 							var abpo = Math.round((2*Ycenter)-key);
 							VTree.forEach(function($, aboveNodes){
 								//if (aboveNodes){
 								for (above of aboveNodes){
-									if (Math.abs(lines.getDims(above)["horizontal"]["center"] - Xcenter) < 100){
+									if (Math.abs(lines.getDims(above)["horizontal"]["center"] - Xcenter) < options.guidelinesStyle.range*2.5*cy.zoom()){
 										if (Math.abs(abpo - lines.getDims(above)["vertical"]["top"]) < 2*options.guidelinesTolerance){
 											belowNode = below; aboveNode = above;
 										}
@@ -284,7 +284,7 @@ module.exports = function (opts, cy, $, debounce) {
 						}
 				}
 			}
-		}, Ycenter - 100, Ycenter);
+		}, Ycenter - options.guidelinesStyle.range*2.5*cy.zoom(), Ycenter);
 
 
 		if (belowNode){
@@ -400,7 +400,7 @@ module.exports = function (opts, cy, $, debounce) {
 		var lowerBound = Xcenter;
 		if (type == "left"){
 			side = "left"; otherSide = "right";
-			var lowerBound = Xcenter - 100;
+			var lowerBound = Xcenter - options.guidelinesStyle.range*2.5*cy.zoom();
 		}
 
 
@@ -416,14 +416,14 @@ module.exports = function (opts, cy, $, debounce) {
 
 			for (left of nodes){
 				var leftDim = lines.getDims(left);
-				if (Math.abs(leftDim["vertical"]["center"] - nodeDim["vertical"]["center"]) < 100){
+				if (Math.abs(leftDim["vertical"]["center"] - nodeDim["vertical"]["center"]) < options.guidelinesStyle.range*2.5*cy.zoom()){
 					if ((leftDim["horizontal"][otherSide]) == key && 
 						compare[type](leftDim["horizontal"][otherSide], nodeDim["horizontal"][side])){
 							var ll = leftDim["horizontal"][side]-(nodeDim["horizontal"][side] - key);
 							rightNodes = HTree.get(ll);
 							if (rightNodes){
 								for (right of rightNodes){
-									if (Math.abs(lines.getDims(right)["vertical"]["center"] - Ycenter) < 100){
+									if (Math.abs(lines.getDims(right)["vertical"]["center"] - Ycenter) < options.guidelinesStyle.range*2.5*cy.zoom()){
 										if (ll == lines.getDims(right)["horizontal"][otherSide]){
 											leftNode = left; rightNode = right;
 										}
@@ -433,7 +433,7 @@ module.exports = function (opts, cy, $, debounce) {
 						}
 				}
 			}
-		}, lowerBound, lowerBound + 100);
+		}, lowerBound, lowerBound + options.guidelinesStyle.range*2.5*cy.zoom());
 
 		// Draw the lines
 		if (leftNode)
@@ -536,7 +536,7 @@ module.exports = function (opts, cy, $, debounce) {
 		var Xcenter = nodeDim["horizontal"]["center"];
 		var Ycenter = nodeDim["vertical"]["center"];
 		var side = "top", otherSide = "bottom";
-		var lowerBound = Ycenter - 100;
+		var lowerBound = Ycenter - options.guidelinesStyle.range*2.5*cy.zoom();
 		if (type == "above"){
 			side = "bottom"; otherSide = "top";
 			lowerBound = Ycenter;
@@ -551,14 +551,14 @@ module.exports = function (opts, cy, $, debounce) {
 
 			for (below of nodes){
 				var belowDim = lines.getDims(below);
-				if (Math.abs(belowDim["horizontal"]["center"] - nodeDim["horizontal"]["center"]) < 100){
+				if (Math.abs(belowDim["horizontal"]["center"] - nodeDim["horizontal"]["center"]) < options.guidelinesStyle.range*2.5*cy.zoom()){
 					if (belowDim["vertical"][otherSide] == key &&
 						compare[type](belowDim["vertical"][otherSide], nodeDim["vertical"][side])){
 							var ll = belowDim["vertical"][side]-(nodeDim["vertical"][side]-key);
 							aboveNodes = VTree.get(ll);
 							if (aboveNodes){
 								for (above of aboveNodes){
-									if (Math.abs(lines.getDims(above)["horizontal"]["center"] - Xcenter) < 100){
+									if (Math.abs(lines.getDims(above)["horizontal"]["center"] - Xcenter) < options.guidelinesStyle.range*2.5*cy.zoom()){
 										if (ll == lines.getDims(above)["vertical"][otherSide]){
 											belowNode = below; aboveNode = above;
 										}
@@ -568,7 +568,7 @@ module.exports = function (opts, cy, $, debounce) {
 						}
 				}
 			}
-		}, lowerBound, lowerBound+100);
+		}, lowerBound, lowerBound+options.guidelinesStyle.range*2.5*cy.zoom());
 
 		if (belowNode){
 			lines.drawDV(node, belowNode, aboveNode, type);

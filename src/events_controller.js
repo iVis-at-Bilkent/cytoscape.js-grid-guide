@@ -144,7 +144,7 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 
     var specialOpts = {
         drawGrid: ["gridSpacing", "zoomDash", "panGrid", "gridStackOrder", "strokeStyle", "lineWidth", "lineDash"],
-        guidelines: ["gridSpacing", "guidelinesStackOrder", "guidelinesTolerance", "guidelinesStyle", "distributionGuidelines"],
+        guidelines: ["gridSpacing", "guidelinesStackOrder", "guidelinesTolerance", "guidelinesStyle", "distributionGuidelines", "range"],
         resize: ["gridSpacing"],
         parentPadding: ["gridSpacing", "parentSpacing"],
         snapToGrid: ["gridSpacing"]
