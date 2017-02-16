@@ -22,7 +22,7 @@ module.exports = function (opts, cy, $, debounce) {
 		return sc;
 	};
 
-	var resizeCanvas = function () {
+	var resizeCanvas = debounce(function () {
 		clearDrawing();
 		$canvas
 			.attr('height', $container.height())
@@ -45,7 +45,7 @@ module.exports = function (opts, cy, $, debounce) {
 					'left': -( canvasBb.left - containerBb.left )
 				});
 		}, 0);
-	};
+	}, 250);
 
 	var clearDrawing = function () {
 		var width = $container.width();
@@ -682,7 +682,6 @@ module.exports = function (opts, cy, $, debounce) {
 
 	lines.resize = function () {
 		resizeCanvas();
-		lines.update();
 	};
 
 
