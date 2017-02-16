@@ -1699,19 +1699,27 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
     }
 
     // Guidelines
-
+	var x; 
     function setGuidelines(enable) {
-       if (enable){
-            cy.on("grab", applyToActiveNodes(guidelines.lines.init));
-            cy.on("drag", applyToActiveNodes(guidelines.lines.update));
-            cy.on("free", guidelines.lines.destroy);
-	    $(window).on("resize", guidelines.lines.resize);
-       }
-        else{
-            cy.off("grab");
-            cy.off("drag");
-            cy.off("free");
-        }
+			
+            cy.on("grab", function(e){
+				if (enable){
+					applyToActiveNodes(guidelines.lines.init)(e);
+				}
+			});
+			cy.on("drag", function(e){
+				if (enable){
+					applyToActiveNodes(guidelines.lines.update)(e);
+				}
+			});
+            cy.on("free", function(e){
+				if (enable)
+					guidelines.lines.destroy();
+			});
+			$(window).on("resize", function(){
+				if (enable)
+					guidelines.lines.resize();
+			});
     }
 
     // Parent Padding
