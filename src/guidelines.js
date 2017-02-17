@@ -352,10 +352,10 @@ module.exports = function (opts, cy, $, debounce) {
 			// find the closest alignment in range of tolerance
 			Tree.forEach(function (exKey, nodes) {
 				for (n of nodes){
-					var pos = n.renderedPosition(axis);
-					if ( Math.abs(pos - center) < targetKey){
+					var dif = Math.abs(center - n.renderedPosition(axis));
+					if ( dif < targetKey && dif < options.guidelinesStyle.geometricGuidelineRange*cy.zoom()){
 						target = n;
-						targetKey = Math.abs(pos - center);
+						targetKey = dif;
 					}
 				}
 
