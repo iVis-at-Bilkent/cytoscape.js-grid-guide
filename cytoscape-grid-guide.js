@@ -1699,27 +1699,33 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
     }
 
     // Guidelines
-	var x; 
+	var x; // <-- not used directly below TODO move to correct place
+    var guidelinesGrabHandler = function(e){
+        applyToActiveNodes(guidelines.lines.init)(e);
+    }
+    var guidelinesDragHandler = function(e){
+        applyToActiveNodes(guidelines.lines.update)(e);
+    };
+    var guidelinesFreeHandler = function(e){
+        guidelines.lines.destroy();
+    };
+    var guidelinesWindowResizeHandler = function(e){
+        guidelines.lines.resize();
+    }
     function setGuidelines(enable) {
-			
-            cy.on("grab", function(e){
-				if (enable){
-					applyToActiveNodes(guidelines.lines.init)(e);
-				}
-			});
-			cy.on("drag", function(e){
-				if (enable){
-					applyToActiveNodes(guidelines.lines.update)(e);
-				}
-			});
-            cy.on("free", function(e){
-				if (enable)
-					guidelines.lines.destroy();
-			});
-			$(window).on("resize", function(){
-				if (enable)
-					guidelines.lines.resize();
-			});
+            if (enable){
+                cy.on("grab", guidelinesGrabHandler);
+    			cy.on("drag", guidelinesDragHandler);
+                cy.on("free", guidelinesFreeHandler);
+                $(window).on("resize", guidelinesWindowResizeHandler);
+            }
+            else{
+                cy.off("grab", guidelinesGrabHandler);
+                cy.off("drag", guidelinesDragHandler);
+                cy.off("free", guidelinesFreeHandler);
+                $(window).off("resize", guidelinesWindowResizeHandler);
+            }
+            // console.log(cy._private.listeners); // <-- to check accumulation
     }
 
     // Parent Padding
