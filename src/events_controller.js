@@ -22,13 +22,6 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
         }
     }
     
-    function applyToActiveNodes(func) {
-        return function (e) {
-            var nodes = e.cyTarget.selected() ? e.cy.$(":selected") : e.cyTarget;
-            func(nodes);
-        };
-    }
-
     function applyToAllNodesButNoParent(func) {
         return function () {
             cy.nodes().not(":parent").each(function (i, ele) {
@@ -106,12 +99,14 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
     }
 
     // Guidelines
-	var x; // <-- not used directly below TODO move to correct place
+	var activeTopMostNodes;
     var guidelinesGrabHandler = function(e){
-        applyToActiveNodes(guidelines.lines.init)(e);
+		var nodes = e.cyTarget.selected() ? e.cy.$(":selected") : e.cyTarget;
+		activeTopMostNodes = guidelines.getTopMostNodes(nodes.nodes());
+        guidelines.lines.init(activeTopMostNodes);
     }
-    var guidelinesDragHandler = function(e){
-        applyToActiveNodes(guidelines.lines.update)(e);
+    var guidelinesDragHandler = function(){
+        guidelines.lines.update(activeTopMostNodes);
     };
     var guidelinesFreeHandler = function(e){
         guidelines.lines.destroy();

@@ -94,12 +94,12 @@ module.exports = function (opts, cy, $, debounce) {
 	};
 
 
-	lines.init = function (_activeNodes) {
+	lines.init = function (activeNodes) {
 		VTree = RBTree();
 		HTree = RBTree();
-		var activeNodes = _activeNodes.nodes(); 
 		var nodes = cy.nodes();
 		excludedNodes = activeNodes.union(activeNodes.ancestors());
+		excludedNodes = excludedNodes.union(activeNodes.descendants());
 		nodes.not(excludedNodes).each(function (i, node) {
 			var dims = lines.getDims(node);
 
@@ -657,24 +657,17 @@ module.exports = function (opts, cy, $, debounce) {
 			y: lines.getDims(aboveNode)["vertical"][otherSide]}, side);
 
 	}
-	lines.update = function (_activeNodes) {
+	lines.update = function (activeNodes) {
 		lines.clear();
-		var activeNodes = _activeNodes.nodes();
-
 		activeNodes.each(function (i, node) {
 			if (options.geometricGuideline){
 				lines.searchForLine("horizontal", node);
 				lines.searchForLine("vertical", node);
 			}
+
 			if (options.distributionGuidelines){
 				lines.horizontalDistribution(node);
 				lines.verticalDistribution(node);
-
-				//				lines.horizontalDistributionNext(node,"left" );
-				//				lines.horizontalDistributionNext(node,"right" );
-
-				//				lines.verticalDistributionNext(node, "below");
-				//				lines.verticalDistributionNext(node, "above");
 			}
 		});
 
@@ -684,12 +677,34 @@ module.exports = function (opts, cy, $, debounce) {
 		resizeCanvas();
 	};
 
+	function getTopMostNodes(nodes) {
+		var nodesMap = {};
+
+		for (var i = 0; i < nodes.length; i++) {
+			nodesMap[nodes[i].id()] = true;
+		}
+
+		var roots = nodes.filter(function (i, ele) {
+			var parent = ele.parent()[0];
+			while (parent != null) {
+				if (nodesMap[parent.id()]) {
+					return false;
+				}
+				parent = parent.parent()[0];
+			}
+			return true;
+		});
+
+		return roots;
+	}
+
 
 
 
 	return {
 		changeOptions: changeOptions,
-			lines: lines
+		lines: lines,
+		getTopMostNodes: getTopMostNodes,
 	}
 
 };
