@@ -1751,7 +1751,7 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 
     var specialOpts = {
         drawGrid: ["gridSpacing", "zoomDash", "panGrid", "gridStackOrder", "strokeStyle", "lineWidth", "lineDash"],
-        guidelines: ["gridSpacing", "guidelinesStackOrder", "guidelinesTolerance", "guidelinesStyle", "distributionGuidelines", "range"],
+        guidelines: ["gridSpacing", "guidelinesStackOrder", "guidelinesTolerance", "guidelinesStyle", "distributionGuidelines", "range", "geometricGuidelineRange"],
         resize: ["gridSpacing"],
         parentPadding: ["gridSpacing", "parentSpacing"],
         snapToGrid: ["gridSpacing"]
@@ -2161,10 +2161,10 @@ module.exports = function (opts, cy, $, debounce) {
 			// find the closest alignment in range of tolerance
 			Tree.forEach(function (exKey, nodes) {
 				for (n of nodes){
-					var pos = n.renderedPosition(axis);
-					if ( Math.abs(pos - center) < targetKey){
+					var dif = Math.abs(center - n.renderedPosition(axis));
+					if ( dif < targetKey && dif < options.guidelinesStyle.geometricGuidelineRange*cy.zoom()){
 						target = n;
-						targetKey = Math.abs(pos - center);
+						targetKey = dif;
 					}
 				}
 
@@ -2542,6 +2542,7 @@ module.exports = function (opts, cy, $, debounce) {
             guidelinesStyle: { // Set ctx properties of line. Properties are here:
                 strokeStyle: "#8b7d6b",
                 lineDash: [3, 5],
+				geometricGuidelineRange: 400,
 				range: 100,
 				horizontalDistColor: "#ff0000", // color of horizontal distribution alignment
 				verticalDistColor: "#00ff00" // color of vertical distribution alignment
