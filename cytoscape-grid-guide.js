@@ -996,7 +996,7 @@ function createRBTree(compare) {
   return new RedBlackTree(compare || defaultCompare, null)
 }
 },{}],2:[function(require,module,exports){
-module.exports = function (cytoscape, $) {
+module.exports = function (cytoscape, cy,  $) {
     
     // Needed because parent nodes cannot be moved!
     function moveTopDown(node, dx, dy) {
@@ -1132,6 +1132,7 @@ module.exports = function (cytoscape, $) {
 
 
 };
+
 },{}],3:[function(require,module,exports){
 
 var debounce = (function(){
@@ -2574,7 +2575,7 @@ module.exports = function (opts, cy, $, debounce) {
         var debounce = require("./debounce");
         var snap, resize, discreteDrag, drawGrid, eventsController, guidelines, parentPadding, alignment;
 
-        function getScratch() {
+        function getScratch(cy) {
             if (!cy.scratch("_gridGuide")) {
                 cy.scratch("_gridGuide", { });
 
@@ -2586,8 +2587,8 @@ module.exports = function (opts, cy, $, debounce) {
             var cy = this;
             $.extend(true, options, opts);
 
-            if (!getScratch().initialized) {
-                snap = _snap(options.gridSpacing);
+            if (!getScratch(cy).initialized) {
+                snap = _snap(cy, options.gridSpacing);
                 resize = _resize(options.gridSpacing);
                 discreteDrag = _discreteDrag(cy, snap);
                 drawGrid = _drawGrid(options, cy, $, debounce);
@@ -2596,10 +2597,10 @@ module.exports = function (opts, cy, $, debounce) {
 
                 eventsController = _eventsController(cy, snap, resize, discreteDrag, drawGrid, guidelines, parentPadding, $);
 
-                alignment = _alignment(cytoscape, $);
+                alignment = _alignment(cytoscape, cy, $);
 
                 eventsController.init(options);
-                getScratch().initialized = true;
+                getScratch(cy).initialized = true;
             } else
                 eventsController.syncWithOptions(options);
 
@@ -2719,7 +2720,7 @@ module.exports = function (gridSpacing) {
 
 };
 },{}],11:[function(require,module,exports){
-module.exports = function (gridSpacing) {
+module.exports = function (cy, gridSpacing) {
 
     var snap = { };
 
@@ -2826,4 +2827,5 @@ module.exports = function (gridSpacing) {
 
 
 };
+
 },{}]},{},[8]);

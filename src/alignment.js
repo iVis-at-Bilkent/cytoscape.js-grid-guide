@@ -1,4 +1,4 @@
-module.exports = function (cytoscape, $) {
+module.exports = function (cytoscape, cy,  $) {
     
     // Needed because parent nodes cannot be moved!
     function moveTopDown(node, dx, dy) {

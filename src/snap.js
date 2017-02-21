@@ -1,4 +1,4 @@
-module.exports = function (gridSpacing) {
+module.exports = function (cy, gridSpacing) {
 
     var snap = { };
 
