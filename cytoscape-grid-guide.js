@@ -1867,6 +1867,7 @@ module.exports = function (opts, cy, $, debounce) {
 
 	var VTree = null;
 	var HTree = null;
+	var nodeInitPos;
 	var excludedNodes;
 	var lines = {};
 
@@ -1902,6 +1903,7 @@ module.exports = function (opts, cy, $, debounce) {
 	lines.init = function (activeNodes) {
 		VTree = RBTree();
 		HTree = RBTree();
+		nodeInitPos = activeNodes.renderedPosition();
 		var nodes = cy.nodes();
 		excludedNodes = activeNodes.union(activeNodes.ancestors());
 		excludedNodes = excludedNodes.union(activeNodes.descendants());
@@ -1934,6 +1936,8 @@ module.exports = function (opts, cy, $, debounce) {
 		lines.clear();
 		VTree = null;
 		HTree = null;
+		nodeInitPos = null;
+		mouseInitPos = {};
 	};
 
 	lines.clear = clearDrawing;
@@ -1983,6 +1987,18 @@ module.exports = function (opts, cy, $, debounce) {
 		}
 
 	}
+
+	lines.drawCross = function(position){
+		ctx.beginPath();
+		ctx.moveTo(position.x - 5, position.y + 5);
+		ctx.lineTo(position.x + 5, position.y - 5);
+		ctx.moveTo(position.x - 5, position.y - 5);
+		ctx.lineTo(position.x + 5, position.y + 5);
+		ctx.strokeStyle = "blue";
+		ctx.stroke();
+	};
+
+
 
 
 	/** Guidelines for horizontally distributed alignment
@@ -2464,6 +2480,7 @@ module.exports = function (opts, cy, $, debounce) {
 	}
 	lines.update = function (activeNodes) {
 		lines.clear();
+		mouseLine(activeNodes);
 		activeNodes.each(function (i, node) {
 			if (options.geometricGuideline){
 				lines.searchForLine("horizontal", node);
@@ -2503,7 +2520,34 @@ module.exports = function (opts, cy, $, debounce) {
 		return roots;
 	}
 
-
+	var mouseInitPos = {};
+	cy.on("tapstart", "node", function(e){
+		mouseInitPos = e.cyRenderedPosition;
+	})
+	var mouseLine = function(node){
+		console.log(mouseInitPos);
+		var nodeCurrentPos = node.renderedPosition();	
+		if (Math.abs(nodeInitPos.y - nodeCurrentPos.y) < options.guidelinesTolerance){
+			lines.drawLine({
+				"x" : mouseInitPos.x,
+				"y" : mouseInitPos.y
+			}, {
+				"x" : nodeCurrentPos.x,
+				"y" : mouseInitPos.y
+			}, "blue");
+			lines.drawCross(mouseInitPos);
+		}
+		else if (Math.abs(nodeInitPos.x - nodeCurrentPos.x) < options.guidelinesTolerance){
+			lines.drawLine({
+				"x" : mouseInitPos.x,
+				"y" : mouseInitPos.y
+			}, {
+				"x" : mouseInitPos.x,
+				"y" : nodeCurrentPos.y
+			}, "blue");
+			lines.drawCross(mouseInitPos);
+		}
+	}
 
 
 	return {
