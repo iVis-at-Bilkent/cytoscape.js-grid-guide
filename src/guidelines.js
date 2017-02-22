@@ -370,7 +370,7 @@ module.exports = function (opts, cy, $, debounce) {
 			// find the closest alignment in range of tolerance
 			Tree.forEach(function (exKey, nodes) {
 				for (n of nodes){
-					if (options.centerToEdgeAlignment || (dimKey != "center" && n.renderedPosition(axis) != exKey) || (dimKey == "center" && n.renderedPosition(otherAxis) == exKey)){
+					if (options.centerToEdgeAlignment || (dimKey != "center" && n.renderedPosition(otherAxis) != exKey) || (dimKey == "center" && n.renderedPosition(otherAxis) == exKey)){
 					var dif = Math.abs(center - n.renderedPosition(axis));
 					if ( dif < targetKey && dif < options.guidelinesStyle.geometricGuidelineRange*cy.zoom()){
 						target = n;
