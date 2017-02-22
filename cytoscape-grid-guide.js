@@ -2151,7 +2151,7 @@ module.exports = function (opts, cy, $, debounce) {
 	lines.searchForLine = function (type, node) {
 
 		// variables
-		var position, target, center, axis, Tree;
+		var position, target, center, axis, otherAxis, Tree;
 		var dims = lines.getDims(node)[type];
 		var targetKey = Number.MAX_SAFE_INTEGER;
 
@@ -2159,9 +2159,11 @@ module.exports = function (opts, cy, $, debounce) {
 		if ( type == "horizontal"){
 			Tree = HTree;
 			axis = "y";
+			otherAxis = "x";
 		} else{
 			Tree = VTree;
 			axis = "x";
+			otherAxis = "y";
 		}
 
 		center = node.renderedPosition(axis);
@@ -2173,10 +2175,12 @@ module.exports = function (opts, cy, $, debounce) {
 			// find the closest alignment in range of tolerance
 			Tree.forEach(function (exKey, nodes) {
 				for (n of nodes){
+					if (options.centerToEdgeAlignment || (dimKey != "center" && n.renderedPosition(axis) != exKey) || (dimKey == "center" && n.renderedPosition(otherAxis) == exKey)){
 					var dif = Math.abs(center - n.renderedPosition(axis));
 					if ( dif < targetKey && dif < options.guidelinesStyle.geometricGuidelineRange*cy.zoom()){
 						target = n;
 						targetKey = dif;
+					}
 					}
 				}
 
@@ -2525,7 +2529,6 @@ module.exports = function (opts, cy, $, debounce) {
 		mouseInitPos = e.cyRenderedPosition;
 	})
 	var mouseLine = function(node){
-		console.log(mouseInitPos);
 		var nodeCurrentPos = node.renderedPosition();	
 		if (Math.abs(nodeInitPos.y - nodeCurrentPos.y) < options.guidelinesTolerance){
 			lines.drawLine({
@@ -2571,8 +2574,9 @@ module.exports = function (opts, cy, $, debounce) {
             // On/Off Modules
             snapToGrid: true, // Snap to grid functionality
             discreteDrag: true, // Discrete Drag
-			distributionGuidelines: true,
-			geometricGuideline: true,
+            distributionGuidelines: true,
+            geometricGuideline: true,
+	    centerToEdgeAlignment: false,
             //guidelines: true,// || geometricGuideline, // Guidelines on dragging nodes
             resize: true, // Adjust node sizes to cell sizes
             parentPadding: true, // Adjust parent sizes to cell sizes by padding
@@ -2597,10 +2601,10 @@ module.exports = function (opts, cy, $, debounce) {
             guidelinesStyle: { // Set ctx properties of line. Properties are here:
                 strokeStyle: "#8b7d6b",
                 lineDash: [3, 5],
-				geometricGuidelineRange: 400,
-				range: 100,
-				horizontalDistColor: "#ff0000", // color of horizontal distribution alignment
-				verticalDistColor: "#00ff00" // color of vertical distribution alignment
+		geometricGuidelineRange: 400,
+		range: 100,
+		horizontalDistColor: "#ff0000", // color of horizontal distribution alignment
+		verticalDistColor: "#00ff00" // color of vertical distribution alignment
             },
 
             distancelinesTolerance: 20, // Horizontal tolerance for verticals and vertical tolerance for horizontals

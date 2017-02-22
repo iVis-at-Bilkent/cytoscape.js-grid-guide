@@ -346,7 +346,7 @@ module.exports = function (opts, cy, $, debounce) {
 	lines.searchForLine = function (type, node) {
 
 		// variables
-		var position, target, center, axis, Tree;
+		var position, target, center, axis, otherAxis, Tree;
 		var dims = lines.getDims(node)[type];
 		var targetKey = Number.MAX_SAFE_INTEGER;
 
@@ -354,9 +354,11 @@ module.exports = function (opts, cy, $, debounce) {
 		if ( type == "horizontal"){
 			Tree = HTree;
 			axis = "y";
+			otherAxis = "x";
 		} else{
 			Tree = VTree;
 			axis = "x";
+			otherAxis = "y";
 		}
 
 		center = node.renderedPosition(axis);
@@ -368,10 +370,12 @@ module.exports = function (opts, cy, $, debounce) {
 			// find the closest alignment in range of tolerance
 			Tree.forEach(function (exKey, nodes) {
 				for (n of nodes){
+					if (options.centerToEdgeAlignment || (dimKey != "center" && n.renderedPosition(axis) != exKey) || (dimKey == "center" && n.renderedPosition(otherAxis) == exKey)){
 					var dif = Math.abs(center - n.renderedPosition(axis));
 					if ( dif < targetKey && dif < options.guidelinesStyle.geometricGuidelineRange*cy.zoom()){
 						target = n;
 						targetKey = dif;
+					}
 					}
 				}
 
@@ -720,7 +724,6 @@ module.exports = function (opts, cy, $, debounce) {
 		mouseInitPos = e.cyRenderedPosition;
 	})
 	var mouseLine = function(node){
-		console.log(mouseInitPos);
 		var nodeCurrentPos = node.renderedPosition();	
 		if (Math.abs(nodeInitPos.y - nodeCurrentPos.y) < options.guidelinesTolerance){
 			lines.drawLine({
