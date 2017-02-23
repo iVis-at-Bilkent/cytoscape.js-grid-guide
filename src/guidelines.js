@@ -98,6 +98,8 @@ module.exports = function (opts, cy, $, debounce) {
 	lines.init = function (activeNodes) {
 		VTree = RBTree();
 		HTree = RBTree();
+		// TODO: seperate initialization of nodeInitPos
+		// not necessary to init trees when geometric and distribution alignments are disabled
 		nodeInitPos = activeNodes.renderedPosition();
 		var nodes = cy.nodes();
 		excludedNodes = activeNodes.union(activeNodes.ancestors());
@@ -189,7 +191,7 @@ module.exports = function (opts, cy, $, debounce) {
 		ctx.lineTo(position.x + 5, position.y - 5);
 		ctx.moveTo(position.x - 5, position.y - 5);
 		ctx.lineTo(position.x + 5, position.y + 5);
-		ctx.strokeStyle = "blue";
+		ctx.strokeStyle = options.guidelinesStyle.initPosAlignmentColor;
 		ctx.stroke();
 	};
 
@@ -679,7 +681,11 @@ module.exports = function (opts, cy, $, debounce) {
 	}
 	lines.update = function (activeNodes) {
 		lines.clear();
-		mouseLine(activeNodes);
+
+		if (options.initPosAlignment){
+			mouseLine(activeNodes);
+		}
+
 		activeNodes.each(function (i, node) {
 			if (options.geometricGuideline){
 				lines.searchForLine("horizontal", node);
@@ -720,9 +726,14 @@ module.exports = function (opts, cy, $, debounce) {
 	}
 
 	var mouseInitPos = {};
-	cy.on("tapstart", "node", function(e){
+	var getMousePos = function(e){
 		mouseInitPos = e.cyRenderedPosition;
-	})
+	}
+
+	//cy.on("tapstart", "node", function(e){
+	//	mouseInitPos = e.cyRenderedPosition;
+	//})
+
 	var mouseLine = function(node){
 		var nodeCurrentPos = node.renderedPosition();	
 		if (Math.abs(nodeInitPos.y - nodeCurrentPos.y) < options.guidelinesTolerance){
@@ -732,7 +743,7 @@ module.exports = function (opts, cy, $, debounce) {
 			}, {
 				"x" : nodeCurrentPos.x,
 				"y" : mouseInitPos.y
-			}, "blue");
+			}, options.guidelinesStyle.initPosAlignmentColor);
 			lines.drawCross(mouseInitPos);
 		}
 		else if (Math.abs(nodeInitPos.x - nodeCurrentPos.x) < options.guidelinesTolerance){
@@ -742,7 +753,7 @@ module.exports = function (opts, cy, $, debounce) {
 			}, {
 				"x" : mouseInitPos.x,
 				"y" : nodeCurrentPos.y
-			}, "blue");
+			}, options.guidelinesStyle.initPosAlignmentColor);
 			lines.drawCross(mouseInitPos);
 		}
 	}
@@ -752,6 +763,7 @@ module.exports = function (opts, cy, $, debounce) {
 		changeOptions: changeOptions,
 		lines: lines,
 		getTopMostNodes: getTopMostNodes,
+		getMousePos: getMousePos,
 	}
 
 };

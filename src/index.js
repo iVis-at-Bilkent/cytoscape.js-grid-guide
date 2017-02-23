@@ -12,7 +12,8 @@
             discreteDrag: true, // Discrete Drag
             distributionGuidelines: true,
             geometricGuideline: true,
-	    centerToEdgeAlignment: false,
+			initPosAlignment: true,
+			centerToEdgeAlignment: false,
             //guidelines: true,// || geometricGuideline, // Guidelines on dragging nodes
             resize: true, // Adjust node sizes to cell sizes
             parentPadding: true, // Adjust parent sizes to cell sizes by padding
@@ -37,10 +38,11 @@
             guidelinesStyle: { // Set ctx properties of line. Properties are here:
                 strokeStyle: "#8b7d6b",
                 lineDash: [3, 5],
-		geometricGuidelineRange: 400,
-		range: 100,
-		horizontalDistColor: "#ff0000", // color of horizontal distribution alignment
-		verticalDistColor: "#00ff00" // color of vertical distribution alignment
+				geometricGuidelineRange: 400,
+				range: 100,
+				horizontalDistColor: "#ff0000", // color of horizontal distribution alignment
+				verticalDistColor: "#00ff00", // color of vertical distribution alignment
+				initPosAlignmentColor: "#0000ff", // color of alignment to initial location
             },
 
             distancelinesTolerance: 20, // Horizontal tolerance for verticals and vertical tolerance for horizontals

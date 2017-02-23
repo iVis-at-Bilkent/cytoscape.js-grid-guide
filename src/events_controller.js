@@ -113,15 +113,20 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
     };
     var guidelinesWindowResizeHandler = function(e){
         guidelines.lines.resize();
-    }
+    };
+	var guidelinesTapHandler = function(e){
+		guidelines.getMousePos(e);
+	}
     function setGuidelines(enable) {
             if (enable){
+				cy.on("tapstart", "node", guidelinesTapHandler);
                 cy.on("grab", guidelinesGrabHandler);
     			cy.on("drag", guidelinesDragHandler);
                 cy.on("free", guidelinesFreeHandler);
                 $(window).on("resize", guidelinesWindowResizeHandler);
             }
             else{
+				cy.off("tapstart", "node", guidelinesTapHandler);
                 cy.off("grab", guidelinesGrabHandler);
                 cy.off("drag", guidelinesDragHandler);
                 cy.off("free", guidelinesFreeHandler);
@@ -161,7 +166,7 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 
     function syncWithOptions(options) {
         currentOptions = $.extend(true, {}, options);
-		options.guidelines = options.distributionGuidelines || options.geometricGuideline;
+		options.guidelines = options.initPosAlignment ||  options.distributionGuidelines || options.geometricGuideline;
         for (var key in options)
             if (latestOptions[key] != options[key])
                 if (controller.hasOwnProperty(key)) {

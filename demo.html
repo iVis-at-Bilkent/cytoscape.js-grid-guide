@@ -133,7 +133,8 @@
                 guidelinesStyle: {
                     strokeStyle: "black",
 					horizontalDistColor: "#ff0000",
-					verticalDistColor: "green"
+					verticalDistColor: "green",
+					initPosAlignmentColor: "#0000ff",
                 }
             });
 
@@ -194,6 +195,15 @@
                 var opt = {
 					guidelinesStyle: {
 						strokeStyle: el.val()}
+                };
+                cy.gridGuide(opt);
+			});
+
+            $("#initPosAlignmentColor").change(function () {
+                var el = $(this);
+                var opt = {
+					guidelinesStyle: {
+						initPosAlignmentColor: el.val()}
                 };
                 cy.gridGuide(opt);
 			});
@@ -270,6 +280,9 @@
         <div id="distributionGuidelines" class="enabled">
             Distribution Guidelines <b> On </b>
         </div>
+        <div id="initPosAlignment" class="enabled">
+            Guidelines to Initial Position <b> On </b>
+        </div>
         <div id="centerToEdgeAlignment" class="disabled">
             Center to Edge Alignment <b> Off </b>
         </div>
@@ -296,6 +309,11 @@
     <div style="margin: 1em">
         <label for="verticalDistColor" >Vertical Alignment Color: </label>
 	<input style="width: 5em" type="color" id="verticalDistColor"  value="#00ff00" >
+    </div>
+
+    <div style="margin: 1em">
+        <label for="initPosAlignmentColor" >Initial Position Alignment Color: </label>
+	<input style="width: 5em" type="color" id="initPosAlignmentColor"  value="#0000ff" >
     </div>
 
 	<div style="margin: 1em">

@@ -1707,15 +1707,20 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
     };
     var guidelinesWindowResizeHandler = function(e){
         guidelines.lines.resize();
-    }
+    };
+	var guidelinesTapHandler = function(e){
+		guidelines.getMousePos(e);
+	}
     function setGuidelines(enable) {
             if (enable){
+				cy.on("tapstart", "node", guidelinesTapHandler);
                 cy.on("grab", guidelinesGrabHandler);
     			cy.on("drag", guidelinesDragHandler);
                 cy.on("free", guidelinesFreeHandler);
                 $(window).on("resize", guidelinesWindowResizeHandler);
             }
             else{
+				cy.off("tapstart", "node", guidelinesTapHandler);
                 cy.off("grab", guidelinesGrabHandler);
                 cy.off("drag", guidelinesDragHandler);
                 cy.off("free", guidelinesFreeHandler);
@@ -1755,7 +1760,7 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 
     function syncWithOptions(options) {
         currentOptions = $.extend(true, {}, options);
-		options.guidelines = options.distributionGuidelines || options.geometricGuideline;
+		options.guidelines = options.initPosAlignment ||  options.distributionGuidelines || options.geometricGuideline;
         for (var key in options)
             if (latestOptions[key] != options[key])
                 if (controller.hasOwnProperty(key)) {
@@ -1903,6 +1908,8 @@ module.exports = function (opts, cy, $, debounce) {
 	lines.init = function (activeNodes) {
 		VTree = RBTree();
 		HTree = RBTree();
+		// TODO: seperate initialization of nodeInitPos
+		// not necessary to init trees when geometric and distribution alignments are disabled
 		nodeInitPos = activeNodes.renderedPosition();
 		var nodes = cy.nodes();
 		excludedNodes = activeNodes.union(activeNodes.ancestors());
@@ -1994,7 +2001,7 @@ module.exports = function (opts, cy, $, debounce) {
 		ctx.lineTo(position.x + 5, position.y - 5);
 		ctx.moveTo(position.x - 5, position.y - 5);
 		ctx.lineTo(position.x + 5, position.y + 5);
-		ctx.strokeStyle = "blue";
+		ctx.strokeStyle = options.guidelinesStyle.initPosAlignmentColor;
 		ctx.stroke();
 	};
 
@@ -2484,7 +2491,11 @@ module.exports = function (opts, cy, $, debounce) {
 	}
 	lines.update = function (activeNodes) {
 		lines.clear();
-		mouseLine(activeNodes);
+
+		if (options.initPosAlignment){
+			mouseLine(activeNodes);
+		}
+
 		activeNodes.each(function (i, node) {
 			if (options.geometricGuideline){
 				lines.searchForLine("horizontal", node);
@@ -2525,9 +2536,14 @@ module.exports = function (opts, cy, $, debounce) {
 	}
 
 	var mouseInitPos = {};
-	cy.on("tapstart", "node", function(e){
+	var getMousePos = function(e){
 		mouseInitPos = e.cyRenderedPosition;
-	})
+	}
+
+	//cy.on("tapstart", "node", function(e){
+	//	mouseInitPos = e.cyRenderedPosition;
+	//})
+
 	var mouseLine = function(node){
 		var nodeCurrentPos = node.renderedPosition();	
 		if (Math.abs(nodeInitPos.y - nodeCurrentPos.y) < options.guidelinesTolerance){
@@ -2537,7 +2553,7 @@ module.exports = function (opts, cy, $, debounce) {
 			}, {
 				"x" : nodeCurrentPos.x,
 				"y" : mouseInitPos.y
-			}, "blue");
+			}, options.guidelinesStyle.initPosAlignmentColor);
 			lines.drawCross(mouseInitPos);
 		}
 		else if (Math.abs(nodeInitPos.x - nodeCurrentPos.x) < options.guidelinesTolerance){
@@ -2547,7 +2563,7 @@ module.exports = function (opts, cy, $, debounce) {
 			}, {
 				"x" : mouseInitPos.x,
 				"y" : nodeCurrentPos.y
-			}, "blue");
+			}, options.guidelinesStyle.initPosAlignmentColor);
 			lines.drawCross(mouseInitPos);
 		}
 	}
@@ -2557,6 +2573,7 @@ module.exports = function (opts, cy, $, debounce) {
 		changeOptions: changeOptions,
 		lines: lines,
 		getTopMostNodes: getTopMostNodes,
+		getMousePos: getMousePos,
 	}
 
 };
@@ -2576,7 +2593,8 @@ module.exports = function (opts, cy, $, debounce) {
             discreteDrag: true, // Discrete Drag
             distributionGuidelines: true,
             geometricGuideline: true,
-	    centerToEdgeAlignment: false,
+			initPosAlignment: true,
+			centerToEdgeAlignment: false,
             //guidelines: true,// || geometricGuideline, // Guidelines on dragging nodes
             resize: true, // Adjust node sizes to cell sizes
             parentPadding: true, // Adjust parent sizes to cell sizes by padding
@@ -2601,10 +2619,11 @@ module.exports = function (opts, cy, $, debounce) {
             guidelinesStyle: { // Set ctx properties of line. Properties are here:
                 strokeStyle: "#8b7d6b",
                 lineDash: [3, 5],
-		geometricGuidelineRange: 400,
-		range: 100,
-		horizontalDistColor: "#ff0000", // color of horizontal distribution alignment
-		verticalDistColor: "#00ff00" // color of vertical distribution alignment
+				geometricGuidelineRange: 400,
+				range: 100,
+				horizontalDistColor: "#ff0000", // color of horizontal distribution alignment
+				verticalDistColor: "#00ff00", // color of vertical distribution alignment
+				initPosAlignmentColor: "#0000ff", // color of alignment to initial location
             },
 
             distancelinesTolerance: 20, // Horizontal tolerance for verticals and vertical tolerance for horizontals
