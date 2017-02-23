@@ -100,7 +100,9 @@ module.exports = function (opts, cy, $, debounce) {
 		HTree = RBTree();
 		// TODO: seperate initialization of nodeInitPos
 		// not necessary to init trees when geometric and distribution alignments are disabled
-		nodeInitPos = activeNodes.renderedPosition();
+		if (!nodeInitPos){
+			nodeInitPos = activeNodes.renderedPosition();
+		}
 		var nodes = cy.nodes();
 		excludedNodes = activeNodes.union(activeNodes.ancestors());
 		excludedNodes = excludedNodes.union(activeNodes.descendants());
@@ -729,10 +731,6 @@ module.exports = function (opts, cy, $, debounce) {
 	var getMousePos = function(e){
 		mouseInitPos = e.cyRenderedPosition;
 	}
-
-	//cy.on("tapstart", "node", function(e){
-	//	mouseInitPos = e.cyRenderedPosition;
-	//})
 
 	var mouseLine = function(node){
 		var nodeCurrentPos = node.renderedPosition();	
