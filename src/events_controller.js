@@ -120,6 +120,7 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 	};
 	var guidelinesPanHandler = function(e){
 		if (activeTopMostNodes){
+			guidelines.setMousePos(cy.pan());
 			guidelines.lines.init(activeTopMostNodes);
 		}
 	}

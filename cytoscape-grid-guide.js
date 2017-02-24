@@ -1714,6 +1714,7 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 	};
 	var guidelinesPanHandler = function(e){
 		if (activeTopMostNodes){
+			guidelines.setMousePos(cy.pan());
 			guidelines.lines.init(activeTopMostNodes);
 		}
 	}
@@ -1883,6 +1884,7 @@ module.exports = function (opts, cy, $, debounce) {
 	var nodeInitPos;
 	var excludedNodes;
 	var lines = {};
+	var panInitPos = {};
 
 	lines.getDims = function (node) {
 
@@ -1919,6 +1921,7 @@ module.exports = function (opts, cy, $, debounce) {
 		// TODO: seperate initialization of nodeInitPos
 		// not necessary to init trees when geometric and distribution alignments are disabled
 		if (!nodeInitPos){
+			panInitPos.x = cy.pan("x"); panInitPos.y = cy.pan("y");
 			nodeInitPos = activeNodes.renderedPosition();
 		}
 		var nodes = cy.nodes();
@@ -2546,31 +2549,48 @@ module.exports = function (opts, cy, $, debounce) {
 	}
 
 	var mouseInitPos = {};
+	var mouseRelativePos = {};
 	var getMousePos = function(e){
 		mouseInitPos = e.cyRenderedPosition;
+		mouseRelativePos.x = mouseInitPos.x;
+		mouseRelativePos.y = mouseInitPos.y;
 	}
-
+	var setMousePos = function(panCurrPos){
+		mouseRelativePos.x += (panCurrPos.x - panInitPos.x);
+		mouseRelativePos.y += (panCurrPos.y - panInitPos.y);
+		panInitPos.x = panCurrPos.x; panInitPos.y = panCurrPos.y;
+	};
 	var mouseLine = function(node){
 		var nodeCurrentPos = node.renderedPosition();	
 		if (Math.abs(nodeInitPos.y - nodeCurrentPos.y) < options.guidelinesTolerance){
 			lines.drawLine({
-				"x" : mouseInitPos.x,
+				"x" : mouseRelativePos.x,
 				"y" : mouseInitPos.y
 			}, {
 				"x" : nodeCurrentPos.x,
 				"y" : mouseInitPos.y
 			}, options.guidelinesStyle.initPosAlignmentColor);
-			lines.drawCross(mouseInitPos);
+			if (mouseInitPos.y == mouseRelativePos.y){
+				lines.drawCross(mouseRelativePos);
+			}
+			else{
+				lines.drawCross(mouseInitPos);
+			}
 		}
 		else if (Math.abs(nodeInitPos.x - nodeCurrentPos.x) < options.guidelinesTolerance){
 			lines.drawLine({
 				"x" : mouseInitPos.x,
-				"y" : mouseInitPos.y
+				"y" : mouseRelativePos.y
 			}, {
 				"x" : mouseInitPos.x,
 				"y" : nodeCurrentPos.y
 			}, options.guidelinesStyle.initPosAlignmentColor);
-			lines.drawCross(mouseInitPos);
+			if (mouseInitPos.x == mouseRelativePos.x){
+				lines.drawCross(mouseRelativePos);
+			}
+			else{
+				lines.drawCross(mouseInitPos);
+			}
 		}
 	}
 
@@ -2580,6 +2600,7 @@ module.exports = function (opts, cy, $, debounce) {
 		lines: lines,
 		getTopMostNodes: getTopMostNodes,
 		getMousePos: getMousePos,
+		setMousePos: setMousePos,
 	}
 
 };
