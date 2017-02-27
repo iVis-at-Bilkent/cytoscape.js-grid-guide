@@ -1703,6 +1703,7 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 		guidelines.lines.update(activeTopMostNodes);
 	};
 	var guidelinesFreeHandler = function(e){
+		guidelines.lines.snapToAlignmentLocation(activeTopMostNodes);
 		guidelines.lines.destroy();
 		activeTopMostNodes = null;
 	};
@@ -1885,6 +1886,7 @@ module.exports = function (opts, cy, $, debounce) {
 	var excludedNodes;
 	var lines = {};
 	var panInitPos = {};
+	var alignedLocations = {"h" : [], "v" : []};
 
 	lines.getDims = function (node) {
 
@@ -1958,6 +1960,7 @@ module.exports = function (opts, cy, $, debounce) {
 		HTree = null;
 		nodeInitPos = null;
 		mouseInitPos = {};
+		alignedLocations = {"h" : [], "v" : []};
 	};
 
 	lines.clear = clearDrawing;
@@ -2171,7 +2174,7 @@ module.exports = function (opts, cy, $, debounce) {
 	lines.searchForLine = function (type, node) {
 
 		// variables
-		var position, target, center, axis, otherAxis, Tree;
+		var position, target, center, axis, otherAxis, Tree, closestKey;
 		var dims = lines.getDims(node)[type];
 		var targetKey = Number.MAX_SAFE_INTEGER;
 
@@ -2180,10 +2183,12 @@ module.exports = function (opts, cy, $, debounce) {
 			Tree = HTree;
 			axis = "y";
 			otherAxis = "x";
+			alignedLocations.h = [];
 		} else{
 			Tree = VTree;
 			axis = "x";
 			otherAxis = "y";
+			alignedLocations.v = [];
 		}
 
 		center = node.renderedPosition(axis);
@@ -2200,6 +2205,7 @@ module.exports = function (opts, cy, $, debounce) {
 					if ( dif < targetKey && dif < options.guidelinesStyle.geometricGuidelineRange*cy.zoom()){
 						target = n;
 						targetKey = dif;
+						closestKey = exKey;
 					}
 					}
 				}
@@ -2209,9 +2215,11 @@ module.exports = function (opts, cy, $, debounce) {
 			// if alignment found, draw lines and break
 			if (target) {
 				targetKey = lines.getDims(node)[type][dimKey];
-
+				
 				// Draw horizontal or vertical alignment line
 				if (type == "horizontal") {
+					alignedLocations.h[0] = targetKey - closestKey;
+					console.log(targetKey + " " + target.renderedPosition(axis) + "w" + target.renderedWidth()/2.0);
 					lines.drawLine({
 						x: targetKey,
 						y: node.renderedPosition("y")
@@ -2220,6 +2228,7 @@ module.exports = function (opts, cy, $, debounce) {
 						y: target.renderedPosition("y")
 					}, options.guidelinesStyle.strokeStyle);
 				} else {
+					alignedLocations.v[0] = targetKey - closestKey;
 					lines.drawLine({
 						x: node.renderedPosition("x"),
 						y: targetKey
@@ -2592,6 +2601,19 @@ module.exports = function (opts, cy, $, debounce) {
 				lines.drawCross(mouseInitPos);
 			}
 		}
+	}
+
+	lines.snapToAlignmentLocation = function(activeNodes){
+		activeNodes.each(function (i, node){
+			var newPos = node.position();
+			if (alignedLocations.h[0]){
+				newPos.x -= alignedLocations.h[0];
+			}
+			if (alignedLocations.v[0]){
+				newPos.y -= alignedLocations.v[0];
+			};
+			node.position(newPos);
+		});
 	}
 
 

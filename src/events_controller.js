@@ -109,6 +109,7 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 		guidelines.lines.update(activeTopMostNodes);
 	};
 	var guidelinesFreeHandler = function(e){
+		guidelines.lines.snapToAlignmentLocation(activeTopMostNodes);
 		guidelines.lines.destroy();
 		activeTopMostNodes = null;
 	};
