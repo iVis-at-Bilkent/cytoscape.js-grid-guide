@@ -399,7 +399,6 @@ module.exports = function (opts, cy, $, debounce) {
 				// Draw horizontal or vertical alignment line
 				if (type == "horizontal") {
 					alignedLocations.h[0] = targetKey - closestKey;
-					console.log(targetKey + " " + target.renderedPosition(axis) + "w" + target.renderedWidth()/2.0);
 					lines.drawLine({
 						x: targetKey,
 						y: node.renderedPosition("y")
@@ -785,14 +784,14 @@ module.exports = function (opts, cy, $, debounce) {
 
 	lines.snapToAlignmentLocation = function(activeNodes){
 		activeNodes.each(function (i, node){
-			var newPos = node.position();
+			var newPos = node.renderedPosition();
 			if (alignedLocations.h[0]){
 				newPos.x -= alignedLocations.h[0];
 			}
 			if (alignedLocations.v[0]){
 				newPos.y -= alignedLocations.v[0];
 			};
-			node.position(newPos);
+			node.renderedPosition(newPos);
 		});
 	}
 
