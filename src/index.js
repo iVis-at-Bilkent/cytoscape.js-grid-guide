@@ -38,12 +38,15 @@
             guidelinesTolerance: 2.00, // Tolerance distance for rendered positions of nodes' interaction.
             guidelinesStyle: { // Set ctx properties of line. Properties are here:
                 strokeStyle: "#8b7d6b",
-                lineDash: [3, 5],
 				geometricGuidelineRange: 400,
 				range: 100,
 				horizontalDistColor: "#ff0000", // color of horizontal distribution alignment
 				verticalDistColor: "#00ff00", // color of vertical distribution alignment
 				initPosAlignmentColor: "#0000ff", // color of alignment to initial location
+                lineDash: [0, 0],
+				horizontalDistLine: [0, 0],
+				verticalDistLine: [0, 0],
+				initPosAlignmentLine: [0, 0],
             },
 
             distancelinesTolerance: 20, // Horizontal tolerance for verticals and vertical tolerance for horizontals

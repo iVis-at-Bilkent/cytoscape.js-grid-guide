@@ -1966,7 +1966,8 @@ module.exports = function (opts, cy, $, debounce) {
 	lines.clear = clearDrawing;
 
 
-	lines.drawLine = function (from, to, color) {
+	lines.drawLine = function (from, to, color, lineStyle) {
+		ctx.setLineDash(lineStyle);
 		ctx.beginPath();
 		ctx.moveTo(from.x, from.y);
 		ctx.lineTo(to.x, to.y);
@@ -2074,7 +2075,7 @@ module.exports = function (opts, cy, $, debounce) {
 			}, {
 				x: lines.getDims(rightNode)["horizontal"]["left"],
 				y: Ycenter
-			}, options.guidelinesStyle.horizontalDistColor);
+			}, options.guidelinesStyle.horizontalDistColor, options.guidelinesStyle.horizontalDistLine);
 
 			lines.drawLine({
 				x: lines.getDims(leftNode)["horizontal"]["right"],
@@ -2082,7 +2083,7 @@ module.exports = function (opts, cy, $, debounce) {
 			}, {
 				x: lines.getDims(leftNode)["horizontal"]["right"],
 				y: lines.getDims(leftNode)["vertical"]["center"]
-			}, options.guidelinesStyle.horizontalDistColor);
+			}, options.guidelinesStyle.horizontalDistColor, options.guidelinesStyle.horizontalDistLine);
 
 			lines.drawLine({
 				x: lines.getDims(rightNode)["horizontal"]["left"],
@@ -2090,7 +2091,7 @@ module.exports = function (opts, cy, $, debounce) {
 			}, {
 				x: lines.getDims(rightNode)["horizontal"]["left"],
 				y: lines.getDims(rightNode)["vertical"]["center"]
-			}, options.guidelinesStyle.horizontalDistColor);
+			}, options.guidelinesStyle.horizontalDistColor, options.guidelinesStyle.horizontalDistLine);
 		}
 		else{
 			var state = lines.horizontalDistributionNext(node,"left" );
@@ -2152,7 +2153,7 @@ module.exports = function (opts, cy, $, debounce) {
 			}, {
 				y: lines.getDims(aboveNode)["vertical"]["top"],
 				x: Xcenter
-			}, options.guidelinesStyle.verticalDistColor);
+			}, options.guidelinesStyle.verticalDistColor, options.guidelinesStyle.verticalDistLine);
 
 			lines.drawLine({
 				y: lines.getDims(belowNode)["vertical"]["bottom"],//renderedPosition("x"),
@@ -2160,7 +2161,7 @@ module.exports = function (opts, cy, $, debounce) {
 			}, {
 				y: lines.getDims(belowNode)["vertical"]["bottom"],
 				x: lines.getDims(belowNode)["horizontal"]["center"]
-			}, options.guidelinesStyle.verticalDistColor);
+			}, options.guidelinesStyle.verticalDistColor, options.guidelinesStyle.verticalDistLine);
 
 			lines.drawLine({
 				y: lines.getDims(aboveNode)["vertical"]["top"],//renderedPosition("x"),
@@ -2168,7 +2169,7 @@ module.exports = function (opts, cy, $, debounce) {
 			}, {
 				y: lines.getDims(aboveNode)["vertical"]["top"],
 				x: lines.getDims(aboveNode)["horizontal"]["center"]
-			}, options.guidelinesStyle.verticalDistColor);
+			}, options.guidelinesStyle.verticalDistColor, options.guidelinesStyle.verticalDistLine);
 		}
 		else{
 			var state = lines.verticalDistributionNext(node,"below" );
@@ -2239,7 +2240,7 @@ module.exports = function (opts, cy, $, debounce) {
 					}, {
 						x: targetKey,
 						y: target.renderedPosition("y")
-					}, options.guidelinesStyle.strokeStyle);
+					}, options.guidelinesStyle.strokeStyle, options.guidelinesStyle.lineDash);
 				} else {
 					alignedLocations.v = targetKey - closestKey;
 					lines.drawLine({
@@ -2248,7 +2249,7 @@ module.exports = function (opts, cy, $, debounce) {
 					}, {
 						x: target.renderedPosition("x"),
 						y: targetKey
-					}, options.guidelinesStyle.strokeStyle);
+					}, options.guidelinesStyle.strokeStyle, options.guidelinesStyle.lineDash);
 				}
 
 				break;
@@ -2328,7 +2329,7 @@ module.exports = function (opts, cy, $, debounce) {
 		}, {
 			x: lines.getDims(node)["horizontal"][side],
 			y: Ycenter
-		}, options.guidelinesStyle.horizontalDistColor);
+		}, options.guidelinesStyle.horizontalDistColor, options.guidelinesStyle.horizontalDistLine);
 
 		lines.drawLine({
 			x: lines.getDims(node)["horizontal"][side],
@@ -2336,7 +2337,7 @@ module.exports = function (opts, cy, $, debounce) {
 		}, {
 			x: lines.getDims(node)["horizontal"][side],
 			y: lines.getDims(leftNode)["vertical"]["center"]
-		}, options.guidelinesStyle.horizontalDistColor);
+		}, options.guidelinesStyle.horizontalDistColor, options.guidelinesStyle.horizontalDistLine);
 
 		lines.drawLine({
 			x: lines.getDims(rightNode)["horizontal"][otherSide],
@@ -2344,14 +2345,14 @@ module.exports = function (opts, cy, $, debounce) {
 		}, {
 			x: lines.getDims(leftNode)["horizontal"][side],
 			y: Ycenter
-		}, options.guidelinesStyle.horizontalDistColor);
+		}, options.guidelinesStyle.horizontalDistColor, options.guidelinesStyle.horizontalDistLine);
 		lines.drawLine({
 			x: lines.getDims(rightNode)["horizontal"][otherSide],
 			y: Ycenter
 		}, {
 			x: lines.getDims(rightNode)["horizontal"][otherSide],
 			y: lines.getDims(rightNode)["vertical"]["center"]
-		}, options.guidelinesStyle.horizontalDistColor);
+		}, options.guidelinesStyle.horizontalDistColor, options.guidelinesStyle.horizontalDistLine);
 
 		lines.drawLine({
 			x: lines.getDims(leftNode)["horizontal"][otherSide],
@@ -2359,7 +2360,7 @@ module.exports = function (opts, cy, $, debounce) {
 		}, {
 			x: lines.getDims(leftNode)["horizontal"][otherSide],
 			y: lines.getDims(leftNode)["vertical"]["center"]
-		}, options.guidelinesStyle.horizontalDistColor);
+		}, options.guidelinesStyle.horizontalDistColor, options.guidelinesStyle.horizontalDistLine);
 
 		lines.drawLine({
 			x: lines.getDims(leftNode)["horizontal"][side],
@@ -2367,7 +2368,7 @@ module.exports = function (opts, cy, $, debounce) {
 		}, {
 			x: lines.getDims(leftNode)["horizontal"][side],
 			y: lines.getDims(leftNode)["vertical"]["center"]
-		}, options.guidelinesStyle.horizontalDistColor);
+		}, options.guidelinesStyle.horizontalDistColor, options.guidelinesStyle.horizontalDistLine);
 
 		lines.drawLine({
 			x: lines.getDims(leftNode)["horizontal"][side],
@@ -2375,7 +2376,7 @@ module.exports = function (opts, cy, $, debounce) {
 		}, {
 			x: lines.getDims(leftNode)["horizontal"][side],
 			y: lines.getDims(leftNode)["vertical"]["center"]
-		}, options.guidelinesStyle.horizontalDistColor);
+		}, options.guidelinesStyle.horizontalDistColor, options.guidelinesStyle.horizontalDistLine);
 
 
 		lines.drawArrow({
@@ -2461,7 +2462,7 @@ module.exports = function (opts, cy, $, debounce) {
 		}, {
 			x: Xcenter,
 			y: lines.getDims(belowNode)["vertical"][otherSide]
-		}, options.guidelinesStyle.verticalDistColor);
+		}, options.guidelinesStyle.verticalDistColor, options.guidelinesStyle.verticalDistLine);
 
 		lines.drawLine({
 			x: Xcenter,
@@ -2469,7 +2470,7 @@ module.exports = function (opts, cy, $, debounce) {
 		}, {
 			x: Xcenter,
 			y: lines.getDims(aboveNode)["vertical"][otherSide]
-		}, options.guidelinesStyle.verticalDistColor);
+		}, options.guidelinesStyle.verticalDistColor, options.guidelinesStyle.verticalDistLine);
 
 
 		lines.drawLine({
@@ -2478,7 +2479,7 @@ module.exports = function (opts, cy, $, debounce) {
 		}, {
 			x: Xcenter,
 			y: nodeDim["vertical"][side]
-		}, options.guidelinesStyle.verticalDistColor);
+		}, options.guidelinesStyle.verticalDistColor, options.guidelinesStyle.verticalDistLine);
 
 
 		lines.drawLine({
@@ -2487,7 +2488,7 @@ module.exports = function (opts, cy, $, debounce) {
 		}, {
 			x: Xcenter,
 			y: lines.getDims(belowNode)["vertical"][otherSide]
-		}, options.guidelinesStyle.verticalDistColor);
+		}, options.guidelinesStyle.verticalDistColor, options.guidelinesStyle.verticalDistLine);
 
 
 		lines.drawLine({
@@ -2496,7 +2497,7 @@ module.exports = function (opts, cy, $, debounce) {
 		}, {
 			x: Xcenter,
 			y: lines.getDims(belowNode)["vertical"][side]
-		}, options.guidelinesStyle.verticalDistColor);
+		}, options.guidelinesStyle.verticalDistColor, options.guidelinesStyle.verticalDistLine);
 
 
 		lines.drawLine({
@@ -2505,7 +2506,7 @@ module.exports = function (opts, cy, $, debounce) {
 		}, {
 			x: lines.getDims(aboveNode)["horizontal"]["center"],
 			y: lines.getDims(aboveNode)["vertical"][otherSide]
-		}, options.guidelinesStyle.verticalDistColor);
+		}, options.guidelinesStyle.verticalDistColor, options.guidelinesStyle.verticalDistLine);
 
 		lines.drawArrow({
 			x: Xcenter,
@@ -2591,7 +2592,7 @@ module.exports = function (opts, cy, $, debounce) {
 			}, {
 				"x" : nodeCurrentPos.x,
 				"y" : mouseInitPos.y
-			}, options.guidelinesStyle.initPosAlignmentColor);
+			}, options.guidelinesStyle.initPosAlignmentColor, options.guidelinesStyle.initPosAlignmentLine);
 			if (mouseInitPos.y == mouseRelativePos.y){
 				lines.drawCross(mouseRelativePos);
 			}
@@ -2606,7 +2607,7 @@ module.exports = function (opts, cy, $, debounce) {
 			}, {
 				"x" : mouseInitPos.x,
 				"y" : nodeCurrentPos.y
-			}, options.guidelinesStyle.initPosAlignmentColor);
+			}, options.guidelinesStyle.initPosAlignmentColor, options.guidelinesStyle.initPosAlignmentLine);
 			if (mouseInitPos.x == mouseRelativePos.x){
 				lines.drawCross(mouseRelativePos);
 			}
@@ -2689,6 +2690,9 @@ module.exports = function (opts, cy, $, debounce) {
 				horizontalDistColor: "#ff0000", // color of horizontal distribution alignment
 				verticalDistColor: "#00ff00", // color of vertical distribution alignment
 				initPosAlignmentColor: "#0000ff", // color of alignment to initial location
+				horizontalDistLine: [3, 5],
+				verticalDistLine: [3, 5],
+				initPosAlignmentLine: [0, 0],
             },
 
             distancelinesTolerance: 20, // Horizontal tolerance for verticals and vertical tolerance for horizontals
