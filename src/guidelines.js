@@ -240,6 +240,14 @@ module.exports = function (opts, cy, $, debounce) {
 
 		// Draw the lines
 		if (leftNode){
+			alignedLocations.hd = Xcenter - (lines.getDims(rightNode)["horizontal"]["left"] + lines.getDims(leftNode)["horizontal"]["right"]) / 2.0;
+			if (alignedLocations.h && Math.abs(alignedLocations.h) > Math.abs(alignedLocations.hd)){
+				alignedLocations.h = alignedLocations.hd;
+			}
+			else if (!alignedLocations.h){
+				alignedLocations.h = alignedLocations.hd;
+			}
+			
 			lines.drawLine({
 				x: lines.getDims(leftNode)["horizontal"]["right"],
 				y: Ycenter
@@ -284,7 +292,6 @@ module.exports = function (opts, cy, $, debounce) {
 		var nodeDim = lines.getDims(node);
 		var Xcenter = nodeDim["horizontal"]["center"];
 		var Ycenter = nodeDim["vertical"]["center"];
-
 		// Find nodes in range and check if they align
 		VTree.forEach(function(key, nodes){
 
@@ -312,6 +319,13 @@ module.exports = function (opts, cy, $, debounce) {
 
 
 		if (belowNode){
+			alignedLocations.vd = Ycenter - (lines.getDims(belowNode)["vertical"]["bottom"] + lines.getDims(aboveNode)["vertical"]["top"]) / 2.0;
+			if (alignedLocations.v && Math.abs(alignedLocations.v) > Math.abs(alignedLocations.vd)){
+				alignedLocations.v = alignedLocations.vd;
+			}
+			else if (!alignedLocations.v){
+				alignedLocations.v = alignedLocations.vd;
+			}
 			lines.drawLine({
 				y: lines.getDims(belowNode)["vertical"]["bottom"],//renderedPosition("x"),
 				x: Xcenter
@@ -363,12 +377,12 @@ module.exports = function (opts, cy, $, debounce) {
 			Tree = HTree;
 			axis = "y";
 			otherAxis = "x";
-			alignedLocations.h = [];
+			alignedLocations.h = null;
 		} else{
 			Tree = VTree;
 			axis = "x";
 			otherAxis = "y";
-			alignedLocations.v = [];
+			alignedLocations.v = null;
 		}
 
 		center = node.renderedPosition(axis);
@@ -398,7 +412,7 @@ module.exports = function (opts, cy, $, debounce) {
 				
 				// Draw horizontal or vertical alignment line
 				if (type == "horizontal") {
-					alignedLocations.h[0] = targetKey - closestKey;
+					alignedLocations.h = targetKey - closestKey;
 					lines.drawLine({
 						x: targetKey,
 						y: node.renderedPosition("y")
@@ -407,7 +421,7 @@ module.exports = function (opts, cy, $, debounce) {
 						y: target.renderedPosition("y")
 					}, options.guidelinesStyle.strokeStyle);
 				} else {
-					alignedLocations.v[0] = targetKey - closestKey;
+					alignedLocations.v = targetKey - closestKey;
 					lines.drawLine({
 						x: node.renderedPosition("x"),
 						y: targetKey
@@ -783,16 +797,18 @@ module.exports = function (opts, cy, $, debounce) {
 	}
 
 	lines.snapToAlignmentLocation = function(activeNodes){
-		activeNodes.each(function (i, node){
-			var newPos = node.renderedPosition();
-			if (alignedLocations.h[0]){
-				newPos.x -= alignedLocations.h[0];
-			}
-			if (alignedLocations.v[0]){
-				newPos.y -= alignedLocations.v[0];
-			};
-			node.renderedPosition(newPos);
-		});
+		if (options.snapToAlignmentLocation){
+			activeNodes.each(function (i, node){
+				var newPos = node.renderedPosition();
+				if (alignedLocations.h){
+					newPos.x -= alignedLocations.h;
+				}
+				if (alignedLocations.v){
+					newPos.y -= alignedLocations.v;
+				};
+				node.renderedPosition(newPos);
+			});
+		}
 	}
 
 

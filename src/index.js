@@ -14,6 +14,7 @@
             geometricGuideline: true,
 			initPosAlignment: true,
 			centerToEdgeAlignment: false,
+			snapToAlignmentLocation: true,
             //guidelines: true,// || geometricGuideline, // Guidelines on dragging nodes
             resize: true, // Adjust node sizes to cell sizes
             parentPadding: true, // Adjust parent sizes to cell sizes by padding
