@@ -13,59 +13,69 @@ Framework for grid interactions. Provides discrete dragging, grid background, gr
  * `cy.gridGuide(options)` Sets stated options any time wanted.
  
  * `eles.align(horizontal, vertical, alignTo)` Aligns vertically/horizontally dimensions of eles to first element of eles
- ( or if alignTo is specified aligns to it). `horizontal` param may get `top`, `center`, `bottom` and `vertical` param may get `left`, `center`, `right` and `horizontal.
+ ( or if alignTo is specified aligns to it). `horizontal` param may get `top`, `center`, `bottom` and `vertical` param may get `left`, `center`, `right` and `horizontal`.
  
  For example the code below aligns selected nodes to top left of first selected node.
 ```js
-      cy.nodes(":selected").align("top", "left")
+cy.nodes(":selected").align("top", "left")
 ```
  
 # Default Undo/Redo Actions
 ```js
-      ur.do("align", {
-          nodes: cy.nodes(":selected"),
-          vertical: "left",
-          horizontal: "top",
-          alignTo: cy.nodes(":selected")[0],
-       })
+ur.do("align", {
+    nodes: cy.nodes(":selected"),
+    vertical: "left",
+    horizontal: "top",
+    alignTo: cy.nodes(":selected")[0],
+})
 ```
  
  
 ## Default Options
 ```js
-        var options = {
-            // On/Off Modules
-            snapToGrid: true, // Snap to grid functionality
-            discreteDrag: true, // Discrete Drag
-            guidelines: true, // Guidelines on dragging nodes
-            resize: true, // Adjust node sizes to cell sizes
-            parentPadding: true, // Adjust parent sizes to cell sizes by padding
-            drawGrid: true, // Draw grid background
+var options = {
+    // On/Off Modules
+    snapToGrid: true, // Snap to grid functionality
+    discreteDrag: true, // Discrete Drag
+    distributionGuidelines: true, // Distribution guidelines
+    geometricGuideline: true, // Geometric guidelines
+    initPosAlignment: true, // Guideline to initial mouse position
+    centerToEdgeAlignment: false, // Center to edge alignment
+    snapToAlignmentLocation: true, // Snap to alignment location
+    //guidelines: true,// || geometricGuideline, // Guidelines on dragging nodes
+    resize: true, // Adjust node sizes to cell sizes
+    parentPadding: true, // Adjust parent sizes to cell sizes by padding
+    drawGrid: true, // Draw grid background
 
-            // Other settings
+    // General
+    gridSpacing: 20, // Distance between the lines of the grid.
 
-            // General
-            gridSpacing: 20, // Distance between the lines of the grid.
+    // Draw Grid
+    zoomDash: true, // Determines whether the size of the dashes should change when the drawing is zoomed in and out if grid is drawn.
+    panGrid: true, // Determines whether the grid should move then the user moves the graph if grid is drawn.
+    gridStackOrder: -1, // Namely z-index
+    strokeStyle: '#dedede', // Color of grid lines
+    lineWidth: 1.0, // Width of grid lines
 
-            // Draw Grid
-            zoomDash: true, // Determines whether the size of the dashes should change when the drawing is zoomed in and out if grid is drawn.
-            panGrid: true, // Determines whether the grid should move then the user moves the graph if grid is drawn.
-            gridStackOrder: -1, // Namely z-index
-            strokeStyle: '#dedede', // Color of grid lines
-            lineWidth: 1.0, // Width of grid lines
-            lineDash: [2.5, 4], // Defines style of dash. Read: https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/setLineDash
+    // Guidelines
+    guidelinesStackOrder: 4, // z-index of guidelines
+    guidelinesTolerance: 2.00, // Tolerance distance for rendered positions of nodes' interaction.
+    guidelinesStyle: { // Set ctx properties of line. Properties are here:
+        strokeStyle: "#8b7d6b", // color of geometric guidelines
+        geometricGuidelineRange: 400, // range of geometric guidelines
+        range: 100, // range of distribution guidelines
+        horizontalDistColor: "#ff0000", // color of horizontal distribution alignment
+        verticalDistColor: "#00ff00", // color of vertical distribution alignment
+        initPosAlignmentColor: "#0000ff", // color of alignment to initial mouse location
+        lineDash: [0, 0], // line style of geometric guidelines
+        horizontalDistLine: [0, 0], // line style of horizontal distribıtion guidelines
+        verticalDistLine: [0, 0], // line style of vertical distribıtion guidelines
+        initPosAlignmentLine: [0, 0], // line style of alignment to initial mouse position
+    },
 
-            // Guidelines
-            guidelinesStackOrder: 4, // z-index of guidelines
-            guidelinesTolerance: 2.00, // Tolerance distance for rendered positions of nodes' interaction.
-            guidelinesStyle: { // Set ctx properties of line. Properties are here:
-                strokeStyle: "#8b7d6b",
-                lineDash: [3, 5] // read https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/setLineDash
-            },
-
-            // Parent Padding
-            parentSpacing: -1 // -1 to set paddings of parents to gridSpacing
-        };
+    // Parent Padding
+    parentSpacing: -1 // -1 to set paddings of parents to gridSpacing
+};
 ```
 
 ## Dependencies
@@ -94,7 +104,7 @@ grid-guide( cytoscape, jquery ); // register extension
 AMD:
 ```js
 require(['cytoscape', 'cytoscape-grid-guide'], function( cytoscape, grid-guide ){
-  grid-guide( cytoscape ); // register extension
+    grid-guide( cytoscape ); // register extension
 });
 ```
 
