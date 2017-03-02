@@ -4,8 +4,24 @@ cytoscape-grid-guide
 
 ## Description
 
-Framework for grid interactions. Provides discrete dragging, grid background, gridlines on dragging, resizing nodes 
-& compounds to fit cells.
+A sophisticated Cytoscape.js extension for grid interactions which provides the following features:
+- discrete dragging
+- grid background
+- snap to grid
+- snap to alignment location
+- different types of guidelines on dragging
+ - guideline to initial mouse position
+ - geometric guidelines
+   - horizontal and vertical guidelines
+ - distribution guidelines
+   - horizontal and vertical guidelines
+- auto resizing nodes 
+
+The following options are customisable:
+- grid size
+- guideline tolerance
+- colors and line styles of each type of guidelines
+- range of geometric and distribution guidelines
 
 
 ## API
@@ -42,7 +58,6 @@ var options = {
     initPosAlignment: true, // Guideline to initial mouse position
     centerToEdgeAlignment: false, // Center to edge alignment
     snapToAlignmentLocation: true, // Snap to alignment location
-    //guidelines: true,// || geometricGuideline, // Guidelines on dragging nodes
     resize: true, // Adjust node sizes to cell sizes
     parentPadding: true, // Adjust parent sizes to cell sizes by padding
     drawGrid: true, // Draw grid background
@@ -118,7 +133,6 @@ This project is set up to automatically be published to npm and bower.  To publi
 1. Set the version number environment variable: `export VERSION=1.2.3`
 1. Publish: `gulp publish`
 1. If publishing to bower for the first time, you'll need to run `bower register cytoscape-grid-guide https://github.com/iVis-at-Bilkent/cytoscape.js-grid-guide.git`
-
 
 ## Team
 
