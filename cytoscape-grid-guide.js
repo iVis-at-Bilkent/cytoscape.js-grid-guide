@@ -1978,15 +1978,16 @@ module.exports = function (opts, cy, $, debounce) {
 	lines.drawArrow = function(position, type){
 		if (type == "right"){
 			// right arrow
+			ctx.setLineDash([0, 0]);	
 			ctx.beginPath();
 			ctx.moveTo(position.x-5, position.y-5);
 			ctx.lineTo(position.x, position.y);
 			ctx.lineTo(position.x-5, position.y+5);
-			//ctx.strokeStyle = "red";
 			ctx.stroke();
 		}
 		else if (type == "left"){
 			// left arrow
+			ctx.setLineDash([0, 0]);	
 			ctx.beginPath();
 			ctx.moveTo(position.x+5, position.y-5);
 			ctx.lineTo(position.x, position.y);
@@ -1995,6 +1996,7 @@ module.exports = function (opts, cy, $, debounce) {
 		}
 		else if (type == "top"){
 			// up arrow
+			ctx.setLineDash([0, 0]);	
 			ctx.beginPath();
 			ctx.moveTo(position.x-5, position.y+5);
 			ctx.lineTo(position.x, position.y);
@@ -2003,6 +2005,7 @@ module.exports = function (opts, cy, $, debounce) {
 		}
 		else if (type == "bottom"){
 			// down arrow
+			ctx.setLineDash([0, 0]);	
 			ctx.beginPath();
 			ctx.moveTo(position.x-5, position.y-5);
 			ctx.lineTo(position.x, position.y);
@@ -2013,12 +2016,12 @@ module.exports = function (opts, cy, $, debounce) {
 	}
 
 	lines.drawCross = function(position){
+		ctx.setLineDash([0, 0]);	
 		ctx.beginPath();
 		ctx.moveTo(position.x - 5, position.y + 5);
 		ctx.lineTo(position.x + 5, position.y - 5);
 		ctx.moveTo(position.x - 5, position.y - 5);
 		ctx.lineTo(position.x + 5, position.y + 5);
-		ctx.strokeStyle = options.guidelinesStyle.initPosAlignmentColor;
 		ctx.stroke();
 	};
 
@@ -2684,14 +2687,14 @@ module.exports = function (opts, cy, $, debounce) {
             guidelinesTolerance: 2.00, // Tolerance distance for rendered positions of nodes' interaction.
             guidelinesStyle: { // Set ctx properties of line. Properties are here:
                 strokeStyle: "#8b7d6b",
-                lineDash: [3, 5],
 				geometricGuidelineRange: 400,
 				range: 100,
 				horizontalDistColor: "#ff0000", // color of horizontal distribution alignment
 				verticalDistColor: "#00ff00", // color of vertical distribution alignment
 				initPosAlignmentColor: "#0000ff", // color of alignment to initial location
-				horizontalDistLine: [3, 5],
-				verticalDistLine: [3, 5],
+                lineDash: [0, 0],
+				horizontalDistLine: [0, 0],
+				verticalDistLine: [0, 0],
 				initPosAlignmentLine: [0, 0],
             },
 

@@ -158,15 +158,16 @@ module.exports = function (opts, cy, $, debounce) {
 	lines.drawArrow = function(position, type){
 		if (type == "right"){
 			// right arrow
+			ctx.setLineDash([0, 0]);	
 			ctx.beginPath();
 			ctx.moveTo(position.x-5, position.y-5);
 			ctx.lineTo(position.x, position.y);
 			ctx.lineTo(position.x-5, position.y+5);
-			//ctx.strokeStyle = "red";
 			ctx.stroke();
 		}
 		else if (type == "left"){
 			// left arrow
+			ctx.setLineDash([0, 0]);	
 			ctx.beginPath();
 			ctx.moveTo(position.x+5, position.y-5);
 			ctx.lineTo(position.x, position.y);
@@ -175,6 +176,7 @@ module.exports = function (opts, cy, $, debounce) {
 		}
 		else if (type == "top"){
 			// up arrow
+			ctx.setLineDash([0, 0]);	
 			ctx.beginPath();
 			ctx.moveTo(position.x-5, position.y+5);
 			ctx.lineTo(position.x, position.y);
@@ -183,6 +185,7 @@ module.exports = function (opts, cy, $, debounce) {
 		}
 		else if (type == "bottom"){
 			// down arrow
+			ctx.setLineDash([0, 0]);	
 			ctx.beginPath();
 			ctx.moveTo(position.x-5, position.y-5);
 			ctx.lineTo(position.x, position.y);
@@ -193,12 +196,12 @@ module.exports = function (opts, cy, $, debounce) {
 	}
 
 	lines.drawCross = function(position){
+		ctx.setLineDash([0, 0]);	
 		ctx.beginPath();
 		ctx.moveTo(position.x - 5, position.y + 5);
 		ctx.lineTo(position.x + 5, position.y - 5);
 		ctx.moveTo(position.x - 5, position.y - 5);
 		ctx.lineTo(position.x + 5, position.y + 5);
-		ctx.strokeStyle = options.guidelinesStyle.initPosAlignmentColor;
 		ctx.stroke();
 	};
 
