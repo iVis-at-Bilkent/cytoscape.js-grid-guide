@@ -1721,6 +1721,7 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 	}
 	function setGuidelines(enable) {
 		if (enable){
+			guidelines.resizeCanvas();
 			cy.on("tapstart", "node", guidelinesTapHandler);
 			cy.on("grab", guidelinesGrabHandler);
 			cy.on("pan", guidelinesPanHandler);
@@ -2642,6 +2643,7 @@ module.exports = function (opts, cy, $, debounce) {
 		getTopMostNodes: getTopMostNodes,
 		getMousePos: getMousePos,
 		setMousePos: setMousePos,
+		resizeCanvas: resizeCanvas,
 	}
 
 };

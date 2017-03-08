@@ -822,6 +822,7 @@ module.exports = function (opts, cy, $, debounce) {
 		getTopMostNodes: getTopMostNodes,
 		getMousePos: getMousePos,
 		setMousePos: setMousePos,
+		resizeCanvas: resizeCanvas,
 	}
 
 };
