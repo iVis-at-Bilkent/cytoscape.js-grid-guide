@@ -3,6 +3,8 @@ cytoscape-grid-guide
 
 ## Description
 
+<img src="guideline-example.png" width="300">
+
 A sophisticated Cytoscape.js extension for grid and guideline interactions. providing the following features:
 
 - **Grid**: Shows a grid in the canvas (with specified size).
