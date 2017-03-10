@@ -2660,15 +2660,15 @@ module.exports = function (opts, cy, $, debounce) {
         var options = {
             // On/Off Modules
             snapToGrid: true, // Snap to grid functionality
-            discreteDrag: true, // Discrete Drag
-            distributionGuidelines: true,
-            geometricGuideline: true,
-			initPosAlignment: true,
+            discreteDrag: false, // Discrete Drag
+            distributionGuidelines: false,
+            geometricGuideline: false,
+			initPosAlignment: false,
 			centerToEdgeAlignment: false,
-			snapToAlignmentLocation: true,
+			snapToAlignmentLocation: false,
             //guidelines: true,// || geometricGuideline, // Guidelines on dragging nodes
-            resize: true, // Adjust node sizes to cell sizes
-            parentPadding: true, // Adjust parent sizes to cell sizes by padding
+            resize: false, // Adjust node sizes to cell sizes
+            parentPadding: false, // Adjust parent sizes to cell sizes by padding
             drawGrid: true, // Draw grid background
 
             // Other settings
@@ -2678,7 +2678,7 @@ module.exports = function (opts, cy, $, debounce) {
 
             // Draw Grid
             zoomDash: true, // Determines whether the size of the dashes should change when the drawing is zoomed in and out if grid is drawn.
-            panGrid: true, // Determines whether the grid should move then the user moves the graph if grid is drawn.
+            panGrid: false, // Determines whether the grid should move then the user moves the graph if grid is drawn.
             gridStackOrder: -1, // Namely z-index
             strokeStyle: '#dedede', // Color of grid lines
             lineWidth: 1.0, // Width of grid lines
