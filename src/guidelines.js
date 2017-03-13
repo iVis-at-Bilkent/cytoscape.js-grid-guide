@@ -488,8 +488,15 @@ module.exports = function (opts, cy, $, debounce) {
 		}, lowerBound, lowerBound + options.guidelinesStyle.range*cy.zoom());
 
 		// Draw the lines
-		if (leftNode)
-		{
+		if (leftNode){
+			alignedLocations.hd =(lines.getDims(node)["horizontal"][side] - lines.getDims(leftNode)["horizontal"][otherSide]) - (lines.getDims(leftNode)["horizontal"][side] - lines.getDims(rightNode)["horizontal"][otherSide]);
+			if (alignedLocations.h && Math.abs(alignedLocations.h) > Math.abs(alignedLocations.hd)){
+				alignedLocations.h = alignedLocations.hd;
+			}
+			else if (!alignedLocations.h){
+				alignedLocations.h = alignedLocations.hd;
+			}
+			
 			lines.drawDH(node, leftNode, rightNode, type);
 			return true;
 		}
@@ -625,6 +632,13 @@ module.exports = function (opts, cy, $, debounce) {
 		}, lowerBound, lowerBound+options.guidelinesStyle.range*cy.zoom());
 
 		if (belowNode){
+			alignedLocations.vd =(lines.getDims(node)["vertical"][side] - lines.getDims(belowNode)["vertical"][otherSide]) - (lines.getDims(belowNode)["vertical"][side] - lines.getDims(aboveNode)["vertical"][otherSide]);
+			if (alignedLocations.v && Math.abs(alignedLocations.v) > Math.abs(alignedLocations.vd)){
+				alignedLocations.v = alignedLocations.vd;
+			}
+			else if (!alignedLocations.v){
+				alignedLocations.v = alignedLocations.vd;
+			}
 			lines.drawDV(node, belowNode, aboveNode, type);
 			return true;
 		}
