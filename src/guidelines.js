@@ -22,6 +22,7 @@ module.exports = function (opts, cy, $, debounce) {
 		return sc;
 	};
 
+	/* Resize canvas */
 	var resizeCanvas = debounce(function () {
 		clearDrawing();
 		$canvas
@@ -47,19 +48,21 @@ module.exports = function (opts, cy, $, debounce) {
 		}, 0);
 	}, 250);
 
+	/* Clear canvas */
 	var clearDrawing = function () {
 		var width = $container.width();
 		var height = $container.height();
-
 		ctx.clearRect(0, 0, width, height);
 	};
 
+	/* Create a canvas */
 	var $canvas = $('<canvas></canvas>');
 	var $container = $(cy.container());
 	var ctx = $canvas[0].getContext('2d');
 	$container.append($canvas);
 	resizeCanvas();
 
+	/* Global variables */
 	var VTree = null;
 	var HTree = null;
 	var nodeInitPos;
@@ -68,8 +71,12 @@ module.exports = function (opts, cy, $, debounce) {
 	var panInitPos = {};
 	var alignedLocations = {"h" : null, "v" : null};
 
+	/**
+	 * Get positions of sides of a node
+	 * @param node : a node
+	 * @return : object of positions
+	 */ 
 	lines.getDims = function (node) {
-
 		var pos = node.renderedPosition();
 		var width = node.renderedWidth();
 		var height = node.renderedHeight();
@@ -80,32 +87,35 @@ module.exports = function (opts, cy, $, debounce) {
 			bottom: Number(node.renderedStyle("padding-bottom").replace("px", ""))
 		};
 
-		// v for vertical, h for horizontal
 		return {
 			horizontal: {
 				center: (pos.x),
 				left: Math.round(pos.x - (padding.left + width / 2)),
 				right: Math.round(pos.x + (padding.right + width / 2))
 			},
-				vertical: {
+			vertical: {
 				center: (pos.y),
 				top: Math.round(pos.y - (padding.top + height / 2)),
 				bottom: Math.round(pos.y + (padding.bottom + height / 2))
 			}
 		};
-
 	};
 
-
+	/**
+	 * Initialize trees and initial position of node
+	 * @param activeNodes : top most active nodes
+	 */
 	lines.init = function (activeNodes) {
 		VTree = RBTree();
 		HTree = RBTree();
 		// TODO: seperate initialization of nodeInitPos
-		// not necessary to init trees when geometric and distribution alignments are disabled
+		// not necessary to init trees when geometric and distribution alignments are disabled,
+		// but reference guideline is enables
 		if (!nodeInitPos){
 			panInitPos.x = cy.pan("x"); panInitPos.y = cy.pan("y");
 			nodeInitPos = activeNodes.renderedPosition();
 		}
+
 		var nodes = cy.nodes();
 		excludedNodes = activeNodes.union(activeNodes.ancestors());
 		excludedNodes = excludedNodes.union(activeNodes.descendants());
@@ -118,26 +128,24 @@ module.exports = function (opts, cy, $, debounce) {
 				HTree.get(hKey).push(node);
 				else
 				HTree = HTree.insert(hKey, [node]);
-
 			});
+
 			["top", "center", "bottom"].forEach(function (val) {
 				var vKey = dims.vertical[val];
 				if (VTree.get(vKey))
 				VTree.get(vKey).push(node);
 				else
 				VTree = VTree.insert(vKey, [node]);
-
 			});
 
 		});
 		lines.update(activeNodes);
-
 	};
 
+	/* Destroy gobal variables */
 	lines.destroy = function () {
 		lines.clear();
-		VTree = null;
-		HTree = null;
+		VTree = null; HTree = null;
 		nodeInitPos = null;
 		mouseInitPos = {};
 		alignedLocations = {"h" : null, "v" : null};
@@ -145,7 +153,13 @@ module.exports = function (opts, cy, $, debounce) {
 
 	lines.clear = clearDrawing;
 
-
+	/**
+	 * Draw straight line
+	 * @param from : initial position
+	 * @param to : final position
+	 * @param color : color of the line
+	 * @param lineStyle : whether line is solid or dashed
+	 */
 	lines.drawLine = function (from, to, color, lineStyle) {
 		ctx.setLineDash(lineStyle);
 		ctx.beginPath();
@@ -155,6 +169,11 @@ module.exports = function (opts, cy, $, debounce) {
 		ctx.stroke();
 	};
 
+	/**
+	 * Draw an arrow
+	 * @param position : position of the arrow
+	 * @param type : type/directşon of the arrow
+	 */
 	lines.drawArrow = function(position, type){
 		if (type == "right"){
 			// right arrow
@@ -195,6 +214,10 @@ module.exports = function (opts, cy, $, debounce) {
 
 	}
 
+	/**
+	 * Draw a cross - x
+	 * @param position : position of the cross
+	 */
 	lines.drawCross = function(position){
 		ctx.setLineDash([0, 0]);	
 		ctx.beginPath();
