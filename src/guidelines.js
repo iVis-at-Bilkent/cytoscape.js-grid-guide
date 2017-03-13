@@ -471,16 +471,17 @@ module.exports = function (opts, cy, $, debounce) {
 					if ((leftDim["horizontal"][otherSide]) == key && 
 						compare[type](leftDim["horizontal"][otherSide], nodeDim["horizontal"][side])){
 							var ll = leftDim["horizontal"][side]-(nodeDim["horizontal"][side] - key);
-							rightNodes = HTree.get(ll);
-							if (rightNodes){
+							HTree.forEach(function($, rightNodes){
+							//if (rightNodes){
 								for (right of rightNodes){
 									if (Math.abs(lines.getDims(right)["vertical"]["center"] - Ycenter) < options.guidelinesStyle.range*cy.zoom()){
-										if (ll == lines.getDims(right)["horizontal"][otherSide]){
+										if (Math.abs(ll - lines.getDims(right)["horizontal"][otherSide]) < 2*options.guidelinesTolerance){
 											leftNode = left; rightNode = right;
 										}
 									}
 								}
-							}
+							//}
+							}, ll - options.guidelinesTolerance, ll + options.guidelinesTolerance);
 						}
 				}
 			}
@@ -606,16 +607,18 @@ module.exports = function (opts, cy, $, debounce) {
 					if (belowDim["vertical"][otherSide] == key &&
 						compare[type](belowDim["vertical"][otherSide], nodeDim["vertical"][side])){
 							var ll = belowDim["vertical"][side]-(nodeDim["vertical"][side]-key);
-							aboveNodes = VTree.get(ll);
-							if (aboveNodes){
+							//aboveNodes = VTree.get(ll);
+							VTree.forEach(function($, aboveNodes){
+							//if (aboveNodes){
 								for (above of aboveNodes){
 									if (Math.abs(lines.getDims(above)["horizontal"]["center"] - Xcenter) < options.guidelinesStyle.range*cy.zoom()){
-										if (ll == lines.getDims(above)["vertical"][otherSide]){
+										if (Math.abs(ll - lines.getDims(above)["vertical"][otherSide]) < 2*options.guidelinesTolerance){
 											belowNode = below; aboveNode = above;
 										}
 									}
 								}
-							}
+							//}
+							}, ll - options.guidelinesTolerance, ll + options.guidelinesTolerance);
 						}
 				}
 			}
