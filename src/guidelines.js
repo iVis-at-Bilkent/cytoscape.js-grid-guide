@@ -66,7 +66,7 @@ module.exports = function (opts, cy, $, debounce) {
 	var excludedNodes;
 	var lines = {};
 	var panInitPos = {};
-	var alignedLocations = {"h" : [], "v" : []};
+	var alignedLocations = {"h" : null, "v" : null};
 
 	lines.getDims = function (node) {
 
@@ -140,7 +140,7 @@ module.exports = function (opts, cy, $, debounce) {
 		HTree = null;
 		nodeInitPos = null;
 		mouseInitPos = {};
-		alignedLocations = {"h" : [], "v" : []};
+		alignedLocations = {"h" : null, "v" : null};
 	};
 
 	lines.clear = clearDrawing;
@@ -245,10 +245,7 @@ module.exports = function (opts, cy, $, debounce) {
 		// Draw the lines
 		if (leftNode){
 			alignedLocations.hd = Xcenter - (lines.getDims(rightNode)["horizontal"]["left"] + lines.getDims(leftNode)["horizontal"]["right"]) / 2.0;
-			if (alignedLocations.h && Math.abs(alignedLocations.h) > Math.abs(alignedLocations.hd)){
-				alignedLocations.h = alignedLocations.hd;
-			}
-			else if (!alignedLocations.h){
+			if (!options.geometricGuideline || alignedLocations.h == null || Math.abs(alignedLocations.h) > Math.abs(alignedLocations.hd)){
 				alignedLocations.h = alignedLocations.hd;
 			}
 			
@@ -324,10 +321,7 @@ module.exports = function (opts, cy, $, debounce) {
 
 		if (belowNode){
 			alignedLocations.vd = Ycenter - (lines.getDims(belowNode)["vertical"]["bottom"] + lines.getDims(aboveNode)["vertical"]["top"]) / 2.0;
-			if (alignedLocations.v && Math.abs(alignedLocations.v) > Math.abs(alignedLocations.vd)){
-				alignedLocations.v = alignedLocations.vd;
-			}
-			else if (!alignedLocations.v){
+			if (!options.geometricGuideline || alignedLocations.v == null || Math.abs(alignedLocations.v) > Math.abs(alignedLocations.vd)){
 				alignedLocations.v = alignedLocations.vd;
 			}
 			lines.drawLine({
@@ -490,10 +484,7 @@ module.exports = function (opts, cy, $, debounce) {
 		// Draw the lines
 		if (leftNode){
 			alignedLocations.hd =(lines.getDims(node)["horizontal"][side] - lines.getDims(leftNode)["horizontal"][otherSide]) - (lines.getDims(leftNode)["horizontal"][side] - lines.getDims(rightNode)["horizontal"][otherSide]);
-			if (alignedLocations.h && Math.abs(alignedLocations.h) > Math.abs(alignedLocations.hd)){
-				alignedLocations.h = alignedLocations.hd;
-			}
-			else if (!alignedLocations.h){
+			if (!options.geometricGuideline || alignedLocations.h == null || Math.abs(alignedLocations.h) > Math.abs(alignedLocations.hd)){
 				alignedLocations.h = alignedLocations.hd;
 			}
 			
@@ -633,10 +624,7 @@ module.exports = function (opts, cy, $, debounce) {
 
 		if (belowNode){
 			alignedLocations.vd =(lines.getDims(node)["vertical"][side] - lines.getDims(belowNode)["vertical"][otherSide]) - (lines.getDims(belowNode)["vertical"][side] - lines.getDims(aboveNode)["vertical"][otherSide]);
-			if (alignedLocations.v && Math.abs(alignedLocations.v) > Math.abs(alignedLocations.vd)){
-				alignedLocations.v = alignedLocations.vd;
-			}
-			else if (!alignedLocations.v){
+			if (!options.geometricGuideline || alignedLocations.v == null || Math.abs(alignedLocations.v) > Math.abs(alignedLocations.vd)){
 				alignedLocations.v = alignedLocations.vd;
 			}
 			lines.drawDV(node, belowNode, aboveNode, type);
