@@ -1960,6 +1960,7 @@ module.exports = function (opts, cy, $, debounce) {
 			});
 
 		});
+		ctx.lineWidth=options.lineWidth;
 		lines.update(activeNodes);
 	};
 
@@ -2049,9 +2050,6 @@ module.exports = function (opts, cy, $, debounce) {
 		ctx.stroke();
 	};
 
-
-
-
 	/** Guidelines for horizontally distributed alignment
 	 * @param: node the node to be aligned
 	 */
@@ -2071,7 +2069,6 @@ module.exports = function (opts, cy, $, debounce) {
 						leftDim["horizontal"]["right"] < nodeDim["horizontal"]["left"]){
 							var ripo = Math.round(2*Xcenter)-key;
 							HTree.forEach(function($, rightNodes){
-								//if (rightNodes){
 								for (right of rightNodes){
 									if (Math.abs(lines.getDims(right)["vertical"]["center"] - Ycenter) < options.guidelinesStyle.range*cy.zoom()){
 										if (Math.abs(ripo - lines.getDims(right)["horizontal"]["left"]) < 2*options.guidelinesTolerance){
@@ -2079,7 +2076,6 @@ module.exports = function (opts, cy, $, debounce) {
 										}
 									}
 								}
-								//}
 							}, ripo - options.guidelinesTolerance, ripo + options.guidelinesTolerance);
 						}
 				}
@@ -2123,9 +2119,6 @@ module.exports = function (opts, cy, $, debounce) {
 			if (!state)  
 				lines.horizontalDistributionNext(node,"right" );
 		}
-
-
-
 	}
 
 	/** Guidelines for horizontally distributed alignment
@@ -2162,7 +2155,6 @@ module.exports = function (opts, cy, $, debounce) {
 			}
 		}, Ycenter - options.guidelinesStyle.range*cy.zoom(), Ycenter);
 
-
 		if (belowNode){
 			alignedLocations.vd = Ycenter - (lines.getDims(belowNode)["vertical"]["bottom"] + lines.getDims(aboveNode)["vertical"]["top"]) / 2.0;
 			if (!options.geometricGuideline || alignedLocations.v == null || Math.abs(alignedLocations.v) > Math.abs(alignedLocations.vd)){
@@ -2198,8 +2190,6 @@ module.exports = function (opts, cy, $, debounce) {
 			if (!state)  
 				lines.verticalDistributionNext(node,"above" );
 		}
-
-
 	}    
 
 	/**
@@ -2245,7 +2235,6 @@ module.exports = function (opts, cy, $, debounce) {
 					}
 					}
 				}
-
 			}, position - Number(options.guidelinesTolerance), position + Number(options.guidelinesTolerance));
 
 			// if alignment found, draw lines and break
@@ -2272,7 +2261,6 @@ module.exports = function (opts, cy, $, debounce) {
 						y: targetKey
 					}, options.guidelinesStyle.strokeStyle, options.guidelinesStyle.lineDash);
 				}
-
 				break;
 			}
 		}
@@ -2292,17 +2280,13 @@ module.exports = function (opts, cy, $, debounce) {
 			var lowerBound = Xcenter - options.guidelinesStyle.range*cy.zoom();
 		}
 
-
 		var compare = {
 			"left": function (x, y) { return x < y },
 			"right": function (x, y) { return x > y }
 		}
 
-
-
 		// Find nodes in range and check if they align
 		HTree.forEach(function(key, nodes){
-
 			for (left of nodes){
 				var leftDim = lines.getDims(left);
 				if (Math.abs(leftDim["vertical"]["center"] - nodeDim["vertical"]["center"]) < options.guidelinesStyle.range*cy.zoom()){
@@ -2310,7 +2294,6 @@ module.exports = function (opts, cy, $, debounce) {
 						compare[type](leftDim["horizontal"][otherSide], nodeDim["horizontal"][side])){
 							var ll = leftDim["horizontal"][side]-(nodeDim["horizontal"][side] - key);
 							HTree.forEach(function($, rightNodes){
-							//if (rightNodes){
 								for (right of rightNodes){
 									if (Math.abs(lines.getDims(right)["vertical"]["center"] - Ycenter) < options.guidelinesStyle.range*cy.zoom()){
 										if (Math.abs(ll - lines.getDims(right)["horizontal"][otherSide]) < 2*options.guidelinesTolerance){
@@ -2318,7 +2301,6 @@ module.exports = function (opts, cy, $, debounce) {
 										}
 									}
 								}
-							//}
 							}, ll - options.guidelinesTolerance, ll + options.guidelinesTolerance);
 						}
 				}
@@ -2339,8 +2321,6 @@ module.exports = function (opts, cy, $, debounce) {
 			return false;
 
 	}
-
-
 
 	lines.drawDH = function(node, leftNode, rightNode, type){
 		var Ycenter = lines.getDims(node)["vertical"]["center"];
@@ -2449,9 +2429,7 @@ module.exports = function (opts, cy, $, debounce) {
 					if (belowDim["vertical"][otherSide] == key &&
 						compare[type](belowDim["vertical"][otherSide], nodeDim["vertical"][side])){
 							var ll = belowDim["vertical"][side]-(nodeDim["vertical"][side]-key);
-							//aboveNodes = VTree.get(ll);
 							VTree.forEach(function($, aboveNodes){
-							//if (aboveNodes){
 								for (above of aboveNodes){
 									if (Math.abs(lines.getDims(above)["horizontal"]["center"] - Xcenter) < options.guidelinesStyle.range*cy.zoom()){
 										if (Math.abs(ll - lines.getDims(above)["vertical"][otherSide]) < 2*options.guidelinesTolerance){
@@ -2459,7 +2437,6 @@ module.exports = function (opts, cy, $, debounce) {
 										}
 									}
 								}
-							//}
 							}, ll - options.guidelinesTolerance, ll + options.guidelinesTolerance);
 						}
 				}
@@ -2504,7 +2481,6 @@ module.exports = function (opts, cy, $, debounce) {
 			y: lines.getDims(aboveNode)["vertical"][otherSide]
 		}, options.guidelinesStyle.verticalDistColor, options.guidelinesStyle.verticalDistLine);
 
-
 		lines.drawLine({
 			x: lines.getDims(belowNode)["horizontal"]["center"],
 			y: nodeDim["vertical"][side]
@@ -2512,7 +2488,6 @@ module.exports = function (opts, cy, $, debounce) {
 			x: Xcenter,
 			y: nodeDim["vertical"][side]
 		}, options.guidelinesStyle.verticalDistColor, options.guidelinesStyle.verticalDistLine);
-
 
 		lines.drawLine({
 			x: lines.getDims(belowNode)["horizontal"]["center"],
@@ -2522,7 +2497,6 @@ module.exports = function (opts, cy, $, debounce) {
 			y: lines.getDims(belowNode)["vertical"][otherSide]
 		}, options.guidelinesStyle.verticalDistColor, options.guidelinesStyle.verticalDistLine);
 
-
 		lines.drawLine({
 			x: lines.getDims(belowNode)["horizontal"]["center"],
 			y: lines.getDims(belowNode)["vertical"][side]
@@ -2530,7 +2504,6 @@ module.exports = function (opts, cy, $, debounce) {
 			x: Xcenter,
 			y: lines.getDims(belowNode)["vertical"][side]
 		}, options.guidelinesStyle.verticalDistColor, options.guidelinesStyle.verticalDistLine);
-
 
 		lines.drawLine({
 			x: Xcenter,//lines.getDims(aboveNode)["horizontal"]["center"],
@@ -2664,7 +2637,6 @@ module.exports = function (opts, cy, $, debounce) {
 		}
 	}
 
-
 	return {
 		changeOptions: changeOptions,
 		lines: lines,
@@ -2673,7 +2645,6 @@ module.exports = function (opts, cy, $, debounce) {
 		setMousePos: setMousePos,
 		resizeCanvas: resizeCanvas,
 	}
-
 };
 
 },{"functional-red-black-tree":1}],8:[function(require,module,exports){
