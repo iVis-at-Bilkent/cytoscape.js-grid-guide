@@ -21,7 +21,11 @@ module.exports = function (cy, gridSpacing) {
             nodesMap[nodes[i].id()] = true;
         }
 
-        var roots = nodes.filter(function (i, ele) {
+        var roots = nodes.filter(function (ele, i) {
+            if(typeof ele === "number") {
+              ele = i;
+            }
+                
             var parent = ele.parent()[0];
             while(parent != null){
                 if(nodesMap[parent.id()]){

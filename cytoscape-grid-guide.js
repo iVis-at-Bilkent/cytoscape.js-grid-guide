@@ -1016,7 +1016,11 @@ module.exports = function (cytoscape, cy,  $) {
         for (var i = 0; i < nodes.length; i++) {
             nodesMap[nodes[i].id()] = true;
         }
-        var roots = nodes.filter(function (i, ele) {
+        var roots = nodes.filter(function (ele, i) {
+            if(typeof ele === "number") {
+              ele = i;
+            }
+            
             var parent = ele.parent()[0];
             while(parent != null){
                 if(nodesMap[parent.id()]){
@@ -1094,7 +1098,10 @@ module.exports = function (cytoscape, cy,  $) {
 
         function returnToPositions(nodesData) {
             var currentPositions = {};
-            cy.nodes().positions(function (i, ele) {
+            cy.nodes().positions(function (ele, i) {
+                if(typeof ele === "number") {
+                  ele = i;
+                }
                 currentPositions[ele.id()] = {
                     x: ele.position("x"),
                     y: ele.position("y")
@@ -1422,7 +1429,11 @@ module.exports = function (cy, snap) {
             nodesMap[nodes[i].id()] = true;
         }
 
-        var roots = nodes.filter(function (i, ele) {
+        var roots = nodes.filter(function (ele, i) {
+            if(typeof ele === "number") {
+              ele = i;
+            }
+            
             var parent = ele.parent()[0];
             while (parent != null) {
                 if (nodesMap[parent.id()]) {
@@ -1618,14 +1629,22 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 
 	function applyToAllNodesButNoParent(func) {
 		return function () {
-			cy.nodes().not(":parent").each(function (i, ele) {
+			cy.nodes().not(":parent").each(function (ele, i) {
+                if(typeof ele === "number") {
+                  ele = i;
+                }
+                
 				func(ele);
 			});
 		};
 	}
 	function applyToAllNodes(func) {
 		return function () {
-			cy.nodes().each(function (i, ele) {
+			cy.nodes().each(function (ele, i) {
+                if(typeof ele === "number") {
+                  ele = i;
+                }
+                
 				func(ele);
 			});
 		};
@@ -2562,7 +2581,11 @@ module.exports = function (opts, cy, $, debounce) {
 			nodesMap[nodes[i].id()] = true;
 		}
 
-		var roots = nodes.filter(function (i, ele) {
+		var roots = nodes.filter(function (ele, i) {
+            if(typeof ele === "number") {
+              ele = i;
+            }
+            
 			var parent = ele.parent()[0];
 			while (parent != null) {
 				if (nodesMap[parent.id()]) {
@@ -2870,7 +2893,11 @@ module.exports = function (cy, gridSpacing) {
             nodesMap[nodes[i].id()] = true;
         }
 
-        var roots = nodes.filter(function (i, ele) {
+        var roots = nodes.filter(function (ele, i) {
+            if(typeof ele === "number") {
+              ele = i;
+            }
+                
             var parent = ele.parent()[0];
             while(parent != null){
                 if(nodesMap[parent.id()]){

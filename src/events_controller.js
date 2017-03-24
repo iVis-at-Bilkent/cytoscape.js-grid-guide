@@ -24,14 +24,22 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 
 	function applyToAllNodesButNoParent(func) {
 		return function () {
-			cy.nodes().not(":parent").each(function (i, ele) {
+			cy.nodes().not(":parent").each(function (ele, i) {
+                if(typeof ele === "number") {
+                  ele = i;
+                }
+                
 				func(ele);
 			});
 		};
 	}
 	function applyToAllNodes(func) {
 		return function () {
-			cy.nodes().each(function (i, ele) {
+			cy.nodes().each(function (ele, i) {
+                if(typeof ele === "number") {
+                  ele = i;
+                }
+                
 				func(ele);
 			});
 		};
