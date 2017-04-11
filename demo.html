@@ -215,6 +215,14 @@
                 cy.gridGuide(opt);
 			});
 
+            $("#minDistributionRange").change(function () {
+                var el = $(this);
+                var opt = {
+					guidelinesStyle: {
+						minDistRange: el.val()}
+                };
+                cy.gridGuide(opt);
+			});
             $("#geometricRange").change(function () {
                 var el = $(this);
                 var opt = {
@@ -323,8 +331,13 @@
 	</div>
 
 	<div style="margin: 1em">
-		<label for="distributionRange" >Distribution Alignment Range: </label>
+		<label for="distributionRange" >Max Distribution Alignment Range: </label>
 		<input style="width: 5em" type="number" id="distributionRange" step="1" value="300" min="0">
+	</div>
+
+	<div style="margin: 1em">
+		<label for="minDistributionRange" >Min Distribution Alignment Range: </label>
+		<input style="width: 5em" type="number" id="minDistributionRange" step="1" value="10" min="0">
 	</div>
 </div>
 </body>

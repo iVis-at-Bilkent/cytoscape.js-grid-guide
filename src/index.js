@@ -30,7 +30,8 @@
 			guidelinesStyle: { // Set ctx properties of line. Properties are here:
 				strokeStyle: "#8b7d6b", // color of geometric guidelines
 				geometricGuidelineRange: 400, // range of geometric guidelines
-				range: 100, // range of geometric guidelines
+				range: 100, // max range of distribution guidelines
+				minDistRange: 10, // min range for distribution guidelines
 				horizontalDistColor: "#ff0000", // color of horizontal distribution alignment
 				verticalDistColor: "#00ff00", // color of vertical distribution alignment
 				initPosAlignmentColor: "#0000ff", // color of alignment to initial location

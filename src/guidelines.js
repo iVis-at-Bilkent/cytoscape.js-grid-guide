@@ -245,7 +245,7 @@ module.exports = function (opts, cy, $, debounce) {
 				var leftDim = lines.getDims(left);
 				if (Math.abs(leftDim["vertical"]["center"] - nodeDim["vertical"]["center"]) < options.guidelinesStyle.range*cy.zoom()){
 					if ((leftDim["horizontal"]["right"]) == key && 
-						leftDim["horizontal"]["right"] < nodeDim["horizontal"]["left"]){
+						nodeDim["horizontal"]["left"] - leftDim["horizontal"]["right"] > options.guidelinesStyle.minDistRange){
 							var ripo = Math.round(2*Xcenter)-key;
 							HTree.forEach(function($, rightNodes){
 								for (right of rightNodes){
@@ -357,7 +357,7 @@ module.exports = function (opts, cy, $, debounce) {
 				var belowDim = lines.getDims(below);
 				if (Math.abs(belowDim["horizontal"]["center"] - nodeDim["horizontal"]["center"]) < options.guidelinesStyle.range*cy.zoom()){
 					if (belowDim["vertical"]["bottom"] == key &&
-						belowDim["vertical"]["bottom"] < nodeDim["vertical"]["top"]){
+						nodeDim["vertical"]["top"] - belowDim["vertical"]["bottom"] > options.guidelinesStyle.minDistRange){
 							var abpo = Math.round((2*Ycenter)-key);
 							VTree.forEach(function($, aboveNodes){
 								//if (aboveNodes){
@@ -541,8 +541,8 @@ module.exports = function (opts, cy, $, debounce) {
 		}
 
 		var compare = {
-			"left": function (x, y) { return x < y },
-			"right": function (x, y) { return x > y }
+			"left": function (x, y) { return y - x > options.guidelinesStyle.minDistRange},
+			"right": function (x, y) { return x - y > options.guidelinesStyle.minDistRange}
 		}
 
 		// Find nodes in range and check if they align
@@ -669,8 +669,8 @@ module.exports = function (opts, cy, $, debounce) {
 		}
 
 		var compare = {
-			"below": function (x, y) { return x < y },
-			"above": function (x, y) { return x > y }
+			"below": function (x, y) { return y - x > options.guidelinesStyle.minDistRange},
+			"above": function (x, y) { return x - y > options.guidelinesStyle.minDistRange}
 		}
 		// Find nodes in range and check if they align
 		VTree.forEach(function(key, nodes){
