@@ -2140,21 +2140,37 @@ module.exports = function (opts, cy, $, debounce) {
 				y: lines.getDims(rightNode)["vertical"]["center"]
 			}, options.guidelinesStyle.horizontalDistColor, options.guidelinesStyle.horizontalDistLine);
 
-		lines.drawArrow({
-			x: lines.getDims(leftNode)["horizontal"]["right"],
-			y: Ycenter}, "left");
+			lines.drawLine({
+				x: nodeDim["horizontal"]["left"],
+				y: Ycenter
+			}, {
+				x: nodeDim["horizontal"]["left"],
+				y: lines.getDims(leftNode)["vertical"]["center"]
+			}, options.guidelinesStyle.horizontalDistColor, options.guidelinesStyle.horizontalDistLine);
 
-		lines.drawArrow({
-			x: nodeDim["horizontal"]["left"],
-			y: Ycenter}, "right");
+			lines.drawLine({
+				x: nodeDim["horizontal"]["right"],
+				y: Ycenter
+			}, {
+				x: nodeDim["horizontal"]["right"],
+				y: lines.getDims(rightNode)["vertical"]["center"]
+			}, options.guidelinesStyle.horizontalDistColor, options.guidelinesStyle.horizontalDistLine);
 
-		lines.drawArrow({
-			x: nodeDim["horizontal"]["right"],
-			y: Ycenter}, "left");
+			lines.drawArrow({
+				x: lines.getDims(leftNode)["horizontal"]["right"],
+				y: Ycenter}, "left");
 
-		lines.drawArrow({
-			x: lines.getDims(rightNode)["horizontal"]["left"],
-			y: Ycenter}, "right");
+			lines.drawArrow({
+				x: nodeDim["horizontal"]["left"],
+				y: Ycenter}, "right");
+
+			lines.drawArrow({
+				x: nodeDim["horizontal"]["right"],
+				y: Ycenter}, "left");
+
+			lines.drawArrow({
+				x: lines.getDims(rightNode)["horizontal"]["left"],
+				y: Ycenter}, "right");
 
 		}
 		else{
@@ -2234,6 +2250,22 @@ module.exports = function (opts, cy, $, debounce) {
 			}, {
 				y: lines.getDims(aboveNode)["vertical"]["top"],
 				x: lines.getDims(aboveNode)["horizontal"]["center"]
+			}, options.guidelinesStyle.verticalDistColor, options.guidelinesStyle.verticalDistLine);
+
+			lines.drawLine({
+				y: nodeDim["vertical"]["bottom"],//renderedPosition("x"),
+				x: Xcenter
+			}, {
+				y: nodeDim["vertical"]["bottom"],//renderedPosition("x"),
+				x: lines.getDims(aboveNode)["horizontal"]["center"]
+			}, options.guidelinesStyle.verticalDistColor, options.guidelinesStyle.verticalDistLine);
+
+			lines.drawLine({
+				y: nodeDim["vertical"]["top"],//renderedPosition("x"),
+				x: Xcenter
+			}, {
+				y: nodeDim["vertical"]["top"],//renderedPosition("x"),
+				x: lines.getDims(belowNode)["horizontal"]["center"]
 			}, options.guidelinesStyle.verticalDistColor, options.guidelinesStyle.verticalDistLine);
 
 			lines.drawArrow({
