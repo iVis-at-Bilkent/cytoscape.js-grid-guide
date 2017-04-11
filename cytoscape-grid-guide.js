@@ -2018,7 +2018,7 @@ module.exports = function (opts, cy, $, debounce) {
 	lines.drawArrow = function(position, type){
 		if (type == "right"){
 			// right arrow
-			ctx.setLineDash([0, 0]);	
+			ctx.setLineDash([]);	
 			ctx.beginPath();
 			ctx.moveTo(position.x-5, position.y-5);
 			ctx.lineTo(position.x, position.y);
@@ -2027,7 +2027,7 @@ module.exports = function (opts, cy, $, debounce) {
 		}
 		else if (type == "left"){
 			// left arrow
-			ctx.setLineDash([0, 0]);	
+			ctx.setLineDash([]);	
 			ctx.beginPath();
 			ctx.moveTo(position.x+5, position.y-5);
 			ctx.lineTo(position.x, position.y);
@@ -2036,7 +2036,7 @@ module.exports = function (opts, cy, $, debounce) {
 		}
 		else if (type == "top"){
 			// up arrow
-			ctx.setLineDash([0, 0]);	
+			ctx.setLineDash([]);	
 			ctx.beginPath();
 			ctx.moveTo(position.x-5, position.y+5);
 			ctx.lineTo(position.x, position.y);
@@ -2045,7 +2045,7 @@ module.exports = function (opts, cy, $, debounce) {
 		}
 		else if (type == "bottom"){
 			// down arrow
-			ctx.setLineDash([0, 0]);	
+			ctx.setLineDash([]);	
 			ctx.beginPath();
 			ctx.moveTo(position.x-5, position.y-5);
 			ctx.lineTo(position.x, position.y);
@@ -2060,7 +2060,7 @@ module.exports = function (opts, cy, $, debounce) {
 	 * @param position : position of the cross
 	 */
 	lines.drawCross = function(position){
-		ctx.setLineDash([0, 0]);	
+		ctx.setLineDash([]);	
 		ctx.beginPath();
 		ctx.moveTo(position.x - 5, position.y + 5);
 		ctx.lineTo(position.x + 5, position.y - 5);

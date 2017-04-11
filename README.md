@@ -85,8 +85,8 @@ var options = {
         verticalDistColor: "#00ff00", // color of vertical distribution alignment
         initPosAlignmentColor: "#0000ff", // color of alignment to initial mouse location
         lineDash: [0, 0], // line style of geometric guidelines
-        horizontalDistLine: [0, 0], // line style of horizontal distribıtion guidelines
-        verticalDistLine: [0, 0], // line style of vertical distribıtion guidelines
+        horizontalDistLine: [0, 0], // line style of horizontal distribution guidelines
+        verticalDistLine: [0, 0], // line style of vertical distribution guidelines
         initPosAlignmentLine: [0, 0], // line style of alignment to initial mouse position
     },
 
