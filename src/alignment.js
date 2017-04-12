@@ -4,7 +4,10 @@ module.exports = function (cytoscape, cy,  $) {
     function moveTopDown(node, dx, dy) {
         var nodes = node.union(node.descendants());
 
-        nodes.positions(function (i, node) {
+        nodes.positions(function (node, i) {
+            if(typeof node === "number") {
+              node = i;
+            }
             var pos = node.position();
             return {
                 x: pos.x + dx,

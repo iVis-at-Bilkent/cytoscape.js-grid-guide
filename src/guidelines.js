@@ -119,7 +119,10 @@ module.exports = function (opts, cy, $, debounce) {
 		var nodes = cy.nodes();
 		excludedNodes = activeNodes.union(activeNodes.ancestors());
 		excludedNodes = excludedNodes.union(activeNodes.descendants());
-		nodes.not(excludedNodes).each(function (i, node) {
+		nodes.not(excludedNodes).each(function (node, i) {
+            if(typeof node === "number") {
+              node = i;
+            }
 			var dims = lines.getDims(node);
 
 			["left", "center", "right"].forEach(function (val) {
@@ -789,7 +792,10 @@ module.exports = function (opts, cy, $, debounce) {
 			mouseLine(activeNodes);
 		}
 
-		activeNodes.each(function (i, node) {
+		activeNodes.each(function (node, i) {
+            if(typeof node === "number") {
+              node = i;
+            }
 			if (options.geometricGuideline){
 				lines.searchForLine("horizontal", node);
 				lines.searchForLine("vertical", node);
@@ -835,7 +841,7 @@ module.exports = function (opts, cy, $, debounce) {
 	var mouseInitPos = {};
 	var mouseRelativePos = {};
 	var getMousePos = function(e){
-		mouseInitPos = e.cyRenderedPosition;
+		mouseInitPos = e.renderedPosition || e.cyRenderedPosition;
 		mouseRelativePos.x = mouseInitPos.x;
 		mouseRelativePos.y = mouseInitPos.y;
 	}
@@ -880,7 +886,10 @@ module.exports = function (opts, cy, $, debounce) {
 
 	lines.snapToAlignmentLocation = function(activeNodes){
 		if (options.snapToAlignmentLocation){
-			activeNodes.each(function (i, node){
+			activeNodes.each(function (node, i){
+                if(typeof node === "number") {
+                  node = i;
+                }
 				var newPos = node.renderedPosition();
 				if (alignedLocations.h){
 					newPos.x -= alignedLocations.h;

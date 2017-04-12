@@ -58,7 +58,10 @@ module.exports = function (cy, gridSpacing) {
 
     function snapTopDown(nodes) {
 
-        nodes.union(nodes.descendants()).positions(function (i, node) {
+        nodes.union(nodes.descendants()).positions(function (node, i) {
+            if(typeof node === "number") {
+              node = i;
+            }
             var pos = node.position();
             return snap.snapPos(pos);
         });
@@ -76,7 +79,10 @@ module.exports = function (cy, gridSpacing) {
     snap.snapNodesTopDown = function (nodes) {
         // getTOpMostNodes -> nodes
         cy.startBatch();
-        nodes.union(nodes.descendants()).positions(function (i, node) {
+        nodes.union(nodes.descendants()).positions(function (node, i) {
+            if(typeof node === "number") {
+              node = i;
+            }
             var pos = node.position();
             return snap.snapPos(pos);
         });
@@ -85,10 +91,11 @@ module.exports = function (cy, gridSpacing) {
 
     snap.onFreeNode = function (e) {
         var nodes;
-        if (e.cyTarget.selected())
+        var cyTarget = e.target || e.cyTarget;
+        if (cyTarget.selected())
             nodes = e.cy.$(":selected");
         else
-            nodes = e.cyTarget;
+            nodes = cyTarget;
 
         snap.snapNodesTopDown(nodes);
 

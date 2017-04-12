@@ -10,14 +10,15 @@ module.exports = function (cy, snap) {
 
 
     discreteDrag.onTapStartNode = function (e) {
-        if (e.cyTarget.selected())
+        var cyTarget = event.target || event.cyTarget;
+        if (cyTarget.selected())
             draggedNodes = e.cy.$(":selected");
         else
-            draggedNodes = e.cyTarget;
+            draggedNodes = cyTarget;
 
-        startPos = e.cyPosition;
+        startPos = e.position || e.cyPosition;
 
-        attachedNode = e.cyTarget;
+        attachedNode = cyTarget;
         attachedNode.lock();
         //attachedNode.trigger("grab");
         cy.on("tapdrag", onTapDrag);
@@ -91,7 +92,7 @@ module.exports = function (cy, snap) {
     var onTapDrag = function (e) {
 
         var nodePos = attachedNode.position();
-        endPos = e.cyPosition;
+        endPos = e.position || e.cyPosition;
         endPos = snap.snapPos(endPos);
         var dist = getDist();
         if (dist.x != 0 || dist.y != 0) {
@@ -99,7 +100,10 @@ module.exports = function (cy, snap) {
             //var topMostNodes = getTopMostNodes(draggedNodes);
             var nodes = draggedNodes.union(draggedNodes.descendants());
 
-            nodes.positions(function (i, node) {
+            nodes.positions(function (node, i) {
+                if(typeof node === "number") {
+                  node = i;
+                }
                 var pos = node.position();
                 return snap.snapPos({
                     x: pos.x + dist.x,

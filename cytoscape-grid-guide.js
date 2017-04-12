@@ -1002,7 +1002,10 @@ module.exports = function (cytoscape, cy,  $) {
     function moveTopDown(node, dx, dy) {
         var nodes = node.union(node.descendants());
 
-        nodes.positions(function (i, node) {
+        nodes.positions(function (node, i) {
+            if(typeof node === "number") {
+              node = i;
+            }
             var pos = node.position();
             return {
                 x: pos.x + dx,
@@ -1392,14 +1395,15 @@ module.exports = function (cy, snap) {
 
 
     discreteDrag.onTapStartNode = function (e) {
-        if (e.cyTarget.selected())
+        var cyTarget = event.target || event.cyTarget;
+        if (cyTarget.selected())
             draggedNodes = e.cy.$(":selected");
         else
-            draggedNodes = e.cyTarget;
+            draggedNodes = cyTarget;
 
-        startPos = e.cyPosition;
+        startPos = e.position || e.cyPosition;
 
-        attachedNode = e.cyTarget;
+        attachedNode = cyTarget;
         attachedNode.lock();
         //attachedNode.trigger("grab");
         cy.on("tapdrag", onTapDrag);
@@ -1473,7 +1477,7 @@ module.exports = function (cy, snap) {
     var onTapDrag = function (e) {
 
         var nodePos = attachedNode.position();
-        endPos = e.cyPosition;
+        endPos = e.position || e.cyPosition;
         endPos = snap.snapPos(endPos);
         var dist = getDist();
         if (dist.x != 0 || dist.y != 0) {
@@ -1481,7 +1485,10 @@ module.exports = function (cy, snap) {
             //var topMostNodes = getTopMostNodes(draggedNodes);
             var nodes = draggedNodes.union(draggedNodes.descendants());
 
-            nodes.positions(function (i, node) {
+            nodes.positions(function (node, i) {
+                if(typeof node === "number") {
+                  node = i;
+                }
                 var pos = node.position();
                 return snap.snapPos({
                     x: pos.x + dist.x,
@@ -1622,8 +1629,9 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 
 	function applyToCyTarget(func, allowParent) {
 		return function (e) {
-			if (!e.cyTarget.is(":parent") || allowParent)
-				func(e.cyTarget);
+            var cyTarget = e.target || e.cyTarget;
+			if (!cyTarget.is(":parent") || allowParent)
+				func(cyTarget);
 		}
 	}
 
@@ -1714,7 +1722,8 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 	// Guidelines
 	var activeTopMostNodes = null;
 	var guidelinesGrabHandler = function(e){
-		var nodes = e.cyTarget.selected() ? e.cy.$(":selected") : e.cyTarget;
+        var cyTarget = e.target || e.cyTarget;
+		var nodes = cyTarget.selected() ? e.cy.$(":selected") : cyTarget;
 		activeTopMostNodes = guidelines.getTopMostNodes(nodes.nodes());
 		guidelines.lines.init(activeTopMostNodes);
 	}
@@ -1959,7 +1968,10 @@ module.exports = function (opts, cy, $, debounce) {
 		var nodes = cy.nodes();
 		excludedNodes = activeNodes.union(activeNodes.ancestors());
 		excludedNodes = excludedNodes.union(activeNodes.descendants());
-		nodes.not(excludedNodes).each(function (i, node) {
+		nodes.not(excludedNodes).each(function (node, i) {
+            if(typeof node === "number") {
+              node = i;
+            }
 			var dims = lines.getDims(node);
 
 			["left", "center", "right"].forEach(function (val) {
@@ -2629,7 +2641,10 @@ module.exports = function (opts, cy, $, debounce) {
 			mouseLine(activeNodes);
 		}
 
-		activeNodes.each(function (i, node) {
+		activeNodes.each(function (node, i) {
+            if(typeof node === "number") {
+              node = i;
+            }
 			if (options.geometricGuideline){
 				lines.searchForLine("horizontal", node);
 				lines.searchForLine("vertical", node);
@@ -2675,7 +2690,7 @@ module.exports = function (opts, cy, $, debounce) {
 	var mouseInitPos = {};
 	var mouseRelativePos = {};
 	var getMousePos = function(e){
-		mouseInitPos = e.cyRenderedPosition;
+		mouseInitPos = e.renderedPosition || e.cyRenderedPosition;
 		mouseRelativePos.x = mouseInitPos.x;
 		mouseRelativePos.y = mouseInitPos.y;
 	}
@@ -2720,7 +2735,10 @@ module.exports = function (opts, cy, $, debounce) {
 
 	lines.snapToAlignmentLocation = function(activeNodes){
 		if (options.snapToAlignmentLocation){
-			activeNodes.each(function (i, node){
+			activeNodes.each(function (node, i){
+                if(typeof node === "number") {
+                  node = i;
+                }
 				var newPos = node.renderedPosition();
 				if (alignedLocations.h){
 					newPos.x -= alignedLocations.h;
@@ -3004,7 +3022,10 @@ module.exports = function (cy, gridSpacing) {
 
     function snapTopDown(nodes) {
 
-        nodes.union(nodes.descendants()).positions(function (i, node) {
+        nodes.union(nodes.descendants()).positions(function (node, i) {
+            if(typeof node === "number") {
+              node = i;
+            }
             var pos = node.position();
             return snap.snapPos(pos);
         });
@@ -3022,7 +3043,10 @@ module.exports = function (cy, gridSpacing) {
     snap.snapNodesTopDown = function (nodes) {
         // getTOpMostNodes -> nodes
         cy.startBatch();
-        nodes.union(nodes.descendants()).positions(function (i, node) {
+        nodes.union(nodes.descendants()).positions(function (node, i) {
+            if(typeof node === "number") {
+              node = i;
+            }
             var pos = node.position();
             return snap.snapPos(pos);
         });
@@ -3031,10 +3055,11 @@ module.exports = function (cy, gridSpacing) {
 
     snap.onFreeNode = function (e) {
         var nodes;
-        if (e.cyTarget.selected())
+        var cyTarget = e.target || e.cyTarget;
+        if (cyTarget.selected())
             nodes = e.cy.$(":selected");
         else
-            nodes = e.cyTarget;
+            nodes = cyTarget;
 
         snap.snapNodesTopDown(nodes);
 

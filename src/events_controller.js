@@ -17,8 +17,9 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 
 	function applyToCyTarget(func, allowParent) {
 		return function (e) {
-			if (!e.cyTarget.is(":parent") || allowParent)
-				func(e.cyTarget);
+            var cyTarget = e.target || e.cyTarget;
+			if (!cyTarget.is(":parent") || allowParent)
+				func(cyTarget);
 		}
 	}
 
@@ -109,7 +110,8 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 	// Guidelines
 	var activeTopMostNodes = null;
 	var guidelinesGrabHandler = function(e){
-		var nodes = e.cyTarget.selected() ? e.cy.$(":selected") : e.cyTarget;
+        var cyTarget = e.target || e.cyTarget;
+		var nodes = cyTarget.selected() ? e.cy.$(":selected") : cyTarget;
 		activeTopMostNodes = guidelines.getTopMostNodes(nodes.nodes());
 		guidelines.lines.init(activeTopMostNodes);
 	}
