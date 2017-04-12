@@ -10,7 +10,7 @@ module.exports = function (cy, snap) {
 
 
     discreteDrag.onTapStartNode = function (e) {
-        var cyTarget = event.target || event.cyTarget;
+        var cyTarget = e.target || e.cyTarget;
         if (cyTarget.selected())
             draggedNodes = e.cy.$(":selected");
         else
