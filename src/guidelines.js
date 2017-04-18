@@ -231,7 +231,32 @@ module.exports = function (opts, cy, $, debounce) {
 		ctx.lineTo(position.x + 5, position.y + 5);
 		ctx.stroke();
 	};
+	
+	/**
+	 * Calculate the amount of offset for distribution guidelines
+	 * @param nodes - list of nodes
+	 * @param type - horizontal or vertical
+	 */
+	calculateOffset = function(nodes, type){
+			var minNode = nodes[0], min = lines.getDims(minNode)[type]["center"];
+			var maxNode = nodes[0], max = lines.getDims(maxNode)[type]["center"];
 
+			for (node of nodes){
+				if (lines.getDims(node)[type]["center"] < min){
+					min = lines.getDims(node)[type]["center"]; minNode = node;
+				}
+				if (lines.getDims(node)[type]["center"] > max){
+					max = lines.getDims(node)[type]["center"]; maxNode = node;
+				}
+			}
+
+			if (type == "horizontal")
+				var offset = (min + max) / 2 < lines.getDims(nodes[1])[type]["center"] ? max + (0.5*maxNode.width() + options.guidelinesStyle.distGuidelineOffset)*cy.zoom() : min - (0.5*minNode.width() + options.guidelinesStyle.distGuidelineOffset)*cy.zoom();
+			else
+				var offset = (min + max) / 2 < lines.getDims(nodes[1])[type]["center"] ? max + (0.5*maxNode.height() + options.guidelinesStyle.distGuidelineOffset)*cy.zoom() : min - (0.5*minNode.height() + options.guidelinesStyle.distGuidelineOffset)*cy.zoom();
+
+			return offset;
+	}
 	/** Guidelines for horizontally distributed alignment
 	 * @param: node the node to be aligned
 	 */
@@ -270,26 +295,27 @@ module.exports = function (opts, cy, $, debounce) {
 			if (!options.geometricGuideline || alignedLocations.h == null || Math.abs(alignedLocations.h) > Math.abs(alignedLocations.hd)){
 				alignedLocations.h = alignedLocations.hd;
 			}
-			
+			var offset = calculateOffset([leftNode, node, rightNode], "vertical");
+	
 			lines.drawLine({
 				x: lines.getDims(leftNode)["horizontal"]["right"],
-				y: Ycenter
+				y: offset
 			}, {
 				x: nodeDim["horizontal"]["left"],
-				y: Ycenter
+				y: offset
 			}, options.guidelinesStyle.horizontalDistColor, options.guidelinesStyle.horizontalDistLine);
 
 			lines.drawLine({
 				x: lines.getDims(rightNode)["horizontal"]["left"],
-				y: Ycenter
+				y: offset
 			}, {
 				x: nodeDim["horizontal"]["right"],
-				y: Ycenter
+				y: offset
 			}, options.guidelinesStyle.horizontalDistColor, options.guidelinesStyle.horizontalDistLine);
 
 			lines.drawLine({
 				x: lines.getDims(leftNode)["horizontal"]["right"],
-				y: Ycenter
+				y: offset
 			}, {
 				x: lines.getDims(leftNode)["horizontal"]["right"],
 				y: lines.getDims(leftNode)["vertical"]["center"]
@@ -297,7 +323,7 @@ module.exports = function (opts, cy, $, debounce) {
 
 			lines.drawLine({
 				x: lines.getDims(rightNode)["horizontal"]["left"],
-				y: Ycenter
+				y: offset
 			}, {
 				x: lines.getDims(rightNode)["horizontal"]["left"],
 				y: lines.getDims(rightNode)["vertical"]["center"]
@@ -305,35 +331,35 @@ module.exports = function (opts, cy, $, debounce) {
 
 			lines.drawLine({
 				x: nodeDim["horizontal"]["left"],
-				y: Ycenter
+				y: offset
 			}, {
 				x: nodeDim["horizontal"]["left"],
-				y: lines.getDims(leftNode)["vertical"]["center"]
+				y: Ycenter
 			}, options.guidelinesStyle.horizontalDistColor, options.guidelinesStyle.horizontalDistLine);
 
 			lines.drawLine({
 				x: nodeDim["horizontal"]["right"],
-				y: Ycenter
+				y: offset
 			}, {
 				x: nodeDim["horizontal"]["right"],
-				y: lines.getDims(rightNode)["vertical"]["center"]
+				y: Ycenter
 			}, options.guidelinesStyle.horizontalDistColor, options.guidelinesStyle.horizontalDistLine);
 
 			lines.drawArrow({
 				x: lines.getDims(leftNode)["horizontal"]["right"],
-				y: Ycenter}, "left");
+				y: offset}, "left");
 
 			lines.drawArrow({
 				x: nodeDim["horizontal"]["left"],
-				y: Ycenter}, "right");
+				y: offset}, "right");
 
 			lines.drawArrow({
 				x: nodeDim["horizontal"]["right"],
-				y: Ycenter}, "left");
+				y: offset}, "left");
 
 			lines.drawArrow({
 				x: lines.getDims(rightNode)["horizontal"]["left"],
-				y: Ycenter}, "right");
+				y: offset}, "right");
 
 		}
 		else{
@@ -383,25 +409,26 @@ module.exports = function (opts, cy, $, debounce) {
 			if (!options.geometricGuideline || alignedLocations.v == null || Math.abs(alignedLocations.v) > Math.abs(alignedLocations.vd)){
 				alignedLocations.v = alignedLocations.vd;
 			}
+			var offset = calculateOffset([belowNode, node, aboveNode], "horizontal");
 			lines.drawLine({
 				y: lines.getDims(belowNode)["vertical"]["bottom"],//renderedPosition("x"),
-				x: Xcenter
+				x: offset
 			}, {
 				y: nodeDim["vertical"]["top"],
-				x: Xcenter
+				x: offset
 			}, options.guidelinesStyle.verticalDistColor, options.guidelinesStyle.verticalDistLine);
 
 			lines.drawLine({
 				y: lines.getDims(aboveNode)["vertical"]["top"],//renderedPosition("x"),
-				x: Xcenter
+				x: offset
 			}, {
 				y: nodeDim["vertical"]["bottom"],
-				x: Xcenter
+				x: offset
 			}, options.guidelinesStyle.verticalDistColor, options.guidelinesStyle.verticalDistLine);
 
 			lines.drawLine({
 				y: lines.getDims(belowNode)["vertical"]["bottom"],//renderedPosition("x"),
-				x: Xcenter
+				x: offset
 			}, {
 				y: lines.getDims(belowNode)["vertical"]["bottom"],
 				x: lines.getDims(belowNode)["horizontal"]["center"]
@@ -409,7 +436,7 @@ module.exports = function (opts, cy, $, debounce) {
 
 			lines.drawLine({
 				y: lines.getDims(aboveNode)["vertical"]["top"],//renderedPosition("x"),
-				x: Xcenter
+				x: offset
 			}, {
 				y: lines.getDims(aboveNode)["vertical"]["top"],
 				x: lines.getDims(aboveNode)["horizontal"]["center"]
@@ -417,34 +444,34 @@ module.exports = function (opts, cy, $, debounce) {
 
 			lines.drawLine({
 				y: nodeDim["vertical"]["bottom"],//renderedPosition("x"),
-				x: Xcenter
+				x: offset
 			}, {
 				y: nodeDim["vertical"]["bottom"],//renderedPosition("x"),
-				x: lines.getDims(aboveNode)["horizontal"]["center"]
+				x: Xcenter
 			}, options.guidelinesStyle.verticalDistColor, options.guidelinesStyle.verticalDistLine);
 
 			lines.drawLine({
 				y: nodeDim["vertical"]["top"],//renderedPosition("x"),
-				x: Xcenter
+				x: offset
 			}, {
 				y: nodeDim["vertical"]["top"],//renderedPosition("x"),
-				x: lines.getDims(belowNode)["horizontal"]["center"]
+				x: Xcenter
 			}, options.guidelinesStyle.verticalDistColor, options.guidelinesStyle.verticalDistLine);
 
 			lines.drawArrow({
-				x: Xcenter,
+				x: offset,
 				y: lines.getDims(belowNode)["vertical"]["bottom"]}, "top");
 
 			lines.drawArrow({
-				x: Xcenter,
+				x: offset,
 				y: nodeDim["vertical"]["top"]}, "bottom");
 
 			lines.drawArrow({
-				x: Xcenter,
+				x: offset,
 			y: lines.getDims(aboveNode)["vertical"]["top"]}, "bottom");
 
 			lines.drawArrow({
-				x: Xcenter,
+				x: offset,
 				y: nodeDim["vertical"]["bottom"]}, "top");
 			}
 		else{
@@ -591,33 +618,34 @@ module.exports = function (opts, cy, $, debounce) {
 		if (type == "left"){
 			side = "left"; otherSide = "right";
 		}
+		var offset = calculateOffset([leftNode, node, rightNode], "vertical");
 
 		lines.drawLine({
 			x: lines.getDims(leftNode)["horizontal"][otherSide],
-			y: Ycenter
+			y: offset
 		}, {
 			x: lines.getDims(node)["horizontal"][side],
-			y: Ycenter
+			y: offset
 		}, options.guidelinesStyle.horizontalDistColor, options.guidelinesStyle.horizontalDistLine);
 
 		lines.drawLine({
 			x: lines.getDims(node)["horizontal"][side],
-			y: Ycenter
+			y: offset
 		}, {
 			x: lines.getDims(node)["horizontal"][side],
-			y: lines.getDims(leftNode)["vertical"]["center"]
+			y: Ycenter,//lines.getDims(leftNode)["vertical"]["center"]
 		}, options.guidelinesStyle.horizontalDistColor, options.guidelinesStyle.horizontalDistLine);
 
 		lines.drawLine({
 			x: lines.getDims(rightNode)["horizontal"][otherSide],
-			y: Ycenter
+			y: offset
 		}, {
 			x: lines.getDims(leftNode)["horizontal"][side],
-			y: Ycenter
+			y: offset
 		}, options.guidelinesStyle.horizontalDistColor, options.guidelinesStyle.horizontalDistLine);
 		lines.drawLine({
 			x: lines.getDims(rightNode)["horizontal"][otherSide],
-			y: Ycenter
+			y: offset
 		}, {
 			x: lines.getDims(rightNode)["horizontal"][otherSide],
 			y: lines.getDims(rightNode)["vertical"]["center"]
@@ -625,7 +653,7 @@ module.exports = function (opts, cy, $, debounce) {
 
 		lines.drawLine({
 			x: lines.getDims(leftNode)["horizontal"][otherSide],
-			y: Ycenter
+			y: offset
 		}, {
 			x: lines.getDims(leftNode)["horizontal"][otherSide],
 			y: lines.getDims(leftNode)["vertical"]["center"]
@@ -633,7 +661,7 @@ module.exports = function (opts, cy, $, debounce) {
 
 		lines.drawLine({
 			x: lines.getDims(leftNode)["horizontal"][side],
-			y: Ycenter
+			y: offset
 		}, {
 			x: lines.getDims(leftNode)["horizontal"][side],
 			y: lines.getDims(leftNode)["vertical"]["center"]
@@ -642,19 +670,19 @@ module.exports = function (opts, cy, $, debounce) {
 
 		lines.drawArrow({
 			x: lines.getDims(node)["horizontal"][side],
-			y: Ycenter}, otherSide);
+			y: offset}, otherSide);
 
 		lines.drawArrow({
 			x: lines.getDims(leftNode)["horizontal"][otherSide],
-			y: Ycenter}, side);
+			y: offset}, side);
 
 		lines.drawArrow({
 			x: lines.getDims(leftNode)["horizontal"][side],
-			y: Ycenter}, otherSide);
+			y: offset}, otherSide);
 
 		lines.drawArrow({
 			x: lines.getDims(rightNode)["horizontal"][otherSide],
-			y: Ycenter}, side);
+			y: offset}, side);
 
 	}
 
@@ -720,27 +748,28 @@ module.exports = function (opts, cy, $, debounce) {
 			side = "bottom"; otherSide = "top";
 		}
 
+		var offset = calculateOffset([belowNode, node, aboveNode], "horizontal");
 		lines.drawLine({
-			x: Xcenter,
+			x: offset,
 			y: nodeDim["vertical"][side]
 		}, {
-			x: Xcenter,
+			x: offset,
 			y: lines.getDims(belowNode)["vertical"][otherSide]
 		}, options.guidelinesStyle.verticalDistColor, options.guidelinesStyle.verticalDistLine);
 
 		lines.drawLine({
-			x: Xcenter,
+			x: offset,
 			y: lines.getDims(belowNode)["vertical"][side]
 		}, {
-			x: Xcenter,
+			x: offset,
 			y: lines.getDims(aboveNode)["vertical"][otherSide]
 		}, options.guidelinesStyle.verticalDistColor, options.guidelinesStyle.verticalDistLine);
 
 		lines.drawLine({
-			x: lines.getDims(belowNode)["horizontal"]["center"],
+			x: Xcenter,
 			y: nodeDim["vertical"][side]
 		}, {
-			x: Xcenter,
+			x: offset,
 			y: nodeDim["vertical"][side]
 		}, options.guidelinesStyle.verticalDistColor, options.guidelinesStyle.verticalDistLine);
 
@@ -748,7 +777,7 @@ module.exports = function (opts, cy, $, debounce) {
 			x: lines.getDims(belowNode)["horizontal"]["center"],
 			y: lines.getDims(belowNode)["vertical"][otherSide]
 		}, {
-			x: Xcenter,
+			x: offset,
 			y: lines.getDims(belowNode)["vertical"][otherSide]
 		}, options.guidelinesStyle.verticalDistColor, options.guidelinesStyle.verticalDistLine);
 
@@ -756,12 +785,12 @@ module.exports = function (opts, cy, $, debounce) {
 			x: lines.getDims(belowNode)["horizontal"]["center"],
 			y: lines.getDims(belowNode)["vertical"][side]
 		}, {
-			x: Xcenter,
+			x: offset,
 			y: lines.getDims(belowNode)["vertical"][side]
 		}, options.guidelinesStyle.verticalDistColor, options.guidelinesStyle.verticalDistLine);
 
 		lines.drawLine({
-			x: Xcenter,//lines.getDims(aboveNode)["horizontal"]["center"],
+			x: offset,//lines.getDims(aboveNode)["horizontal"]["center"],
 			y: lines.getDims(aboveNode)["vertical"][otherSide]
 		}, {
 			x: lines.getDims(aboveNode)["horizontal"]["center"],
@@ -769,19 +798,19 @@ module.exports = function (opts, cy, $, debounce) {
 		}, options.guidelinesStyle.verticalDistColor, options.guidelinesStyle.verticalDistLine);
 
 		lines.drawArrow({
-			x: Xcenter,
+			x: offset,
 			y: nodeDim["vertical"][side]}, otherSide);
 
 		lines.drawArrow({
-			x: Xcenter,
+			x: offset,
 			y: lines.getDims(belowNode)["vertical"][otherSide]}, side);
 
 		lines.drawArrow({
-			x: Xcenter,
+			x: offset,
 			y: lines.getDims(belowNode)["vertical"][side]}, otherSide);
 
 		lines.drawArrow({
-			x: Xcenter,
+			x: offset,
 			y: lines.getDims(aboveNode)["vertical"][otherSide]}, side);
 
 	}
