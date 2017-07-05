@@ -59,7 +59,8 @@ var options = {
     geometricGuideline: true, // Geometric guidelines
     initPosAlignment: true, // Guideline to initial mouse position
     centerToEdgeAlignment: false, // Center to edge alignment
-    snapToAlignmentLocation: true, // Snap to alignment location
+    snapToAlignmentLocationOnRelease: false, // Snap to alignment location on release
+    snapToAlignmentLocationDuringDrag: false, // Snap to alignment location during drag
     resize: true, // Adjust node sizes to cell sizes
     parentPadding: true, // Adjust parent sizes to cell sizes by padding
     drawGrid: true, // Draw grid background
@@ -99,7 +100,7 @@ var options = {
 
 ## Dependencies
 
- * Cytoscape.js ^1.6.10
+ * Cytoscape.js >=1.6.10
  * jQuery ^1.4 || ^2.0 || ^3.0
 
 
