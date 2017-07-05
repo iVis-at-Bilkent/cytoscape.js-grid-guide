@@ -115,8 +115,10 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 		activeTopMostNodes = guidelines.getTopMostNodes(nodes.nodes());
 		guidelines.lines.init(activeTopMostNodes);
 	}
-	var guidelinesDragHandler = function(){
-		guidelines.lines.update(activeTopMostNodes);
+	var guidelinesDragHandler = function(e){
+		if (e.target.id() == activeTopMostNodes.id()){
+			guidelines.lines.update(activeTopMostNodes);
+		}
 	};
 	var guidelinesFreeHandler = function(e){
 		guidelines.lines.snapToAlignmentLocation(activeTopMostNodes);
@@ -141,7 +143,7 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 			cy.on("tapstart", "node", guidelinesTapHandler);
 			cy.on("grab", guidelinesGrabHandler);
 			cy.on("pan", guidelinesPanHandler);
-			cy.on("drag", guidelinesDragHandler);
+			cy.on("drag", "node", guidelinesDragHandler);
 			cy.on("free", guidelinesFreeHandler);
 			$(window).on("resize", guidelinesWindowResizeHandler);
 		}
@@ -149,11 +151,10 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 			cy.off("tapstart", "node", guidelinesTapHandler);
 			cy.off("grab", guidelinesGrabHandler);
 			cy.off("pan", guidelinesPanHandler);
-			cy.off("drag", guidelinesDragHandler);
+			cy.off("drag", "node", guidelinesDragHandler);
 			cy.off("free", guidelinesFreeHandler);
 			$(window).off("resize", guidelinesWindowResizeHandler);
 		}
-		// console.log(cy._private.listeners); // <-- to check accumulation
 	}
 
 	// Parent Padding
