@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1, maximum-scale=1">
 
     <script src="https://code.jquery.com/jquery-3.0.0.min.js"></script>
-    <script src="http://cytoscape.github.io/cytoscape.js/api/cytoscape.js-latest/cytoscape.min.js"></script>
+    <script src="https://unpkg.com/cytoscape/dist/cytoscape.min.js"></script>
 
     <!-- for testing with local version of cytoscape.js -->
     <!--<script src="../cytoscape.js/build/cytoscape.js"></script>-->
@@ -271,8 +271,11 @@
         <div id="snapToGrid" class="enabled">
             Snap to Grid <b> On </b>
         </div>
-        <div id="snapToAlignmentLocation" class="disabled">
-            Snap to Alignment Location <b> Off </b>
+        <div id="snapToAlignmentLocationOnRelease" class="disabled">
+            Snap to Alignment Location On Release<b> Off </b>
+        </div>
+        <div id="snapToAlignmentLocationDuringDrag" class="disabled">
+            Snap to Alignment Location During Drag<b> Off </b>
         </div>
         <div id="parentPadding" class="disabled">
             Parent Padding <b> Off </b>
