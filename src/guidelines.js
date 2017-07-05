@@ -153,6 +153,10 @@ module.exports = function (opts, cy, $, debounce) {
 		nodeInitPos = null;
 		mouseInitPos = {};
 		alignedLocations = {"h" : null, "v" : null};
+		if (nodeToAlign){
+			nodeToAlign.unlock();
+			nodeToAlign = undefined;
+		}
 	};
 
 	lines.clear = clearDrawing;
@@ -607,8 +611,10 @@ module.exports = function (opts, cy, $, debounce) {
 			lines.drawDH(node, leftNode, rightNode, type);
 			return true;
 		}
-		else
-			return false;
+		else if (!options.geometricGuideline){
+			alignedLocations.h = null;
+		}
+		return false;
 
 	}
 
@@ -734,8 +740,10 @@ module.exports = function (opts, cy, $, debounce) {
 			lines.drawDV(node, belowNode, aboveNode, type);
 			return true;
 		}
-		else
-			return false;
+		else if (!options.geometricGuideline){
+			alignedLocations.v = null;
+		}
+		return false;
 	}
 
 
@@ -913,22 +921,63 @@ module.exports = function (opts, cy, $, debounce) {
 		}
 	}
 
+	function moveNodes(positionDiff, nodes) {
+		// Get the descendants of top most nodes. Note that node.position() can move just the simple nodes.
+		var topMostNodes = getTopMostNodes(nodes);
+		var nodesToMove = topMostNodes.union(topMostNodes.descendants());
+
+		nodesToMove.forEach(function(node, i) {
+			if(typeof node === "number") {
+			  node = i;
+			}
+			var newPos = {x: positionDiff.x + node.renderedPosition("x"),
+				y: positionDiff.y + node.renderedPosition("y")};
+
+			node.renderedPosition(newPos);
+		});
+	}
+
+	var currMousePos, oldMousePos = {"x": 0, "y": 0};
+	cy.on("mousemove", function(e){
+		currMousePos = e.renderedPosition || e.cyRenderedPosition;
+		if (nodeToAlign && nodeToAlign.locked()
+			&& (Math.abs(currMousePos.x - oldMousePos.x) > 2*options.guidelinesTolerance
+			|| Math.abs(currMousePos.y - oldMousePos.y) > 2*options.guidelinesTolerance)){
+
+			nodeToAlign.unlock();
+			var diff = {};
+			diff.x = currMousePos.x - nodeToAlign.renderedPosition().x;
+			diff.y = currMousePos.y - nodeToAlign.renderedPosition().y;
+			moveNodes(diff, nodeToAlign);
+		};
+
+	});
+
+	var nodeToAlign;
 	lines.snapToAlignmentLocation = function(activeNodes){
-		if (options.snapToAlignmentLocation){
-			activeNodes.each(function (node, i){
-                if(typeof node === "number") {
-                  node = i;
-                }
-				var newPos = node.renderedPosition();
-				if (alignedLocations.h){
-					newPos.x -= alignedLocations.h;
-				}
-				if (alignedLocations.v){
-					newPos.y -= alignedLocations.v;
-				};
+		activeNodes.each(function (node, i){
+			if(typeof node === "number") {
+			  node = i;
+			}
+			nodeToAlign = node;
+			var newPos = node.renderedPosition();
+			if (alignedLocations.h){
+				newPos.x -= alignedLocations.h;
 				node.renderedPosition(newPos);
-			});
-		}
+				oldMousePos = currMousePos;
+			}
+			if (alignedLocations.v){
+				newPos.y -= alignedLocations.v;
+				node.renderedPosition(newPos);
+				oldMousePos = currMousePos;
+			};
+			if (alignedLocations.v || alignedLocations.h){
+				alignedLocations.h = null;
+				alignedLocations.v = null;
+				node.lock();
+			}
+			lines.update(node);
+		});
 	}
 
 	return {

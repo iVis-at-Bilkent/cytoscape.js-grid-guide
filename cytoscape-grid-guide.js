@@ -1610,7 +1610,7 @@ module.exports = function (opts, cy, $, debounce) {
 };
 
 },{}],6:[function(require,module,exports){
-module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines, parentPadding, $) {
+module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines, parentPadding, $, opts) {
 
 	var feature = function (func) {
 		return function (enable) {
@@ -1727,11 +1727,18 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 		activeTopMostNodes = guidelines.getTopMostNodes(nodes.nodes());
 		guidelines.lines.init(activeTopMostNodes);
 	}
-	var guidelinesDragHandler = function(){
-		guidelines.lines.update(activeTopMostNodes);
+	var guidelinesDragHandler = function(e){
+		if (this.id() == activeTopMostNodes.id()){
+			guidelines.lines.update(activeTopMostNodes);
+
+			if (opts.snapToAlignmentLocationDuringDrag)
+				guidelines.lines.snapToAlignmentLocation(activeTopMostNodes);
+		}
 	};
 	var guidelinesFreeHandler = function(e){
-		guidelines.lines.snapToAlignmentLocation(activeTopMostNodes);
+		if (opts.snapToAlignmentLocationOnRelease)
+			guidelines.lines.snapToAlignmentLocation(activeTopMostNodes);
+
 		guidelines.lines.destroy();
 		activeTopMostNodes = null;
 	};
@@ -1753,7 +1760,7 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 			cy.on("tapstart", "node", guidelinesTapHandler);
 			cy.on("grab", guidelinesGrabHandler);
 			cy.on("pan", guidelinesPanHandler);
-			cy.on("drag", guidelinesDragHandler);
+			cy.on("drag", "node", guidelinesDragHandler);
 			cy.on("free", guidelinesFreeHandler);
 			$(window).on("resize", guidelinesWindowResizeHandler);
 		}
@@ -1761,11 +1768,10 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 			cy.off("tapstart", "node", guidelinesTapHandler);
 			cy.off("grab", guidelinesGrabHandler);
 			cy.off("pan", guidelinesPanHandler);
-			cy.off("drag", guidelinesDragHandler);
+			cy.off("drag", "node", guidelinesDragHandler);
 			cy.off("free", guidelinesFreeHandler);
 			$(window).off("resize", guidelinesWindowResizeHandler);
 		}
-		// console.log(cy._private.listeners); // <-- to check accumulation
 	}
 
 	// Parent Padding
@@ -2002,6 +2008,10 @@ module.exports = function (opts, cy, $, debounce) {
 		nodeInitPos = null;
 		mouseInitPos = {};
 		alignedLocations = {"h" : null, "v" : null};
+		if (nodeToAlign){
+			nodeToAlign.unlock();
+			nodeToAlign = undefined;
+		}
 	};
 
 	lines.clear = clearDrawing;
@@ -2456,8 +2466,10 @@ module.exports = function (opts, cy, $, debounce) {
 			lines.drawDH(node, leftNode, rightNode, type);
 			return true;
 		}
-		else
-			return false;
+		else if (!options.geometricGuideline){
+			alignedLocations.h = null;
+		}
+		return false;
 
 	}
 
@@ -2583,8 +2595,10 @@ module.exports = function (opts, cy, $, debounce) {
 			lines.drawDV(node, belowNode, aboveNode, type);
 			return true;
 		}
-		else
-			return false;
+		else if (!options.geometricGuideline){
+			alignedLocations.v = null;
+		}
+		return false;
 	}
 
 
@@ -2762,22 +2776,63 @@ module.exports = function (opts, cy, $, debounce) {
 		}
 	}
 
+	function moveNodes(positionDiff, nodes) {
+		// Get the descendants of top most nodes. Note that node.position() can move just the simple nodes.
+		var topMostNodes = getTopMostNodes(nodes);
+		var nodesToMove = topMostNodes.union(topMostNodes.descendants());
+
+		nodesToMove.forEach(function(node, i) {
+			if(typeof node === "number") {
+			  node = i;
+			}
+			var newPos = {x: positionDiff.x + node.renderedPosition("x"),
+				y: positionDiff.y + node.renderedPosition("y")};
+
+			node.renderedPosition(newPos);
+		});
+	}
+
+	var currMousePos, oldMousePos = {"x": 0, "y": 0};
+	cy.on("mousemove", function(e){
+		currMousePos = e.renderedPosition || e.cyRenderedPosition;
+		if (nodeToAlign && nodeToAlign.locked()
+			&& (Math.abs(currMousePos.x - oldMousePos.x) > 2*options.guidelinesTolerance
+			|| Math.abs(currMousePos.y - oldMousePos.y) > 2*options.guidelinesTolerance)){
+
+			nodeToAlign.unlock();
+			var diff = {};
+			diff.x = currMousePos.x - nodeToAlign.renderedPosition().x;
+			diff.y = currMousePos.y - nodeToAlign.renderedPosition().y;
+			moveNodes(diff, nodeToAlign);
+		};
+
+	});
+
+	var nodeToAlign;
 	lines.snapToAlignmentLocation = function(activeNodes){
-		if (options.snapToAlignmentLocation){
-			activeNodes.each(function (node, i){
-                if(typeof node === "number") {
-                  node = i;
-                }
-				var newPos = node.renderedPosition();
-				if (alignedLocations.h){
-					newPos.x -= alignedLocations.h;
-				}
-				if (alignedLocations.v){
-					newPos.y -= alignedLocations.v;
-				};
+		activeNodes.each(function (node, i){
+			if(typeof node === "number") {
+			  node = i;
+			}
+			nodeToAlign = node;
+			var newPos = node.renderedPosition();
+			if (alignedLocations.h){
+				newPos.x -= alignedLocations.h;
 				node.renderedPosition(newPos);
-			});
-		}
+				oldMousePos = currMousePos;
+			}
+			if (alignedLocations.v){
+				newPos.y -= alignedLocations.v;
+				node.renderedPosition(newPos);
+				oldMousePos = currMousePos;
+			};
+			if (alignedLocations.v || alignedLocations.h){
+				alignedLocations.h = null;
+				alignedLocations.v = null;
+				node.lock();
+			}
+			lines.update(node);
+		});
 	}
 
 	return {
@@ -2806,7 +2861,8 @@ module.exports = function (opts, cy, $, debounce) {
 			geometricGuideline: false, // Geometric guidelines
 			initPosAlignment: false, // Guideline to initial mouse position
 			centerToEdgeAlignment: false, // Center tı edge alignment
-			snapToAlignmentLocation: false, // Snap to alignment location
+			snapToAlignmentLocationOnRelease: false, // Snap to alignment location on release
+			snapToAlignmentLocationDuringDrag: false, // Snap to alignment location during drag
 			resize: false, // Adjust node sizes to cell sizes
 			parentPadding: false, // Adjust parent sizes to cell sizes by padding
 			drawGrid: true, // Draw grid background
@@ -2869,7 +2925,7 @@ module.exports = function (opts, cy, $, debounce) {
 				guidelines = _guidelines(options, cy, $, debounce);
 				parentPadding = _parentPadding(options, cy);
 
-				eventsController = _eventsController(cy, snap, resize, discreteDrag, drawGrid, guidelines, parentPadding, $);
+				eventsController = _eventsController(cy, snap, resize, discreteDrag, drawGrid, guidelines, parentPadding, $, options);
 
 				alignment = _alignment(cytoscape, cy, $);
 

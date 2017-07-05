@@ -1,4 +1,4 @@
-module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines, parentPadding, $) {
+module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines, parentPadding, $, opts) {
 
 	var feature = function (func) {
 		return function (enable) {
@@ -116,12 +116,17 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 		guidelines.lines.init(activeTopMostNodes);
 	}
 	var guidelinesDragHandler = function(e){
-		if (e.target.id() == activeTopMostNodes.id()){
+		if (this.id() == activeTopMostNodes.id()){
 			guidelines.lines.update(activeTopMostNodes);
+
+			if (opts.snapToAlignmentLocationDuringDrag)
+				guidelines.lines.snapToAlignmentLocation(activeTopMostNodes);
 		}
 	};
 	var guidelinesFreeHandler = function(e){
-		guidelines.lines.snapToAlignmentLocation(activeTopMostNodes);
+		if (opts.snapToAlignmentLocationOnRelease)
+			guidelines.lines.snapToAlignmentLocation(activeTopMostNodes);
+
 		guidelines.lines.destroy();
 		activeTopMostNodes = null;
 	};

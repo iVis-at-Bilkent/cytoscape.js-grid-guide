@@ -13,7 +13,8 @@
 			geometricGuideline: false, // Geometric guidelines
 			initPosAlignment: false, // Guideline to initial mouse position
 			centerToEdgeAlignment: false, // Center tı edge alignment
-			snapToAlignmentLocation: false, // Snap to alignment location
+			snapToAlignmentLocationOnRelease: false, // Snap to alignment location on release
+			snapToAlignmentLocationDuringDrag: false, // Snap to alignment location during drag
 			resize: false, // Adjust node sizes to cell sizes
 			parentPadding: false, // Adjust parent sizes to cell sizes by padding
 			drawGrid: true, // Draw grid background
@@ -76,7 +77,7 @@
 				guidelines = _guidelines(options, cy, $, debounce);
 				parentPadding = _parentPadding(options, cy);
 
-				eventsController = _eventsController(cy, snap, resize, discreteDrag, drawGrid, guidelines, parentPadding, $);
+				eventsController = _eventsController(cy, snap, resize, discreteDrag, drawGrid, guidelines, parentPadding, $, options);
 
 				alignment = _alignment(cytoscape, cy, $);
 
