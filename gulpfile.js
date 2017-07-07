@@ -17,7 +17,7 @@ gulp.task('default', [], function( next ){
 });
 
 gulp.task('publish', [], function( next ){
-  runSequence('confver', 'pkgver', 'push', 'tag', 'npm', next);
+  runSequence('confver', 'pkgver', 'push', 'tag', /*'npm',*/ next);
 });
 
 gulp.task('confver', ['version'], function(){
