@@ -162,6 +162,14 @@
                 cy.gridGuide(opt);
             });
 
+            $("#gridColor").change(function () {
+                var el = $(this);
+                var opt = {
+                    strokeStyle: el.val()}
+                cy.gridGuide(opt);
+
+           });
+
             $("#guidelinesTolerance").change(function () {
                 var el = $(this);
                 var opt = {
@@ -253,6 +261,11 @@
             <input style="width: 5em" type="number" id="gridSpacing" value="20" min="1">
         </div>
         
+        <div style="margin: 1em">
+            <label for="gridColor" >Grid Color: </label>
+            <input style="width: 5em" type="color" id="gridColor"  value="#dedede" >
+        </div>
+
         <div id="panGrid" class="disabled">
             Move Grid on Pan <b> Off </b>
         </div>
