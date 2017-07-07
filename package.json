@@ -21,6 +21,9 @@
   "bugs": {
     "url": "https://github.com/iVis-at-Bilkent/cytoscape.js-grid-guide/issues"
   },
+  "peerDependencies": {
+    "cytoscape": ">=1.6.10"
+  },
   "homepage": "https://github.com/iVis-at-Bilkent/cytoscape.js-grid-guide",
   "devDependencies": {
     "gulp": "^3.8.8",

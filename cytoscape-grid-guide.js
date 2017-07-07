@@ -1383,132 +1383,6 @@ var debounce = (function(){
 
 module.exports = debounce;
 },{}],4:[function(require,module,exports){
-module.exports = function (cy, snap) {
-
-    var discreteDrag = {};
-
-    var attachedNode;
-    var draggedNodes;
-
-    var startPos;
-    var endPos;
-
-
-    discreteDrag.onTapStartNode = function (e) {
-        var cyTarget = e.target || e.cyTarget;
-        if (cyTarget.selected())
-            draggedNodes = e.cy.$(":selected");
-        else
-            draggedNodes = cyTarget;
-
-        startPos = e.position || e.cyPosition;
-
-        attachedNode = cyTarget;
-        attachedNode.lock();
-        //attachedNode.trigger("grab");
-        cy.on("tapdrag", onTapDrag);
-        cy.on("tapend", onTapEndNode);
-
-    };
-
-    var onTapEndNode = function (e) {
-        //attachedNode.trigger("free");
-        cy.off("tapdrag", onTapDrag);
-        cy.off("tapend", onTapEndNode);
-        attachedNode.unlock();
-        e.preventDefault();
-    };
-
-    var getDist = function () {
-        return {
-            x: endPos.x - startPos.x,
-            y: endPos.y - startPos.y
-        }
-    };
-
-    function getTopMostNodes(nodes) {
-        var nodesMap = {};
-
-        for (var i = 0; i < nodes.length; i++) {
-            nodesMap[nodes[i].id()] = true;
-        }
-
-        var roots = nodes.filter(function (ele, i) {
-            if(typeof ele === "number") {
-              ele = i;
-            }
-            
-            var parent = ele.parent()[0];
-            while (parent != null) {
-                if (nodesMap[parent.id()]) {
-                    return false;
-                }
-                parent = parent.parent()[0];
-            }
-            return true;
-        });
-
-        return roots;
-    }
-
-    var moveNodesTopDown = function (nodes, dx, dy) {
-
-/*
-        console.log(nodes.map(function (e) {
-            return e.id();
-        }));
-        for (var i = 0; i < nodes.length; i++) {
-            var node = nodes[i];
-            var pos = node.position();
-
-            if (!node.isParent()) {
-                node.position({
-                    x: pos.x + dx,
-                    y: pos.y + dy
-                });
-                console.log(node.id() + " " + dx + " " + dy);
-            }
-
-            moveNodesTopDown(nodes.children(), dx, dy);
-        }
-*/
-    };
-
-    var onTapDrag = function (e) {
-
-        var nodePos = attachedNode.position();
-        endPos = e.position || e.cyPosition;
-        endPos = snap.snapPos(endPos);
-        var dist = getDist();
-        if (dist.x != 0 || dist.y != 0) {
-            attachedNode.unlock();
-            //var topMostNodes = getTopMostNodes(draggedNodes);
-            var nodes = draggedNodes.union(draggedNodes.descendants());
-
-            nodes.positions(function (node, i) {
-                if(typeof node === "number") {
-                  node = i;
-                }
-                var pos = node.position();
-                return snap.snapPos({
-                    x: pos.x + dist.x,
-                    y: pos.y + dist.y
-                });
-            });
-
-            startPos = endPos;
-            attachedNode.lock();
-            attachedNode.trigger("drag");
-        }
-
-    };
-
-    return discreteDrag;
-
-
-};
-
-},{}],5:[function(require,module,exports){
 module.exports = function (opts, cy, $, debounce) {
 
     var options = opts;
@@ -1609,8 +1483,8 @@ module.exports = function (opts, cy, $, debounce) {
     };
 };
 
-},{}],6:[function(require,module,exports){
-module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines, parentPadding, $, opts) {
+},{}],5:[function(require,module,exports){
+module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, guidelines, parentPadding, $, opts) {
 
 	var feature = function (func) {
 		return function (enable) {
@@ -1619,9 +1493,9 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 	};
 
 	var controller = {
-		discreteDrag: new feature(setDiscreteDrag),
+		snapToGridDuringDrag: new feature(setDiscreteDrag),
 		resize: new feature(setResize),
-		snapToGrid: new feature(setSnapToGrid),
+		snapToGridOnRelease: new feature(setSnapToGrid),
 		drawGrid: new feature(setDrawGrid),
 		guidelines: new feature(setGuidelines),
 		parentPadding: new feature(setParentPadding)
@@ -1665,7 +1539,7 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 
 	// Discrete Drag
 	function setDiscreteDrag(enable) {
-		cy[eventStatus(enable)]("tapstart", "node", discreteDrag.onTapStartNode);
+		cy[eventStatus(enable)]("tapstart", "node", snapToGridDuringDrag.onTapStartNode);
 	}
 
 	// Resize
@@ -1800,7 +1674,7 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 		guidelines: ["gridSpacing", "guidelinesStackOrder", "guidelinesTolerance", "guidelinesStyle", "distributionGuidelines", "range", "minDistRange",  "geometricGuidelineRange"],
 		resize: ["gridSpacing"],
 		parentPadding: ["gridSpacing", "parentSpacing"],
-		snapToGrid: ["gridSpacing"]
+		snapToGridOnRelease: ["gridSpacing"]
 	};
 
 	function syncWithOptions(options) {
@@ -1820,9 +1694,9 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 									drawGrid.resizeCanvas();
 							}
 
-							if (optsKey == "snapToGrid"){
+							if (optsKey == "snapToGridOnRelease"){
 								snap.changeOptions(options);
-								if (options.snapToGrid)
+								if (options.snapToGridOnRelease)
 									snapAllNodes();
 							}
 
@@ -1852,7 +1726,7 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 
 };
 
-},{}],7:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 module.exports = function (opts, cy, $, debounce) {
 
 
@@ -2845,7 +2719,7 @@ module.exports = function (opts, cy, $, debounce) {
 	}
 };
 
-},{"functional-red-black-tree":1}],8:[function(require,module,exports){
+},{"functional-red-black-tree":1}],7:[function(require,module,exports){
 ;(function(){ 'use strict';
 
 	// registers the extension on a cytoscape lib ref
@@ -2855,14 +2729,15 @@ module.exports = function (opts, cy, $, debounce) {
 
 		var options = {
 			// On/Off Modules
-			snapToGrid: true, // Snap to grid functionality
-			discreteDrag: false, // Discrete Drag
+			/* From the following four snap options, at most one should be true at a given time */
+			snapToGridOnRelease: true, // Snap to grid on release
+			snapToGridDuringDrag: false, // Snap to grid during drag
+			snapToAlignmentLocationOnRelease: false, // Snap to alignment location on release
+			snapToAlignmentLocationDuringDrag: false, // Snap to alignment location during drag
 			distributionGuidelines: false, //Distribution guidelines
 			geometricGuideline: false, // Geometric guidelines
 			initPosAlignment: false, // Guideline to initial mouse position
 			centerToEdgeAlignment: false, // Center tı edge alignment
-			snapToAlignmentLocationOnRelease: false, // Snap to alignment location on release
-			snapToAlignmentLocationDuringDrag: false, // Snap to alignment location during drag
 			resize: false, // Adjust node sizes to cell sizes
 			parentPadding: false, // Adjust parent sizes to cell sizes by padding
 			drawGrid: true, // Draw grid background
@@ -2894,8 +2769,8 @@ module.exports = function (opts, cy, $, debounce) {
 			// Parent Padding
 			parentSpacing: -1 // -1 to set paddings of parents to gridSpacing
 		};
-		var _snap = require("./snap");
-		var _discreteDrag = require("./discrete_drag");
+		var _snapOnRelease = require("./snap_on_release");
+		var _snapToGridDuringDrag = require("./snap_during_drag");
 		var _drawGrid = require("./draw_grid");
 		var _resize = require("./resize");
 		var _eventsController = require("./events_controller");
@@ -2903,7 +2778,7 @@ module.exports = function (opts, cy, $, debounce) {
 		var _parentPadding = require("./parentPadding");
 		var _alignment = require("./alignment");
 		var debounce = require("./debounce");
-		var snap, resize, discreteDrag, drawGrid, eventsController, guidelines, parentPadding, alignment;
+		var snap, resize, snapToGridDuringDrag, drawGrid, eventsController, guidelines, parentPadding, alignment;
 
 		function getScratch(cy) {
 			if (!cy.scratch("_gridGuide")) {
@@ -2918,14 +2793,14 @@ module.exports = function (opts, cy, $, debounce) {
 			$.extend(true, options, opts);
 
 			if (!getScratch(cy).initialized) {
-				snap = _snap(cy, options.gridSpacing);
+				snap = _snapOnRelease(cy, options.gridSpacing);
 				resize = _resize(options.gridSpacing);
-				discreteDrag = _discreteDrag(cy, snap);
+				snapToGridDuringDrag = _snapToGridDuringDrag(cy, snap);
 				drawGrid = _drawGrid(options, cy, $, debounce);
 				guidelines = _guidelines(options, cy, $, debounce);
 				parentPadding = _parentPadding(options, cy);
 
-				eventsController = _eventsController(cy, snap, resize, discreteDrag, drawGrid, guidelines, parentPadding, $, options);
+				eventsController = _eventsController(cy, snap, resize, snapToGridDuringDrag, drawGrid, guidelines, parentPadding, $, options);
 
 				alignment = _alignment(cytoscape, cy, $);
 
@@ -2955,7 +2830,7 @@ module.exports = function (opts, cy, $, debounce) {
 
 })();
 
-},{"./alignment":2,"./debounce":3,"./discrete_drag":4,"./draw_grid":5,"./events_controller":6,"./guidelines":7,"./parentPadding":9,"./resize":10,"./snap":11}],9:[function(require,module,exports){
+},{"./alignment":2,"./debounce":3,"./draw_grid":4,"./events_controller":5,"./guidelines":6,"./parentPadding":8,"./resize":9,"./snap_during_drag":10,"./snap_on_release":11}],8:[function(require,module,exports){
 module.exports = function (opts, cy) {
 
     var options = opts;
@@ -2992,7 +2867,7 @@ module.exports = function (opts, cy) {
         setPaddingOfParent: setPaddingOfParent
     };
 };
-},{}],10:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 module.exports = function (gridSpacing) {
 
 
@@ -3047,6 +2922,132 @@ module.exports = function (gridSpacing) {
     };
 
 };
+},{}],10:[function(require,module,exports){
+module.exports = function (cy, snap) {
+
+    var snapToGridDuringDrag = {};
+
+    var attachedNode;
+    var draggedNodes;
+
+    var startPos;
+    var endPos;
+
+
+    snapToGridDuringDrag.onTapStartNode = function (e) {
+        var cyTarget = e.target || e.cyTarget;
+        if (cyTarget.selected())
+            draggedNodes = e.cy.$(":selected");
+        else
+            draggedNodes = cyTarget;
+
+        startPos = e.position || e.cyPosition;
+
+        attachedNode = cyTarget;
+        attachedNode.lock();
+        //attachedNode.trigger("grab");
+        cy.on("tapdrag", onTapDrag);
+        cy.on("tapend", onTapEndNode);
+
+    };
+
+    var onTapEndNode = function (e) {
+        //attachedNode.trigger("free");
+        cy.off("tapdrag", onTapDrag);
+        cy.off("tapend", onTapEndNode);
+        attachedNode.unlock();
+        e.preventDefault();
+    };
+
+    var getDist = function () {
+        return {
+            x: endPos.x - startPos.x,
+            y: endPos.y - startPos.y
+        }
+    };
+
+    function getTopMostNodes(nodes) {
+        var nodesMap = {};
+
+        for (var i = 0; i < nodes.length; i++) {
+            nodesMap[nodes[i].id()] = true;
+        }
+
+        var roots = nodes.filter(function (ele, i) {
+            if(typeof ele === "number") {
+              ele = i;
+            }
+            
+            var parent = ele.parent()[0];
+            while (parent != null) {
+                if (nodesMap[parent.id()]) {
+                    return false;
+                }
+                parent = parent.parent()[0];
+            }
+            return true;
+        });
+
+        return roots;
+    }
+
+    var moveNodesTopDown = function (nodes, dx, dy) {
+
+/*
+        console.log(nodes.map(function (e) {
+            return e.id();
+        }));
+        for (var i = 0; i < nodes.length; i++) {
+            var node = nodes[i];
+            var pos = node.position();
+
+            if (!node.isParent()) {
+                node.position({
+                    x: pos.x + dx,
+                    y: pos.y + dy
+                });
+                console.log(node.id() + " " + dx + " " + dy);
+            }
+
+            moveNodesTopDown(nodes.children(), dx, dy);
+        }
+*/
+    };
+
+    var onTapDrag = function (e) {
+
+        var nodePos = attachedNode.position();
+        endPos = e.position || e.cyPosition;
+        endPos = snap.snapPos(endPos);
+        var dist = getDist();
+        if (dist.x != 0 || dist.y != 0) {
+            attachedNode.unlock();
+            //var topMostNodes = getTopMostNodes(draggedNodes);
+            var nodes = draggedNodes.union(draggedNodes.descendants());
+
+            nodes.positions(function (node, i) {
+                if(typeof node === "number") {
+                  node = i;
+                }
+                var pos = node.position();
+                return snap.snapPos({
+                    x: pos.x + dist.x,
+                    y: pos.y + dist.y
+                });
+            });
+
+            startPos = endPos;
+            attachedNode.lock();
+            attachedNode.trigger("drag");
+        }
+
+    };
+
+    return snapToGridDuringDrag;
+
+
+};
+
 },{}],11:[function(require,module,exports){
 module.exports = function (cy, gridSpacing) {
 
@@ -3167,4 +3168,4 @@ module.exports = function (cy, gridSpacing) {
 
 };
 
-},{}]},{},[8]);
+},{}]},{},[7]);

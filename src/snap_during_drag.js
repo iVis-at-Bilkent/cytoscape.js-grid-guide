@@ -1,6 +1,6 @@
 module.exports = function (cy, snap) {
 
-    var discreteDrag = {};
+    var snapToGridDuringDrag = {};
 
     var attachedNode;
     var draggedNodes;
@@ -9,7 +9,7 @@ module.exports = function (cy, snap) {
     var endPos;
 
 
-    discreteDrag.onTapStartNode = function (e) {
+    snapToGridDuringDrag.onTapStartNode = function (e) {
         var cyTarget = e.target || e.cyTarget;
         if (cyTarget.selected())
             draggedNodes = e.cy.$(":selected");
@@ -118,7 +118,7 @@ module.exports = function (cy, snap) {
 
     };
 
-    return discreteDrag;
+    return snapToGridDuringDrag;
 
 
 };

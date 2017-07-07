@@ -53,14 +53,15 @@ ur.do("align", {
 ```js
 var options = {
     // On/Off Modules
-    snapToGrid: true, // Snap to grid functionality
-    discreteDrag: true, // Discrete Drag
+    /* From the following four snap options, at most one should be true at a given time */
+    snapToGridOnRelease: true, // Snap to grid on release
+    snapToGridDuringDrag: false, // Snap to grid during drag
+    snapToAlignmentLocationOnRelease: false, // Snap to alignment location on release
+    snapToAlignmentLocationDuringDrag: false, // Snap to alignment location during drag
     distributionGuidelines: true, // Distribution guidelines
     geometricGuideline: true, // Geometric guidelines
     initPosAlignment: true, // Guideline to initial mouse position
     centerToEdgeAlignment: false, // Center to edge alignment
-    snapToAlignmentLocationOnRelease: false, // Snap to alignment location on release
-    snapToAlignmentLocationDuringDrag: false, // Snap to alignment location during drag
     resize: true, // Adjust node sizes to cell sizes
     parentPadding: true, // Adjust parent sizes to cell sizes by padding
     drawGrid: true, // Draw grid background

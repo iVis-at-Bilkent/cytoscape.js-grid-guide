@@ -1,4 +1,4 @@
-module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines, parentPadding, $, opts) {
+module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, guidelines, parentPadding, $, opts) {
 
 	var feature = function (func) {
 		return function (enable) {
@@ -7,9 +7,9 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 	};
 
 	var controller = {
-		discreteDrag: new feature(setDiscreteDrag),
+		snapToGridDuringDrag: new feature(setDiscreteDrag),
 		resize: new feature(setResize),
-		snapToGrid: new feature(setSnapToGrid),
+		snapToGridOnRelease: new feature(setSnapToGrid),
 		drawGrid: new feature(setDrawGrid),
 		guidelines: new feature(setGuidelines),
 		parentPadding: new feature(setParentPadding)
@@ -53,7 +53,7 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 
 	// Discrete Drag
 	function setDiscreteDrag(enable) {
-		cy[eventStatus(enable)]("tapstart", "node", discreteDrag.onTapStartNode);
+		cy[eventStatus(enable)]("tapstart", "node", snapToGridDuringDrag.onTapStartNode);
 	}
 
 	// Resize
@@ -188,7 +188,7 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 		guidelines: ["gridSpacing", "guidelinesStackOrder", "guidelinesTolerance", "guidelinesStyle", "distributionGuidelines", "range", "minDistRange",  "geometricGuidelineRange"],
 		resize: ["gridSpacing"],
 		parentPadding: ["gridSpacing", "parentSpacing"],
-		snapToGrid: ["gridSpacing"]
+		snapToGridOnRelease: ["gridSpacing"]
 	};
 
 	function syncWithOptions(options) {
@@ -208,9 +208,9 @@ module.exports = function (cy, snap, resize, discreteDrag, drawGrid, guidelines,
 									drawGrid.resizeCanvas();
 							}
 
-							if (optsKey == "snapToGrid"){
+							if (optsKey == "snapToGridOnRelease"){
 								snap.changeOptions(options);
-								if (options.snapToGrid)
+								if (options.snapToGridOnRelease)
 									snapAllNodes();
 							}
 

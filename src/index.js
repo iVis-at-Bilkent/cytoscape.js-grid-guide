@@ -7,14 +7,15 @@
 
 		var options = {
 			// On/Off Modules
-			snapToGrid: true, // Snap to grid functionality
-			discreteDrag: false, // Discrete Drag
+			/* From the following four snap options, at most one should be true at a given time */
+			snapToGridOnRelease: true, // Snap to grid on release
+			snapToGridDuringDrag: false, // Snap to grid during drag
+			snapToAlignmentLocationOnRelease: false, // Snap to alignment location on release
+			snapToAlignmentLocationDuringDrag: false, // Snap to alignment location during drag
 			distributionGuidelines: false, //Distribution guidelines
 			geometricGuideline: false, // Geometric guidelines
 			initPosAlignment: false, // Guideline to initial mouse position
 			centerToEdgeAlignment: false, // Center tı edge alignment
-			snapToAlignmentLocationOnRelease: false, // Snap to alignment location on release
-			snapToAlignmentLocationDuringDrag: false, // Snap to alignment location during drag
 			resize: false, // Adjust node sizes to cell sizes
 			parentPadding: false, // Adjust parent sizes to cell sizes by padding
 			drawGrid: true, // Draw grid background
@@ -46,8 +47,8 @@
 			// Parent Padding
 			parentSpacing: -1 // -1 to set paddings of parents to gridSpacing
 		};
-		var _snap = require("./snap");
-		var _discreteDrag = require("./discrete_drag");
+		var _snapOnRelease = require("./snap_on_release");
+		var _snapToGridDuringDrag = require("./snap_during_drag");
 		var _drawGrid = require("./draw_grid");
 		var _resize = require("./resize");
 		var _eventsController = require("./events_controller");
@@ -55,7 +56,7 @@
 		var _parentPadding = require("./parentPadding");
 		var _alignment = require("./alignment");
 		var debounce = require("./debounce");
-		var snap, resize, discreteDrag, drawGrid, eventsController, guidelines, parentPadding, alignment;
+		var snap, resize, snapToGridDuringDrag, drawGrid, eventsController, guidelines, parentPadding, alignment;
 
 		function getScratch(cy) {
 			if (!cy.scratch("_gridGuide")) {
@@ -70,14 +71,14 @@
 			$.extend(true, options, opts);
 
 			if (!getScratch(cy).initialized) {
-				snap = _snap(cy, options.gridSpacing);
+				snap = _snapOnRelease(cy, options.gridSpacing);
 				resize = _resize(options.gridSpacing);
-				discreteDrag = _discreteDrag(cy, snap);
+				snapToGridDuringDrag = _snapToGridDuringDrag(cy, snap);
 				drawGrid = _drawGrid(options, cy, $, debounce);
 				guidelines = _guidelines(options, cy, $, debounce);
 				parentPadding = _parentPadding(options, cy);
 
-				eventsController = _eventsController(cy, snap, resize, discreteDrag, drawGrid, guidelines, parentPadding, $, options);
+				eventsController = _eventsController(cy, snap, resize, snapToGridDuringDrag, drawGrid, guidelines, parentPadding, $, options);
 
 				alignment = _alignment(cytoscape, cy, $);
 
