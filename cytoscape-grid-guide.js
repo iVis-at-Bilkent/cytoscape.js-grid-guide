@@ -1406,16 +1406,16 @@ module.exports = function (opts, cy, $, debounce) {
         var initialValueX = pan.x%increment;
         var initialValueY = pan.y%increment;
 
-        ctx.strokeStyle = options.strokeStyle;
+        ctx.strokeStyle = options.gridColor;
         ctx.lineWidth = options.lineWidth;
 
         var data = '\t<svg width="'+ canvasWidth + '" height="'+ canvasHeight + '" xmlns="http://www.w3.org/2000/svg">\n\
             <defs>\n\
                 <pattern id="horizontalLines" width="' + increment + '" height="' + increment + '" patternUnits="userSpaceOnUse">\n\
-                    <path d="M ' + increment + ' 0 L 0 0 0 ' + 0 + '" fill="none" stroke="' + options.strokeStyle + '" stroke-width="' + options.lineWidth + '" />\n\
+                    <path d="M ' + increment + ' 0 L 0 0 0 ' + 0 + '" fill="none" stroke="' + options.gridColor + '" stroke-width="' + options.lineWidth + '" />\n\
                 </pattern>\n\
                 <pattern id="verticalLines" width="' + increment + '" height="' + increment + '" patternUnits="userSpaceOnUse">\n\
-                    <path d="M ' + 0 + ' 0 L 0 0 0 ' + increment + '" fill="none" stroke="' + options.strokeStyle + '" stroke-width="' + options.lineWidth + '" />\n\
+                    <path d="M ' + 0 + ' 0 L 0 0 0 ' + increment + '" fill="none" stroke="' + options.gridColor + '" stroke-width="' + options.lineWidth + '" />\n\
                 </pattern>\n\
             </defs>\n\
             <rect width="100%" height="100%" fill="url(#horizontalLines)" transform="translate('+ 0 + ', ' + initialValueY + ')" />\n\
@@ -1670,7 +1670,7 @@ module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, gui
 	var currentOptions;
 
 	var specialOpts = {
-		drawGrid: ["gridSpacing", "zoomDash", "panGrid", "gridStackOrder", "strokeStyle", "lineWidth", "lineDash"],
+		drawGrid: ["gridSpacing", "zoomDash", "panGrid", "gridStackOrder", "gridColor", "lineWidth", "lineDash"],
 		guidelines: ["gridSpacing", "guidelinesStackOrder", "guidelinesTolerance", "guidelinesStyle", "distributionGuidelines", "range", "minDistRange",  "geometricGuidelineRange"],
 		resize: ["gridSpacing"],
 		parentPadding: ["gridSpacing", "parentSpacing"],
@@ -2747,7 +2747,7 @@ module.exports = function (opts, cy, $, debounce) {
 			zoomDash: true, // Determines whether the size of the dashes should change when the drawing is zoomed in and out if grid is drawn.
 			panGrid: false, // Determines whether the grid should move then the user moves the graph if grid is drawn.
 			gridStackOrder: -1, // Namely z-index
-			strokeStyle: '#dedede', // Color of grid lines
+			gridColor: '#dedede', // Color of grid lines
 			lineWidth: 1.0, // Width of grid lines
 			guidelinesStackOrder: 4, // z-index of guidelines
 			guidelinesTolerance: 2.00, // Tolerance distance for rendered positions of nodes' interaction.

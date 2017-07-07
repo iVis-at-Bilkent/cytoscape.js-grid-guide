@@ -21,16 +21,16 @@ module.exports = function (opts, cy, $, debounce) {
         var initialValueX = pan.x%increment;
         var initialValueY = pan.y%increment;
 
-        ctx.strokeStyle = options.strokeStyle;
+        ctx.strokeStyle = options.gridColor;
         ctx.lineWidth = options.lineWidth;
 
         var data = '\t<svg width="'+ canvasWidth + '" height="'+ canvasHeight + '" xmlns="http://www.w3.org/2000/svg">\n\
             <defs>\n\
                 <pattern id="horizontalLines" width="' + increment + '" height="' + increment + '" patternUnits="userSpaceOnUse">\n\
-                    <path d="M ' + increment + ' 0 L 0 0 0 ' + 0 + '" fill="none" stroke="' + options.strokeStyle + '" stroke-width="' + options.lineWidth + '" />\n\
+                    <path d="M ' + increment + ' 0 L 0 0 0 ' + 0 + '" fill="none" stroke="' + options.gridColor + '" stroke-width="' + options.lineWidth + '" />\n\
                 </pattern>\n\
                 <pattern id="verticalLines" width="' + increment + '" height="' + increment + '" patternUnits="userSpaceOnUse">\n\
-                    <path d="M ' + 0 + ' 0 L 0 0 0 ' + increment + '" fill="none" stroke="' + options.strokeStyle + '" stroke-width="' + options.lineWidth + '" />\n\
+                    <path d="M ' + 0 + ' 0 L 0 0 0 ' + increment + '" fill="none" stroke="' + options.gridColor + '" stroke-width="' + options.lineWidth + '" />\n\
                 </pattern>\n\
             </defs>\n\
             <rect width="100%" height="100%" fill="url(#horizontalLines)" transform="translate('+ 0 + ', ' + initialValueY + ')" />\n\

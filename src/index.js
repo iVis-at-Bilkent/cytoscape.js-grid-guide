@@ -25,7 +25,7 @@
 			zoomDash: true, // Determines whether the size of the dashes should change when the drawing is zoomed in and out if grid is drawn.
 			panGrid: false, // Determines whether the grid should move then the user moves the graph if grid is drawn.
 			gridStackOrder: -1, // Namely z-index
-			strokeStyle: '#dedede', // Color of grid lines
+			gridColor: '#dedede', // Color of grid lines
 			lineWidth: 1.0, // Width of grid lines
 			guidelinesStackOrder: 4, // z-index of guidelines
 			guidelinesTolerance: 2.00, // Tolerance distance for rendered positions of nodes' interaction.
