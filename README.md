@@ -9,19 +9,21 @@ A sophisticated Cytoscape.js extension for grid and guideline interactions. prov
 
 - **Grid**: Shows a grid in the canvas (with specified size).
 - **Auto resizing nodes**: Nodes are resized to fit perfectly to grid.
-- **Snap to grid on release**: Upon release of the mouse during drag, the node snaps to theclosest grid location.
-- **Snap to grid During drag**: During drag the node snaps to the closest grid location; dragging is discrete.
 - **Alignment guidelines on drag**: As a node is dragged different types of guidelines are drawn to indicate both horizontal and vertical alignment of the dragged node with others. Two nodes are considered aligned when the difference between their x or y coordinates are within the specified tolerance:
- - **Reference guidelines**: When the dragged node aligns horizontally or vertically with the position of the mouse when the node is picked for drag, this guideline is drawn.
- - **Geometric guidelines**: When the dragged node (center or edge) aligns horizontally or vertically with another node (center or edge) within specified range, this guideline is drawn.
- - **Distribution guidelines**: This type of guideline is drawn in one of these two different cases:
-    - when the center of the dragged node is in the middle of the closer edges of two other nodes horizontally or vertically (i.e. dragged node is in the middle of two other nodes)
-    - when the distance between the dragged node A to node C is exactly twice the distance to node B horizontally or vertically (i.e. node B is in the middle of the dragged node A and another node C)
-- **Snap to alignment location on mouse release**: Note that guidelines are drawn when the node is within a certain 'tolerance' amount to perfect alignment. Upon release of the mouse during drag, the node snaps to shown guideline to form perfect alignment.
-- **Snap to alignment location during drag**: Note that guidelines are drawn when the node is within a certain 'tolerance' amount to perfect alignment. During drag, the node snaps to shown guideline to form perfect alignment.
+    - **Reference guidelines**: When the dragged node aligns horizontally or vertically with the position of the mouse when the node is picked for drag, this guideline is drawn.
+    - **Geometric guidelines**: When the dragged node (center or edge) aligns horizontally or vertically with another node (center or edge) within specified range, this guideline is drawn.
+    - **Distribution guidelines**: This type of guideline is drawn in one of these two different cases:
+       - when the center of the dragged node is in the middle of the closer edges of two other nodes horizontally or vertically (i.e. dragged node is in the middle of two other nodes)
+       - when the distance between the dragged node A to node C is exactly twice the distance to node B horizontally or vertically (i.e. node B is in the middle of the dragged node A and another node C)
+- **Snapping nodes**: Nodes are snapped either to the grid or alignment location. The following options are available:
+    - **Snap to grid on mouse release**: Upon release of the mouse during drag, the node snaps to theclosest grid location.
+    - **Snap to grid during drag**: During drag the node snaps to the closest grid location; dragging is discrete.
+    - **Snap to alignment location on mouse release**: Note that guidelines are drawn when the node is within a certain 'tolerance' amount to perfect alignment. Upon release of the mouse during drag, the node snaps to shown guideline to form perfect alignment.
+    - **Snap to alignment location during drag**: Note that guidelines are drawn when the node is within a certain 'tolerance' amount to perfect alignment. During drag, the node snaps to shown guideline to form perfect alignment.
 
 The users are allowed to customize various things about the functionality including:
-- grid size
+- grid size and color
+- snap type
 - alignment guideline tolerance
 - colors and line styles of each type of guidelines
 - range of geometric and distribution guidelines (i.e. do not consider nodes that are outside this range for alignment)
@@ -74,7 +76,7 @@ var options = {
     zoomDash: true, // Determines whether the size of the dashes should change when the drawing is zoomed in and out if grid is drawn.
     panGrid: true, // Determines whether the grid should move then the user moves the graph if grid is drawn.
     gridStackOrder: -1, // Namely z-index
-    strokeStyle: '#dedede', // Color of grid lines
+    gridColor: '#dedede', // Color of grid lines
     lineWidth: 1.0, // Width of grid lines
 
     // Guidelines
