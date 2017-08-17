@@ -68,7 +68,7 @@ gulp.task('push', shell.task([
 
 gulp.task('tag', shell.task([
   'git tag -a v$VERSION -m "tagging v$VERSION"',
-  'git push origin $VERSION'
+  'git push origin v$VERSION'
 ]));
 
 gulp.task('npm', shell.task([
