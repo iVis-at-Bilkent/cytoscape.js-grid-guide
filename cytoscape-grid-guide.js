@@ -1071,11 +1071,11 @@ module.exports = function (cytoscape, cy,  $) {
             var newPos = $.extend({}, node.position());
 
             if (vertical != "none")
-                newPos.x = modelNode.position("x") + xFactor * (modelNode.width() - node.width()) / 2;
+                newPos.x = modelNode.position("x") + xFactor * (modelNode.outerWidth() - node.outerWidth()) / 2;
 
 
             if (horizontal != "none")
-                newPos.y = modelNode.position("y") + yFactor * (modelNode.height() - node.height()) / 2;
+                newPos.y = modelNode.position("y") + yFactor * (modelNode.outerHeight() - node.outerHeight()) / 2;
 
             moveTopDown(node, newPos.x - oldPos.x, newPos.y - oldPos.y);
         }
@@ -2666,47 +2666,54 @@ module.exports = function (opts, cy, $, debounce) {
 		});
 	}
 
+	var tappedNode;
+	cy.on("tapstart", "node", function(){tappedNode = this});
+
 	var currMousePos, oldMousePos = {"x": 0, "y": 0};
 	cy.on("mousemove", function(e){
 		currMousePos = e.renderedPosition || e.cyRenderedPosition;
-		if (nodeToAlign && nodeToAlign.locked()
-			&& (Math.abs(currMousePos.x - oldMousePos.x) > 2*options.guidelinesTolerance
+		if (nodeToAlign)
+		nodeToAlign.each(function (node, i){
+			if(typeof node === "number") {
+			  node = i;
+			}
+		if (node.locked() && (Math.abs(currMousePos.x - oldMousePos.x) > 2*options.guidelinesTolerance
 			|| Math.abs(currMousePos.y - oldMousePos.y) > 2*options.guidelinesTolerance)){
 
-			nodeToAlign.unlock();
+			node.unlock();
 			var diff = {};
-			diff.x = currMousePos.x - nodeToAlign.renderedPosition().x;
-			diff.y = currMousePos.y - nodeToAlign.renderedPosition().y;
-			moveNodes(diff, nodeToAlign);
+			diff.x = currMousePos.x - tappedNode.renderedPosition("x");
+			diff.y = currMousePos.y - tappedNode.renderedPosition("y");;
+			moveNodes(diff, node);
 		};
+    });
 
 	});
-
 	var nodeToAlign;
 	lines.snapToAlignmentLocation = function(activeNodes){
+		nodeToAlign = activeNodes;
 		activeNodes.each(function (node, i){
 			if(typeof node === "number") {
 			  node = i;
 			}
-			nodeToAlign = node;
 			var newPos = node.renderedPosition();
 			if (alignedLocations.h){
+				oldMousePos = currMousePos;
 				newPos.x -= alignedLocations.h;
 				node.renderedPosition(newPos);
-				oldMousePos = currMousePos;
 			}
 			if (alignedLocations.v){
+				oldMousePos = currMousePos;
 				newPos.y -= alignedLocations.v;
 				node.renderedPosition(newPos);
-				oldMousePos = currMousePos;
 			};
 			if (alignedLocations.v || alignedLocations.h){
 				alignedLocations.h = null;
 				alignedLocations.v = null;
-				node.lock();
+				nodeToAlign.lock();
 			}
-			lines.update(node);
 		});
+		lines.update(activeNodes);
 	}
 
 	return {

@@ -73,11 +73,11 @@ module.exports = function (cytoscape, cy,  $) {
             var newPos = $.extend({}, node.position());
 
             if (vertical != "none")
-                newPos.x = modelNode.position("x") + xFactor * (modelNode.width() - node.width()) / 2;
+                newPos.x = modelNode.position("x") + xFactor * (modelNode.outerWidth() - node.outerWidth()) / 2;
 
 
             if (horizontal != "none")
-                newPos.y = modelNode.position("y") + yFactor * (modelNode.height() - node.height()) / 2;
+                newPos.y = modelNode.position("y") + yFactor * (modelNode.outerHeight() - node.outerHeight()) / 2;
 
             moveTopDown(node, newPos.x - oldPos.x, newPos.y - oldPos.y);
         }
