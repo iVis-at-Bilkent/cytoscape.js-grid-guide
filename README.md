@@ -29,6 +29,10 @@ The users are allowed to customize various things about the functionality includ
 - range of geometric and distribution guidelines (i.e. do not consider nodes that are outside this range for alignment)
 - whether or not edge to center alignment should be ignored
 
+## Demo
+
+Click [here](https://rawgit.com/iVis-at-Bilkent/cytoscape.js-grid-guide/master/demo.html) for demo
+
 ## API
 
  * `cy.gridGuide(options)` Sets stated options any time wanted.
