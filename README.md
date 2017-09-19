@@ -5,7 +5,7 @@ cytoscape-grid-guide
 
 <img src="guideline-example.png" width="300">
 
-A sophisticated and highly customizable Cytoscape.js extension for grid and guideline interactions. The following features are provided:
+A sophisticated and highly customizable Cytoscape.js extension for grid and guideline interactions, distributed under [The MIT License](https://opensource.org/licenses/MIT). The following features are provided:
 
 - **Grid**: Shows a grid in the canvas (with specified size).
 - **Auto resizing nodes**: Nodes are resized to fit perfectly to grid.
