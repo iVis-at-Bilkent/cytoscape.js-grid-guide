@@ -1845,7 +1845,7 @@ module.exports = function (opts, cy, $, debounce) {
 			nodeInitPos = activeNodes.renderedPosition();
 		}
 
-		var nodes = cy.nodes();
+		var nodes = cy.nodes(":visible");
 		excludedNodes = activeNodes.union(activeNodes.ancestors());
 		excludedNodes = excludedNodes.union(activeNodes.descendants());
 		nodes.not(excludedNodes).each(function (node, i) {
