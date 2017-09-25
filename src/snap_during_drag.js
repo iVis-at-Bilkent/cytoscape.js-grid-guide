@@ -18,12 +18,13 @@ module.exports = function (cy, snap) {
 
         startPos = e.position || e.cyPosition;
 
-        attachedNode = cyTarget;
-        attachedNode.lock();
-        //attachedNode.trigger("grab");
-        cy.on("tapdrag", onTapDrag);
-        cy.on("tapend", onTapEndNode);
-
+        if (cyTarget.grabbable() && !cyTarget.locked()){
+          attachedNode = cyTarget;
+          attachedNode.lock();
+          //attachedNode.trigger("grab");
+          cy.on("tapdrag", onTapDrag);
+          cy.on("tapend", onTapEndNode);
+        }
     };
 
     var onTapEndNode = function (e) {
