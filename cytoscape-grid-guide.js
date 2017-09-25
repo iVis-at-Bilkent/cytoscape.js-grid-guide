@@ -1119,7 +1119,7 @@ module.exports = function (cytoscape, cy,  $) {
             return currentPositions
         }
 
-        var ur = cy.undoRedo();
+        var ur = cy.undoRedo(null, true);
 
         ur.action("align", function (args) {
 
