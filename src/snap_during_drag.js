@@ -10,6 +10,12 @@ module.exports = function (cy, snap) {
 
 
     snapToGridDuringDrag.onTapStartNode = function (e) {
+        // If user intends to do box selection, then return. Related issue #28
+        if (e.originalEvent.altKey || e.originalEvent.ctrlKey
+                || e.originalEvent.metaKey || e.originalEvent.shiftKey){
+            return;
+        }
+
         var cyTarget = e.target || e.cyTarget;
         if (cyTarget.selected())
             draggedNodes = e.cy.$(":selected");
