@@ -56,7 +56,6 @@
 		var _parentPadding = require("./parentPadding");
 		var _alignment = require("./alignment");
 		var debounce = require("./debounce");
-		var snap, resize, snapToGridDuringDrag, drawGrid, eventsController, guidelines, parentPadding, alignment;
 
 		function getScratch(cy) {
 			if (!cy.scratch("_gridGuide")) {
@@ -70,7 +69,13 @@
 			var cy = this;
 			$.extend(true, options, opts);
 
-			if (!getScratch(cy).initialized) {
+			// access the scratch pad for cy
+			var scratchPad = getScratch(cy);
+
+			if (!scratchPad.initialized) {
+
+				var snap, resize, snapToGridDuringDrag, drawGrid, eventsController, guidelines, parentPadding, alignment;
+
 				snap = _snapOnRelease(cy, options.gridSpacing);
 				resize = _resize(options.gridSpacing);
 				snapToGridDuringDrag = _snapToGridDuringDrag(cy, snap);
@@ -83,9 +88,15 @@
 				alignment = _alignment(cytoscape, cy, $);
 
 				eventsController.init(options);
-				getScratch(cy).initialized = true;
-			} else
+
+				// init params in scratchPad
+				scratchPad.initialized = true;
+				scratchPad.eventsController = eventsController;
+			}
+			else {
+				var eventsController = scratchPad.eventsController;
 				eventsController.syncWithOptions(options);
+			}
 
 			return this; // chainability
 		} ) ;
