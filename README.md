@@ -65,12 +65,12 @@ var options = {
     snapToGridDuringDrag: false, // Snap to grid during drag
     snapToAlignmentLocationOnRelease: false, // Snap to alignment location on release
     snapToAlignmentLocationDuringDrag: false, // Snap to alignment location during drag
-    distributionGuidelines: true, // Distribution guidelines
-    geometricGuideline: true, // Geometric guidelines
-    initPosAlignment: true, // Guideline to initial mouse position
+    distributionGuidelines: false, // Distribution guidelines
+    geometricGuideline: false, // Geometric guidelines
+    initPosAlignment: false, // Guideline to initial mouse position
     centerToEdgeAlignment: false, // Center to edge alignment
-    resize: true, // Adjust node sizes to cell sizes
-    parentPadding: true, // Adjust parent sizes to cell sizes by padding
+    resize: false, // Adjust node sizes to cell sizes
+    parentPadding: false, // Adjust parent sizes to cell sizes by padding
     drawGrid: true, // Draw grid background
 
     // General
@@ -78,7 +78,7 @@ var options = {
 
     // Draw Grid
     zoomDash: true, // Determines whether the size of the dashes should change when the drawing is zoomed in and out if grid is drawn.
-    panGrid: true, // Determines whether the grid should move then the user moves the graph if grid is drawn.
+    panGrid: false, // Determines whether the grid should move then the user moves the graph if grid is drawn.
     gridStackOrder: -1, // Namely z-index
     gridColor: '#dedede', // Color of grid lines
     lineWidth: 1.0, // Width of grid lines
