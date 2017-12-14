@@ -5,7 +5,7 @@
 
 		if( !cytoscape ){ return; } // can't register if cytoscape unspecified
 
-		var options = {
+		var defaults = {
 			// On/Off Modules
 			/* From the following four snap options, at most one should be true at a given time */
 			snapToGridOnRelease: true, // Snap to grid on release
@@ -67,10 +67,15 @@
 
 		cytoscape( 'core', 'gridGuide', function(opts){
 			var cy = this;
-			$.extend(true, options, opts);
 
 			// access the scratch pad for cy
 			var scratchPad = getScratch(cy);
+
+			// extend the already existing options for the instance or the default options
+			var options = $.extend(true, {}, scratchPad.options || defaults, opts);
+
+			// reset the options for the instance
+			scratchPad.options = options;
 
 			if (!scratchPad.initialized) {
 
