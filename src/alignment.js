@@ -1,5 +1,5 @@
-module.exports = function (cytoscape, cy,  $) {
-    
+module.exports = function (cytoscape, cy,  $, apiRegistered) {
+
     // Needed because parent nodes cannot be moved!
     function moveTopDown(node, dx, dy) {
         var nodes = node.union(node.descendants());
@@ -40,50 +40,58 @@ module.exports = function (cytoscape, cy,  $) {
     }
 
 
-    cytoscape( "collection", "align", function (horizontal, vertical, alignTo) {
+    // If extension api functions are not registed to cytoscape yet register them here.
+		// Note that ideally these functions should not be directly registered to core from cytoscape.js
+		// extensions
+    if ( !apiRegistered ) {
 
-        var eles = getTopMostNodes(this.nodes(":visible"));
+      cytoscape( "collection", "align", function (horizontal, vertical, alignTo) {
 
-        var modelNode = alignTo ? alignTo : eles[0];
+          var eles = getTopMostNodes(this.nodes(":visible"));
 
-        eles = eles.not(modelNode);
+          var modelNode = alignTo ? alignTo : eles[0];
 
-        horizontal = horizontal ? horizontal : "none";
-        vertical = vertical ? vertical : "none";
+          eles = eles.not(modelNode);
 
-
-        // 0 for center
-        var xFactor = 0;
-        var yFactor = 0;
-
-        if (vertical == "left")
-            xFactor = -1;
-        else if (vertical == "right")
-            xFactor = 1;
-
-        if (horizontal == "top")
-            yFactor = -1;
-        else if (horizontal == "bottom")
-            yFactor = 1;
+          horizontal = horizontal ? horizontal : "none";
+          vertical = vertical ? vertical : "none";
 
 
-        for (var i = 0; i < eles.length; i++) {
-            var node = eles[i];
-            var oldPos = $.extend({}, node.position());
-            var newPos = $.extend({}, node.position());
+          // 0 for center
+          var xFactor = 0;
+          var yFactor = 0;
 
-            if (vertical != "none")
-                newPos.x = modelNode.position("x") + xFactor * (modelNode.outerWidth() - node.outerWidth()) / 2;
+          if (vertical == "left")
+              xFactor = -1;
+          else if (vertical == "right")
+              xFactor = 1;
+
+          if (horizontal == "top")
+              yFactor = -1;
+          else if (horizontal == "bottom")
+              yFactor = 1;
 
 
-            if (horizontal != "none")
-                newPos.y = modelNode.position("y") + yFactor * (modelNode.outerHeight() - node.outerHeight()) / 2;
+          for (var i = 0; i < eles.length; i++) {
+              var node = eles[i];
+              var oldPos = $.extend({}, node.position());
+              var newPos = $.extend({}, node.position());
 
-            moveTopDown(node, newPos.x - oldPos.x, newPos.y - oldPos.y);
-        }
+              if (vertical != "none")
+                  newPos.x = modelNode.position("x") + xFactor * (modelNode.outerWidth() - node.outerWidth()) / 2;
 
-        return this;
-    });
+
+              if (horizontal != "none")
+                  newPos.y = modelNode.position("y") + yFactor * (modelNode.outerHeight() - node.outerHeight()) / 2;
+
+              moveTopDown(node, newPos.x - oldPos.x, newPos.y - oldPos.y);
+          }
+
+          return this;
+      });
+
+    }
+
 
     if (cy.undoRedo) {
         function getNodePositions() {

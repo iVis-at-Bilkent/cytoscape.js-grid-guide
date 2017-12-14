@@ -5,6 +5,11 @@
 
 		if( !cytoscape ){ return; } // can't register if cytoscape unspecified
 
+		// flag that indicates if extension api functions are registed to cytoscape
+		// note that ideally these functions should not be directly registered to core from cytoscape.js
+		// extensions
+		var apiRegistered = false;
+
 		var defaults = {
 			// On/Off Modules
 			/* From the following four snap options, at most one should be true at a given time */
@@ -90,7 +95,10 @@
 
 				eventsController = _eventsController(cy, snap, resize, snapToGridDuringDrag, drawGrid, guidelines, parentPadding, $, options);
 
-				alignment = _alignment(cytoscape, cy, $);
+				alignment = _alignment(cytoscape, cy, $, apiRegistered);
+
+				// mark that api functions are registered to cytoscape
+				apiRegistered = true;
 
 				eventsController.init(options);
 
