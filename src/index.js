@@ -5,7 +5,12 @@
 
 		if( !cytoscape ){ return; } // can't register if cytoscape unspecified
 
-		var options = {
+		// flag that indicates if extension api functions are registed to cytoscape
+		// note that ideally these functions should not be directly registered to core from cytoscape.js
+		// extensions
+		var apiRegistered = false;
+
+		var defaults = {
 			// On/Off Modules
 			/* From the following four snap options, at most one should be true at a given time */
 			snapToGridOnRelease: true, // Snap to grid on release
@@ -56,7 +61,6 @@
 		var _parentPadding = require("./parentPadding");
 		var _alignment = require("./alignment");
 		var debounce = require("./debounce");
-		var snap, resize, snapToGridDuringDrag, drawGrid, eventsController, guidelines, parentPadding, alignment;
 
 		function getScratch(cy) {
 			if (!cy.scratch("_gridGuide")) {
@@ -68,9 +72,20 @@
 
 		cytoscape( 'core', 'gridGuide', function(opts){
 			var cy = this;
-			$.extend(true, options, opts);
 
-			if (!getScratch(cy).initialized) {
+			// access the scratch pad for cy
+			var scratchPad = getScratch(cy);
+
+			// extend the already existing options for the instance or the default options
+			var options = $.extend(true, {}, scratchPad.options || defaults, opts);
+
+			// reset the options for the instance
+			scratchPad.options = options;
+
+			if (!scratchPad.initialized) {
+
+				var snap, resize, snapToGridDuringDrag, drawGrid, eventsController, guidelines, parentPadding, alignment;
+
 				snap = _snapOnRelease(cy, options.gridSpacing);
 				resize = _resize(options.gridSpacing);
 				snapToGridDuringDrag = _snapToGridDuringDrag(cy, snap);
@@ -80,12 +95,21 @@
 
 				eventsController = _eventsController(cy, snap, resize, snapToGridDuringDrag, drawGrid, guidelines, parentPadding, $, options);
 
-				alignment = _alignment(cytoscape, cy, $);
+				alignment = _alignment(cytoscape, cy, $, apiRegistered);
+
+				// mark that api functions are registered to cytoscape
+				apiRegistered = true;
 
 				eventsController.init(options);
-				getScratch(cy).initialized = true;
-			} else
+
+				// init params in scratchPad
+				scratchPad.initialized = true;
+				scratchPad.eventsController = eventsController;
+			}
+			else {
+				var eventsController = scratchPad.eventsController;
 				eventsController.syncWithOptions(options);
+			}
 
 			return this; // chainability
 		} ) ;
