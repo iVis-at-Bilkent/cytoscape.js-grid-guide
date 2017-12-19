@@ -996,8 +996,8 @@ function createRBTree(compare) {
   return new RedBlackTree(compare || defaultCompare, null)
 }
 },{}],2:[function(require,module,exports){
-module.exports = function (cytoscape, cy,  $) {
-    
+module.exports = function (cytoscape, cy,  $, apiRegistered) {
+
     // Needed because parent nodes cannot be moved!
     function moveTopDown(node, dx, dy) {
         var nodes = node.union(node.descendants());
@@ -1038,50 +1038,58 @@ module.exports = function (cytoscape, cy,  $) {
     }
 
 
-    cytoscape( "collection", "align", function (horizontal, vertical, alignTo) {
+    // If extension api functions are not registed to cytoscape yet register them here.
+		// Note that ideally these functions should not be directly registered to core from cytoscape.js
+		// extensions
+    if ( !apiRegistered ) {
 
-        var eles = getTopMostNodes(this.nodes(":visible"));
+      cytoscape( "collection", "align", function (horizontal, vertical, alignTo) {
 
-        var modelNode = alignTo ? alignTo : eles[0];
+          var eles = getTopMostNodes(this.nodes(":visible"));
 
-        eles = eles.not(modelNode);
+          var modelNode = alignTo ? alignTo : eles[0];
 
-        horizontal = horizontal ? horizontal : "none";
-        vertical = vertical ? vertical : "none";
+          eles = eles.not(modelNode);
 
-
-        // 0 for center
-        var xFactor = 0;
-        var yFactor = 0;
-
-        if (vertical == "left")
-            xFactor = -1;
-        else if (vertical == "right")
-            xFactor = 1;
-
-        if (horizontal == "top")
-            yFactor = -1;
-        else if (horizontal == "bottom")
-            yFactor = 1;
+          horizontal = horizontal ? horizontal : "none";
+          vertical = vertical ? vertical : "none";
 
 
-        for (var i = 0; i < eles.length; i++) {
-            var node = eles[i];
-            var oldPos = $.extend({}, node.position());
-            var newPos = $.extend({}, node.position());
+          // 0 for center
+          var xFactor = 0;
+          var yFactor = 0;
 
-            if (vertical != "none")
-                newPos.x = modelNode.position("x") + xFactor * (modelNode.outerWidth() - node.outerWidth()) / 2;
+          if (vertical == "left")
+              xFactor = -1;
+          else if (vertical == "right")
+              xFactor = 1;
+
+          if (horizontal == "top")
+              yFactor = -1;
+          else if (horizontal == "bottom")
+              yFactor = 1;
 
 
-            if (horizontal != "none")
-                newPos.y = modelNode.position("y") + yFactor * (modelNode.outerHeight() - node.outerHeight()) / 2;
+          for (var i = 0; i < eles.length; i++) {
+              var node = eles[i];
+              var oldPos = $.extend({}, node.position());
+              var newPos = $.extend({}, node.position());
 
-            moveTopDown(node, newPos.x - oldPos.x, newPos.y - oldPos.y);
-        }
+              if (vertical != "none")
+                  newPos.x = modelNode.position("x") + xFactor * (modelNode.outerWidth() - node.outerWidth()) / 2;
 
-        return this;
-    });
+
+              if (horizontal != "none")
+                  newPos.y = modelNode.position("y") + yFactor * (modelNode.outerHeight() - node.outerHeight()) / 2;
+
+              moveTopDown(node, newPos.x - oldPos.x, newPos.y - oldPos.y);
+          }
+
+          return this;
+      });
+
+    }
+
 
     if (cy.undoRedo) {
         function getNodePositions() {
@@ -2734,7 +2742,12 @@ module.exports = function (opts, cy, $, debounce) {
 
 		if( !cytoscape ){ return; } // can't register if cytoscape unspecified
 
-		var options = {
+		// flag that indicates if extension api functions are registed to cytoscape
+		// note that ideally these functions should not be directly registered to core from cytoscape.js
+		// extensions
+		var apiRegistered = false;
+
+		var defaults = {
 			// On/Off Modules
 			/* From the following four snap options, at most one should be true at a given time */
 			snapToGridOnRelease: true, // Snap to grid on release
@@ -2785,7 +2798,6 @@ module.exports = function (opts, cy, $, debounce) {
 		var _parentPadding = require("./parentPadding");
 		var _alignment = require("./alignment");
 		var debounce = require("./debounce");
-		var snap, resize, snapToGridDuringDrag, drawGrid, eventsController, guidelines, parentPadding, alignment;
 
 		function getScratch(cy) {
 			if (!cy.scratch("_gridGuide")) {
@@ -2797,9 +2809,20 @@ module.exports = function (opts, cy, $, debounce) {
 
 		cytoscape( 'core', 'gridGuide', function(opts){
 			var cy = this;
-			$.extend(true, options, opts);
 
-			if (!getScratch(cy).initialized) {
+			// access the scratch pad for cy
+			var scratchPad = getScratch(cy);
+
+			// extend the already existing options for the instance or the default options
+			var options = $.extend(true, {}, scratchPad.options || defaults, opts);
+
+			// reset the options for the instance
+			scratchPad.options = options;
+
+			if (!scratchPad.initialized) {
+
+				var snap, resize, snapToGridDuringDrag, drawGrid, eventsController, guidelines, parentPadding, alignment;
+
 				snap = _snapOnRelease(cy, options.gridSpacing);
 				resize = _resize(options.gridSpacing);
 				snapToGridDuringDrag = _snapToGridDuringDrag(cy, snap);
@@ -2809,12 +2832,21 @@ module.exports = function (opts, cy, $, debounce) {
 
 				eventsController = _eventsController(cy, snap, resize, snapToGridDuringDrag, drawGrid, guidelines, parentPadding, $, options);
 
-				alignment = _alignment(cytoscape, cy, $);
+				alignment = _alignment(cytoscape, cy, $, apiRegistered);
+
+				// mark that api functions are registered to cytoscape
+				apiRegistered = true;
 
 				eventsController.init(options);
-				getScratch(cy).initialized = true;
-			} else
+
+				// init params in scratchPad
+				scratchPad.initialized = true;
+				scratchPad.eventsController = eventsController;
+			}
+			else {
+				var eventsController = scratchPad.eventsController;
 				eventsController.syncWithOptions(options);
+			}
 
 			return this; // chainability
 		} ) ;
