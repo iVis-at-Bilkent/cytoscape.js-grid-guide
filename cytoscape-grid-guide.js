@@ -1982,7 +1982,8 @@ module.exports = function (opts, cy, $, debounce) {
 			var minNode = nodes[0], min = lines.getDims(minNode)[type]["center"];
 			var maxNode = nodes[0], max = lines.getDims(maxNode)[type]["center"];
 
-			for (node of nodes){
+			for (var i = 0; i < nodes.length; i++){
+				var node = nodes[i];
 				if (lines.getDims(node)[type]["center"] < min){
 					min = lines.getDims(node)[type]["center"]; minNode = node;
 				}
@@ -2010,14 +2011,16 @@ module.exports = function (opts, cy, $, debounce) {
 		// Find nodes in range and check if they align
 		HTree.forEach(function(key, nodes){
 
-			for (left of nodes){
+			for (var i = 0; i < nodes.length; i++){
+				var left = nodes[i];
 				var leftDim = lines.getDims(left);
 				if (Math.abs(leftDim["vertical"]["center"] - nodeDim["vertical"]["center"]) < options.guidelinesStyle.range*cy.zoom()){
 					if ((leftDim["horizontal"]["right"]) == key && 
 						nodeDim["horizontal"]["left"] - leftDim["horizontal"]["right"] > options.guidelinesStyle.minDistRange){
 							var ripo = Math.round(2*Xcenter)-key;
 							HTree.forEach(function($, rightNodes){
-								for (right of rightNodes){
+								for (var j = 0; j < rightNodes.length; j++){
+									var right = rightNodes[j];
 									if (Math.abs(lines.getDims(right)["vertical"]["center"] - Ycenter) < options.guidelinesStyle.range*cy.zoom()){
 										if (Math.abs(ripo - lines.getDims(right)["horizontal"]["left"]) < 2*options.guidelinesTolerance){
 											leftNode = left; rightNode = right;
@@ -2123,7 +2126,8 @@ module.exports = function (opts, cy, $, debounce) {
 		// Find nodes in range and check if they align
 		VTree.forEach(function(key, nodes){
 
-			for (below of nodes){
+			for (var i = 0; i < nodes.length; i++){
+				var below = nodes[i];
 				var belowDim = lines.getDims(below);
 				if (Math.abs(belowDim["horizontal"]["center"] - nodeDim["horizontal"]["center"]) < options.guidelinesStyle.range*cy.zoom()){
 					if (belowDim["vertical"]["bottom"] == key &&
@@ -2131,7 +2135,8 @@ module.exports = function (opts, cy, $, debounce) {
 							var abpo = Math.round((2*Ycenter)-key);
 							VTree.forEach(function($, aboveNodes){
 								//if (aboveNodes){
-								for (above of aboveNodes){
+								for (var j = 0; j < aboveNodes.length; j++){
+									var above = aboveNodes[j];
 									if (Math.abs(lines.getDims(above)["horizontal"]["center"] - Xcenter) < options.guidelinesStyle.range*cy.zoom()){
 										if (Math.abs(abpo - lines.getDims(above)["vertical"]["top"]) < 2*options.guidelinesTolerance){
 											belowNode = below; aboveNode = above;
@@ -2256,7 +2261,8 @@ module.exports = function (opts, cy, $, debounce) {
 
 			// find the closest alignment in range of tolerance
 			Tree.forEach(function (exKey, nodes) {
-				for (n of nodes){
+				for (var i = 0; i < nodes.length; i++){
+					var n = nodes[i];
 					if (options.centerToEdgeAlignment || (dimKey != "center" && n.renderedPosition(otherAxis) != exKey) || (dimKey == "center" && n.renderedPosition(otherAxis) == exKey)){
 					var dif = Math.abs(center - n.renderedPosition(axis));
 					if ( dif < targetKey && dif < options.guidelinesStyle.geometricGuidelineRange*cy.zoom()){
@@ -2318,14 +2324,16 @@ module.exports = function (opts, cy, $, debounce) {
 
 		// Find nodes in range and check if they align
 		HTree.forEach(function(key, nodes){
-			for (left of nodes){
+			for (var i = 0; i < nodes.length; i++){
+				var left = nodes[i];
 				var leftDim = lines.getDims(left);
 				if (Math.abs(leftDim["vertical"]["center"] - nodeDim["vertical"]["center"]) < options.guidelinesStyle.range*cy.zoom()){
 					if ((leftDim["horizontal"][otherSide]) == key && 
 						compare[type](leftDim["horizontal"][otherSide], nodeDim["horizontal"][side])){
 							var ll = leftDim["horizontal"][side]-(nodeDim["horizontal"][side] - key);
 							HTree.forEach(function($, rightNodes){
-								for (right of rightNodes){
+								for (var j = 0; j < rightNodes.length; j++){
+									var right = rightNodes[j];
 									if (Math.abs(lines.getDims(right)["vertical"]["center"] - Ycenter) < options.guidelinesStyle.range*cy.zoom()){
 										if (Math.abs(ll - lines.getDims(right)["horizontal"][otherSide]) < 2*options.guidelinesTolerance){
 											leftNode = left; rightNode = right;
@@ -2448,15 +2456,16 @@ module.exports = function (opts, cy, $, debounce) {
 		}
 		// Find nodes in range and check if they align
 		VTree.forEach(function(key, nodes){
-
-			for (below of nodes){
+			for (var i = 0; i < nodes.length; i++){
+				var below = nodes[i];
 				var belowDim = lines.getDims(below);
 				if (Math.abs(belowDim["horizontal"]["center"] - nodeDim["horizontal"]["center"]) < options.guidelinesStyle.range*cy.zoom()){
 					if (belowDim["vertical"][otherSide] == key &&
 						compare[type](belowDim["vertical"][otherSide], nodeDim["vertical"][side])){
 							var ll = belowDim["vertical"][side]-(nodeDim["vertical"][side]-key);
 							VTree.forEach(function($, aboveNodes){
-								for (above of aboveNodes){
+								for (var j = 0; j < aboveNodes.length; j++){
+									var above = aboveNodes[j];
 									if (Math.abs(lines.getDims(above)["horizontal"]["center"] - Xcenter) < options.guidelinesStyle.range*cy.zoom()){
 										if (Math.abs(ll - lines.getDims(above)["vertical"][otherSide]) < 2*options.guidelinesTolerance){
 											belowNode = below; aboveNode = above;
