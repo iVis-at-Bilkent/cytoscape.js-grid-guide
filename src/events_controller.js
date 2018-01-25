@@ -119,12 +119,12 @@ module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, gui
 		if (this.id() == activeTopMostNodes.id()){
 			guidelines.lines.update(activeTopMostNodes);
 
-			if (opts.snapToAlignmentLocationDuringDrag)
+			if (currentOptions.snapToAlignmentLocationDuringDrag)
 				guidelines.lines.snapToAlignmentLocation(activeTopMostNodes);
 		}
 	};
 	var guidelinesFreeHandler = function(e){
-		if (opts.snapToAlignmentLocationOnRelease)
+		if (currentOptions.snapToAlignmentLocationOnRelease)
 			guidelines.lines.snapToAlignmentLocation(activeTopMostNodes);
 
 		guidelines.lines.destroy();
