@@ -13,32 +13,6 @@ module.exports = function (cy, gridSpacing) {
         return node.scratch("_gridGuide");
     };
 
-
-    function getTopMostNodes(nodes) {
-        var nodesMap = {};
-
-        for (var i = 0; i < nodes.length; i++) {
-            nodesMap[nodes[i].id()] = true;
-        }
-
-        var roots = nodes.filter(function (ele, i) {
-            if(typeof ele === "number") {
-              ele = i;
-            }
-                
-            var parent = ele.parent()[0];
-            while(parent != null){
-                if(nodesMap[parent.id()]){
-                    return false;
-                }
-                parent = parent.parent()[0];
-            }
-            return true;
-        });
-
-        return roots;
-    }
-
     snap.snapPos = function (pos) {
         var newPos = {
             x: (Math.floor(pos.x / gridSpacing) + 0.5) * gridSpacing,
@@ -55,26 +29,6 @@ module.exports = function (cy, gridSpacing) {
 
         node.position(newPos);
     };
-
-    function snapTopDown(nodes) {
-
-        nodes.union(nodes.descendants()).positions(function (node, i) {
-            if(typeof node === "number") {
-              node = i;
-            }
-            var pos = node.position();
-            return snap.snapPos(pos);
-        });
-        /*
-        for (var i = 0; i < nodes.length; i++) {
-
-            if (!nodes[i].isParent())
-                snap.snapNode(nodes[i]);
-
-            snapTopDown(nodes.children());
-        }*/
-
-    }
 
     snap.snapNodesTopDown = function (nodes) {
         // getTOpMostNodes -> nodes

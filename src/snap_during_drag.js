@@ -8,7 +8,6 @@ module.exports = function (cy, snap) {
     var startPos;
     var endPos;
 
-
     snapToGridDuringDrag.onTapStartNode = function (e) {
         // If user intends to do box selection, then return. Related issue #28
         if (e.originalEvent.altKey || e.originalEvent.ctrlKey
@@ -48,54 +47,6 @@ module.exports = function (cy, snap) {
         }
     };
 
-    function getTopMostNodes(nodes) {
-        var nodesMap = {};
-
-        for (var i = 0; i < nodes.length; i++) {
-            nodesMap[nodes[i].id()] = true;
-        }
-
-        var roots = nodes.filter(function (ele, i) {
-            if(typeof ele === "number") {
-              ele = i;
-            }
-            
-            var parent = ele.parent()[0];
-            while (parent != null) {
-                if (nodesMap[parent.id()]) {
-                    return false;
-                }
-                parent = parent.parent()[0];
-            }
-            return true;
-        });
-
-        return roots;
-    }
-
-    var moveNodesTopDown = function (nodes, dx, dy) {
-
-/*
-        console.log(nodes.map(function (e) {
-            return e.id();
-        }));
-        for (var i = 0; i < nodes.length; i++) {
-            var node = nodes[i];
-            var pos = node.position();
-
-            if (!node.isParent()) {
-                node.position({
-                    x: pos.x + dx,
-                    y: pos.y + dy
-                });
-                console.log(node.id() + " " + dx + " " + dy);
-            }
-
-            moveNodesTopDown(nodes.children(), dx, dy);
-        }
-*/
-    };
-
     var onTapDrag = function (e) {
 
         var nodePos = attachedNode.position();
@@ -104,7 +55,6 @@ module.exports = function (cy, snap) {
         var dist = getDist();
         if (dist.x != 0 || dist.y != 0) {
             attachedNode.unlock();
-            //var topMostNodes = getTopMostNodes(draggedNodes);
             var nodes = draggedNodes.union(draggedNodes.descendants());
 
             nodes.filter(":childless").positions(function (node, i) {
