@@ -107,7 +107,7 @@ module.exports = function (cy, snap) {
             //var topMostNodes = getTopMostNodes(draggedNodes);
             var nodes = draggedNodes.union(draggedNodes.descendants());
 
-            nodes.positions(function (node, i) {
+            nodes.filter(":childless").positions(function (node, i) {
                 if(typeof node === "number") {
                   node = i;
                 }

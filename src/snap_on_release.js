@@ -79,7 +79,7 @@ module.exports = function (cy, gridSpacing) {
     snap.snapNodesTopDown = function (nodes) {
         // getTOpMostNodes -> nodes
         cy.startBatch();
-        nodes.union(nodes.descendants()).positions(function (node, i) {
+        nodes.union(nodes.descendants()).filter(":childless").positions(function (node, i) {
             if(typeof node === "number") {
               node = i;
             }

@@ -1,10 +1,10 @@
 module.exports = function (cytoscape, cy,  $, apiRegistered) {
 
-    // Needed because parent nodes cannot be moved!
+    // Needed because parent nodes cannot be moved in Cytoscape.js < v3.2
     function moveTopDown(node, dx, dy) {
         var nodes = node.union(node.descendants());
 
-        nodes.positions(function (node, i) {
+        nodes.filter(":childless").positions(function (node, i) {
             if(typeof node === "number") {
               node = i;
             }

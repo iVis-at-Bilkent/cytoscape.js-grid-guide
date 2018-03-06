@@ -998,11 +998,11 @@ function createRBTree(compare) {
 },{}],2:[function(require,module,exports){
 module.exports = function (cytoscape, cy,  $, apiRegistered) {
 
-    // Needed because parent nodes cannot be moved!
+    // Needed because parent nodes cannot be moved in Cytoscape.js < v3.2
     function moveTopDown(node, dx, dy) {
         var nodes = node.union(node.descendants());
 
-        nodes.positions(function (node, i) {
+        nodes.filter(":childless").positions(function (node, i) {
             if(typeof node === "number") {
               node = i;
             }
@@ -2672,7 +2672,7 @@ module.exports = function (opts, cy, $, debounce) {
 		var topMostNodes = getTopMostNodes(nodes);
 		var nodesToMove = topMostNodes.union(topMostNodes.descendants());
 
-		nodesToMove.forEach(function(node, i) {
+		nodesToMove.filter(":childless").forEach(function(node, i) {
 			if(typeof node === "number") {
 			  node = i;
 			}
@@ -3080,7 +3080,7 @@ module.exports = function (cy, snap) {
             //var topMostNodes = getTopMostNodes(draggedNodes);
             var nodes = draggedNodes.union(draggedNodes.descendants());
 
-            nodes.positions(function (node, i) {
+            nodes.filter(":childless").positions(function (node, i) {
                 if(typeof node === "number") {
                   node = i;
                 }
@@ -3185,7 +3185,7 @@ module.exports = function (cy, gridSpacing) {
     snap.snapNodesTopDown = function (nodes) {
         // getTOpMostNodes -> nodes
         cy.startBatch();
-        nodes.union(nodes.descendants()).positions(function (node, i) {
+        nodes.union(nodes.descendants()).filter(":childless").positions(function (node, i) {
             if(typeof node === "number") {
               node = i;
             }

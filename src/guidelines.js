@@ -935,7 +935,7 @@ module.exports = function (opts, cy, $, debounce) {
 		var topMostNodes = getTopMostNodes(nodes);
 		var nodesToMove = topMostNodes.union(topMostNodes.descendants());
 
-		nodesToMove.forEach(function(node, i) {
+		nodesToMove.filter(":childless").forEach(function(node, i) {
 			if(typeof node === "number") {
 			  node = i;
 			}
