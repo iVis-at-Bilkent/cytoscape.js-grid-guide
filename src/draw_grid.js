@@ -37,18 +37,15 @@ module.exports = function (opts, cy, $, debounce) {
             <rect width="100%" height="100%" fill="url(#verticalLines)" transform="translate('+ initialValueX + ', ' + 0 + ')" />\n\
         </svg>\n';
 
-        var DOMURL = window.URL || window.webkitURL || window;
         var img = new Image();
-        var svg = new Blob([data], {type: 'image/svg+xml'});
-        var url = DOMURL.createObjectURL(svg);
+        data = encodeURIComponent(data);
         
         img.onload = function () {
             clearDrawing();
             ctx.drawImage(img, 0, 0);
-            DOMURL.revokeObjectURL(url);
         };
         
-        img.src = url;
+        img.src = "data:image/svg+xml," + data;
     };
     
     var clearDrawing = function() {
