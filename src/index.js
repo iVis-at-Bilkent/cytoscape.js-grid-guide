@@ -1,9 +1,9 @@
 ;(function(){ 'use strict';
 
 	// registers the extension on a cytoscape lib ref
-	var register = function( cytoscape ){
+	var register = function(cytoscape, $){
 
-		if( !cytoscape ){ return; } // can't register if cytoscape unspecified
+		if(!cytoscape || !$){ return; } // can't register if cytoscape unspecified
 
 		// flag that indicates if extension api functions are registed to cytoscape
 		// note that ideally these functions should not be directly registered to core from cytoscape.js
@@ -126,8 +126,8 @@
 		});
 	}
 
-	if( typeof cytoscape !== 'undefined' ){ // expose to global cytoscape (i.e. window.cytoscape)
-		register( cytoscape );
+	if( typeof cytoscape !== 'undefined' && $ ){ // expose to global cytoscape (i.e. window.cytoscape)
+		register( cytoscape, $ );
 	}
 
 })();
