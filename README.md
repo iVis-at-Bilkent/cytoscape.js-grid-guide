@@ -124,15 +124,16 @@ Download the library:
 CommonJS:
 ```js
 var cytoscape = require('cytoscape');
-var grid-guide = require('cytoscape-grid-guide');
+var jquery = require('jquery');
+var gridGuide = require('cytoscape-grid-guide');
 
-grid-guide( cytoscape, jquery ); // register extension
+gridGuide( cytoscape, jquery ); // register extension
 ```
 
 AMD:
 ```js
-require(['cytoscape', 'cytoscape-grid-guide'], function( cytoscape, grid-guide ){
-    grid-guide( cytoscape ); // register extension
+require(['cytoscape', 'jquery', 'cytoscape-grid-guide'], function( cytoscape, jquery, gridGuide ){
+    gridGuide( cytoscape, jquery ); // register extension
 });
 ```
 
