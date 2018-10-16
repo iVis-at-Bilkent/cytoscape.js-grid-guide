@@ -96,13 +96,13 @@ module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, gui
 	function setDrawGrid(enable) {
 		cy[eventStatus(enable)]('zoom', drawGridOnZoom);
 		cy[eventStatus(enable)]('pan', drawGridOnPan);
-		cy[eventStatus(enable)]('ready', drawGrid.resizeCanvas);
 
 		if (enable) {
 			drawGrid.initCanvas();
 			$(window).on('resize', drawGrid.resizeCanvas);
 		} else {
 			drawGrid.clearCanvas();
+			drawGrid.resetCanvas();
 			$(window).off('resize', drawGrid.resizeCanvas);
 		}
 	}
@@ -158,6 +158,7 @@ module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, gui
 			cy.off("pan", guidelinesPanHandler);
 			cy.off("drag", "node", guidelinesDragHandler);
 			cy.off("free", guidelinesFreeHandler);
+			guidelines.resetCanvas();
 			$(window).off("resize", guidelinesWindowResizeHandler);
 		}
 	}

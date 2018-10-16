@@ -60,7 +60,20 @@ module.exports = function (opts, cy, $, debounce) {
 	var $container = $(cy.container());
 	var ctx = $canvas[0].getContext('2d');
 	$container.append($canvas);
-	resizeCanvas();
+
+	var resetCanvas = function () {
+		$canvas
+			.attr('height', 0)
+			.attr('width', 0)
+			.css( {
+				'position': 'absolute',
+				'top': 0,
+				'left': 0,
+				'z-index': options.gridStackOrder
+			});
+	};
+
+	resetCanvas();
 
 	/* Global variables */
 	var VTree = null;
@@ -1003,5 +1016,6 @@ module.exports = function (opts, cy, $, debounce) {
 		getMousePos: getMousePos,
 		setMousePos: setMousePos,
 		resizeCanvas: resizeCanvas,
+		resetCanvas: resetCanvas,
 	}
 };
