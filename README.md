@@ -33,7 +33,7 @@ The users are allowed to customize various things about the functionality includ
 
 ## Demo
 
-Click [here](https://rawgit.com/iVis-at-Bilkent/cytoscape.js-grid-guide/master/demo.html) for demo
+Click [here](https://ivis-at-bilkent.github.io/cytoscape.js-grid-guide/demo.html) for demo
 
 ## API
 
