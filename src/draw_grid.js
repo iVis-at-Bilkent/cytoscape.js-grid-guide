@@ -12,6 +12,20 @@ module.exports = function (opts, cy, $, debounce) {
     var ctx = $canvas[ 0 ].getContext( '2d' );
     $container.append( $canvas );
 
+    var resetCanvas = function () {
+        $canvas
+            .attr('height', 0)
+            .attr('width', 0)
+            .css( {
+                'position': 'absolute',
+                'top': 0,
+                'left': 0,
+                'z-index': options.gridStackOrder
+            });
+    };
+
+    resetCanvas();
+
     var drawGrid = function() {
         var zoom = cy.zoom();
         var canvasWidth = $container.width();
@@ -88,6 +102,7 @@ module.exports = function (opts, cy, $, debounce) {
     return {
         initCanvas: resizeCanvas,
         resizeCanvas: resizeCanvas,
+        resetCanvas: resetCanvas,
         clearCanvas: clearDrawing,
         drawGrid: drawGrid,
         changeOptions: changeOptions,
