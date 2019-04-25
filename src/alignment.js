@@ -1,4 +1,4 @@
-module.exports = function (cytoscape, cy,  $, apiRegistered) {
+module.exports = function (cytoscape, cy, apiRegistered) {
 
     // Needed because parent nodes cannot be moved in Cytoscape.js < v3.2
     function moveTopDown(node, dx, dy) {
@@ -74,8 +74,8 @@ module.exports = function (cytoscape, cy,  $, apiRegistered) {
 
           for (var i = 0; i < eles.length; i++) {
               var node = eles[i];
-              var oldPos = $.extend({}, node.position());
-              var newPos = $.extend({}, node.position());
+              var oldPos = Object.assign({}, node.position());
+              var newPos = Object.assign({}, node.position());
 
               if (vertical != "none")
                   newPos.x = modelNode.position("x") + xFactor * (modelNode.outerWidth() - node.outerWidth()) / 2;

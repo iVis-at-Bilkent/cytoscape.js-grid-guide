@@ -1,4 +1,4 @@
-module.exports = function (opts, cy, $, debounce) {
+module.exports = function (opts, cy, debounce) {
 
     var options = opts;
 
@@ -7,29 +7,26 @@ module.exports = function (opts, cy, $, debounce) {
     };
 
 
-    var $canvas = $( '<canvas></canvas>' );
-    var $container = $( cy.container() );
-    var ctx = $canvas[ 0 ].getContext( '2d' );
+    var $canvas = document.createElement('canvas');
+    var $container = cy.container();
+    var ctx = $canvas.getContext( '2d' );
     $container.append( $canvas );
 
     var resetCanvas = function () {
-        $canvas
-            .attr('height', 0)
-            .attr('width', 0)
-            .css( {
-                'position': 'absolute',
-                'top': 0,
-                'left': 0,
-                'z-index': options.gridStackOrder
-            });
+        $canvas.height = 0;
+        $canvas.width = 0;
+        $canvas.style.position = 'absolute';
+        $canvas.style.top = 0;
+        $canvas.style.left = 0;
+        $canvas.style.zIndex = options.gridStackOrder;
     };
 
     resetCanvas();
 
     var drawGrid = function() {
         var zoom = cy.zoom();
-        var canvasWidth = $container.width();
-        var canvasHeight = $container.height();
+        var canvasWidth = cy.width();
+        var canvasHeight = cy.height();
         var increment = options.gridSpacing*zoom;
         var pan = cy.pan();
         var initialValueX = pan.x%increment;
@@ -63,36 +60,27 @@ module.exports = function (opts, cy, $, debounce) {
     };
     
     var clearDrawing = function() {
-        var width = $container.width();
-        var height = $container.height();
+        var width = cy.width();
+        var height = cy.height();
 
         ctx.clearRect( 0, 0, width, height );
     };
 
     var resizeCanvas = debounce(function() {
-            $canvas
-                .attr( 'height', $container.height() )
-                .attr( 'width', $container.width() )
-                .css( {
-                    'position': 'absolute',
-                    'top': 0,
-                    'left': 0,
-                    'z-index': options.gridStackOrder
-                } );
+        $canvas.height = cy.height();
+        $canvas.width = cy.width();
+        $canvas.style.position = 'absolute';
+        $canvas.style.top = 0;
+        $canvas.style.left = 0;
+        $canvas.style.zIndex = options.gridStackOrder;
 
-            setTimeout( function() {
-                var canvasBb = $canvas.offset();
-                var containerBb = $container.offset();
-
-                $canvas
-                    .attr( 'height', $container.height() )
-                    .attr( 'width', $container.width() )
-                    .css( {
-                        'top': -( canvasBb.top - containerBb.top ),
-                        'left': -( canvasBb.left - containerBb.left )
-                    } );
-                drawGrid();
-            }, 0 );
+        setTimeout( function() {
+            $canvas.height = cy.height();
+            $canvas.width = cy.width();
+            $canvas.style.top = -( $canvas.offsetTop - $container.offsetTop );
+            $canvas.style.left = -( $canvas.offsetLeft - $container.offsetLeft )
+            drawGrid();
+        }, 0 );
 
     }, 250);
 

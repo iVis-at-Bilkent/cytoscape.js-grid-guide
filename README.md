@@ -111,7 +111,6 @@ var options = {
 ## Dependencies
 
  * Cytoscape.js >=1.6.10
- * jQuery ^1.4 || ^2.0 || ^3.0
 
 
 ## Usage instructions
@@ -126,16 +125,15 @@ Download the library:
 CommonJS:
 ```js
 var cytoscape = require('cytoscape');
-var jquery = require('jquery');
 var gridGuide = require('cytoscape-grid-guide');
 
-gridGuide( cytoscape, jquery ); // register extension
+gridGuide( cytoscape ); // register extension
 ```
 
 AMD:
 ```js
-require(['cytoscape', 'jquery', 'cytoscape-grid-guide'], function( cytoscape, jquery, gridGuide ){
-    gridGuide( cytoscape, jquery ); // register extension
+require(['cytoscape', 'cytoscape-grid-guide'], function( cytoscape, gridGuide ){
+    gridGuide( cytoscape ); // register extension
 });
 ```
 
