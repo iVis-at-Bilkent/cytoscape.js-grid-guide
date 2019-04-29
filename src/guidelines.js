@@ -14,6 +14,15 @@ module.exports = function (opts, cy, debounce) {
 			options.guidelinesTolerance = 0.001;
 	};
 
+	var offset = function(elt) {
+		var rect = elt.getBoundingClientRect();
+
+		return {
+			top: rect.top + document.documentElement.scrollTop,
+			left: rect.left + document.documentElement.scrollLeft
+		}
+	};
+
 	var getCyScratch = function () {
 		var sc = cy.scratch("_guidelines");
 		if (!sc)
@@ -36,8 +45,11 @@ module.exports = function (opts, cy, debounce) {
 
 			$canvas.height = cy.height();
 			$canvas.width = cy.width();
-			$canvas.style.top = -( $canvas.offsetTop - $container.offsetTop );
-			$canvas.style.left = -( $canvas.offsetLeft - $container.offsetLeft );
+
+			var canvasBb = offset($canvas);
+			var containerBb = offset($container);
+			$canvas.style.top = -(canvasBb.top - containerBb.top);
+			$canvas.style.left = -(canvasBb.left - containerBb.left);
 		}, 0);
 	}, 250);
 
