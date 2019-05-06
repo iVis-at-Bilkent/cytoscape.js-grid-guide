@@ -2800,6 +2800,7 @@ module.exports = function (opts, cy, $, debounce) {
 
 			// General
 			gridSpacing: 20, // Distance between the lines of the grid.
+			snapToGridCenter: true, // Snaps nodes and edges to center of gridlines.
 			zoomDash: true, // Determines whether the size of the dashes should change when the drawing is zoomed in and out if grid is drawn.
 			panGrid: false, // Determines whether the grid should move then the user moves the graph if grid is drawn.
 			gridStackOrder: -1, // Namely z-index
@@ -3087,6 +3088,7 @@ module.exports = function (cy, gridSpacing) {
 
     snap.changeOptions = function (opts) {
         gridSpacing = opts.gridSpacing;
+        gridSpacingOffset = opts.snapToGridCenter ? 0.5 : 0;
     };
 
     var getScratch = function (node) {
@@ -3097,9 +3099,11 @@ module.exports = function (cy, gridSpacing) {
     };
 
     snap.snapPos = function (pos) {
+        var xPosition = gridSpacingOffset ? Math.floor(pos.x / gridSpacing) : Math.round(pos.x / gridSpacing);
+        var yPosition = gridSpacingOffset ? Math.floor(pos.y / gridSpacing) : Math.round(pos.y / gridSpacing);
         var newPos = {
-            x: (Math.floor(pos.x / gridSpacing) + 0.5) * gridSpacing,
-            y: (Math.floor(pos.y / gridSpacing) + 0.5) * gridSpacing
+            x: (xPosition + gridSpacingOffset) * gridSpacing,
+            y: (yPosition + gridSpacingOffset) * gridSpacing
         };
 
         return newPos;

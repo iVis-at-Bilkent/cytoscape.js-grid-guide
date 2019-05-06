@@ -27,6 +27,7 @@
 
 			// General
 			gridSpacing: 20, // Distance between the lines of the grid.
+			snapToGridCenter: true, // Snaps nodes and edges to center of gridlines.
 			zoomDash: true, // Determines whether the size of the dashes should change when the drawing is zoomed in and out if grid is drawn.
 			panGrid: false, // Determines whether the grid should move then the user moves the graph if grid is drawn.
 			gridStackOrder: -1, // Namely z-index
@@ -86,7 +87,7 @@
 
 				var snap, resize, snapToGridDuringDrag, drawGrid, eventsController, guidelines, parentPadding, alignment;
 
-				snap = _snapOnRelease(cy, options.gridSpacing);
+				snap = _snapOnRelease(cy, options.gridSpacing, options.snapToGridCenter);
 				resize = _resize(options.gridSpacing);
 				snapToGridDuringDrag = _snapToGridDuringDrag(cy, snap);
 				drawGrid = _drawGrid(options, cy, $, debounce);
