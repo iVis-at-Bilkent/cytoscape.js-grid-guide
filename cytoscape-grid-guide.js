@@ -1695,7 +1695,7 @@ module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, gui
 		guidelines: ["gridSpacing", "guidelinesStackOrder", "guidelinesTolerance", "guidelinesStyle", "distributionGuidelines", "range", "minDistRange",  "geometricGuidelineRange"],
 		resize: ["gridSpacing"],
 		parentPadding: ["gridSpacing", "parentSpacing"],
-		snapToGridOnRelease: ["gridSpacing"]
+		snapToGridOnRelease: ["gridSpacing", "snapToGridCenter"]
 	};
 
 	function syncWithOptions(options) {
@@ -2800,7 +2800,7 @@ module.exports = function (opts, cy, $, debounce) {
 
 			// General
 			gridSpacing: 20, // Distance between the lines of the grid.
-			snapToGridCenter: true, // Snaps nodes and edges to center of gridlines.
+			snapToGridCenter: true, // Snaps nodes to center of gridlines. When false, snaps to gridlines themselves.
 			zoomDash: true, // Determines whether the size of the dashes should change when the drawing is zoomed in and out if grid is drawn.
 			panGrid: false, // Determines whether the grid should move then the user moves the graph if grid is drawn.
 			gridStackOrder: -1, // Namely z-index
@@ -2860,7 +2860,7 @@ module.exports = function (opts, cy, $, debounce) {
 
 				var snap, resize, snapToGridDuringDrag, drawGrid, eventsController, guidelines, parentPadding, alignment;
 
-				snap = _snapOnRelease(cy, options.gridSpacing);
+				snap = _snapOnRelease(cy, options.gridSpacing, options.snapToGridCenter);
 				resize = _resize(options.gridSpacing);
 				snapToGridDuringDrag = _snapToGridDuringDrag(cy, snap);
 				drawGrid = _drawGrid(options, cy, $, debounce);
@@ -3082,7 +3082,7 @@ module.exports = function (cy, snap) {
 };
 
 },{}],11:[function(require,module,exports){
-module.exports = function (cy, gridSpacing) {
+module.exports = function (cy, gridSpacing, gridSpacingOffset) {
 
     var snap = { };
 

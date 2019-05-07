@@ -27,7 +27,7 @@
 
 			// General
 			gridSpacing: 20, // Distance between the lines of the grid.
-			snapToGridCenter: true, // Snaps nodes and edges to center of gridlines.
+			snapToGridCenter: true, // Snaps nodes to center of gridlines. When false, snaps to gridlines themselves.
 			zoomDash: true, // Determines whether the size of the dashes should change when the drawing is zoomed in and out if grid is drawn.
 			panGrid: false, // Determines whether the grid should move then the user moves the graph if grid is drawn.
 			gridStackOrder: -1, // Namely z-index
