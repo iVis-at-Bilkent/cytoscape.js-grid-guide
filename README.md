@@ -78,7 +78,7 @@ var options = {
 
     // General
     gridSpacing: 20, // Distance between the lines of the grid.
-    snapToGridCenter: true, // Snaps nodes to center of gridlines. When false, snaps to gridlines themselves.
+    snapToGridCenter: true, // Snaps nodes to center of gridlines. When false, snaps to gridlines themselves. Note that either snapToGridOnRelease or snapToGridDuringDrag must be true.
 
     // Draw Grid
     zoomDash: true, // Determines whether the size of the dashes should change when the drawing is zoomed in and out if grid is drawn.
