@@ -84,6 +84,7 @@ var options = {
     gridStackOrder: -1, // Namely z-index
     gridColor: '#dedede', // Color of grid lines
     lineWidth: 1.0, // Width of grid lines
+    snapToGridCenter: true, // Snaps nodes to center of gridlines. When false, snaps to gridlines themselves.
 
     // Guidelines
     guidelinesStackOrder: 4, // z-index of guidelines
