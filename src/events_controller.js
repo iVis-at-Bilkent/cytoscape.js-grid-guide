@@ -1,4 +1,4 @@
-module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, guidelines, parentPadding, $, opts) {
+module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, guidelines, parentPadding, opts) {
 
 	var feature = function (func) {
 		return function (enable) {
@@ -99,11 +99,11 @@ module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, gui
 
 		if (enable) {
 			drawGrid.initCanvas();
-			$(window).on('resize', drawGrid.resizeCanvas);
+			window.addEventListener('resize', drawGrid.resizeCanvas);
 		} else {
 			drawGrid.clearCanvas();
 			drawGrid.resetCanvas();
-			$(window).off('resize', drawGrid.resizeCanvas);
+			window.removeEventListener('resize', drawGrid.resizeCanvas);
 		}
 	}
 
@@ -150,7 +150,7 @@ module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, gui
 			cy.on("pan", guidelinesPanHandler);
 			cy.on("drag", "node", guidelinesDragHandler);
 			cy.on("free", guidelinesFreeHandler);
-			$(window).on("resize", guidelinesWindowResizeHandler);
+			window.addEventListener('resize', guidelinesWindowResizeHandler);
 		}
 		else{
 			cy.off("tapstart", "node", guidelinesTapHandler);
@@ -159,7 +159,7 @@ module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, gui
 			cy.off("drag", "node", guidelinesDragHandler);
 			cy.off("free", guidelinesFreeHandler);
 			guidelines.resetCanvas();
-			$(window).off("resize", guidelinesWindowResizeHandler);
+			window.removeEventListener('resize', guidelinesWindowResizeHandler);
 		}
 	}
 
@@ -193,7 +193,7 @@ module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, gui
 	};
 
 	function syncWithOptions(options) {
-		currentOptions = $.extend(true, {}, options);
+		currentOptions = Object.extend({}, options);
 		options.guidelines = options.initPosAlignment ||  options.distributionGuidelines || options.geometricGuideline;
 		for (var key in options)
 			if (latestOptions[key] != options[key])
@@ -231,7 +231,7 @@ module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, gui
 						}
 					}
 				}
-		latestOptions = $.extend(true, latestOptions, options);
+		latestOptions = Object.extend({}, latestOptions, options);
 	}
 
 	return {
