@@ -189,7 +189,7 @@ module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, gui
 		guidelines: ["gridSpacing", "guidelinesStackOrder", "guidelinesTolerance", "guidelinesStyle", "distributionGuidelines", "range", "minDistRange",  "geometricGuidelineRange"],
 		resize: ["gridSpacing"],
 		parentPadding: ["gridSpacing", "parentSpacing"],
-		snapToGridOnRelease: ["gridSpacing"]
+		snapToGridOnRelease: ["gridSpacing", "snapToGridCenter"]
 	};
 
 	function syncWithOptions(options) {

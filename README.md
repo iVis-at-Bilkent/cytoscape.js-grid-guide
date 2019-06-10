@@ -30,10 +30,11 @@ The users are allowed to customize various things about the functionality includ
 - colors and line styles of each type of guidelines
 - range of geometric and distribution guidelines (i.e. do not consider nodes that are outside this range for alignment)
 - whether or not edge to center alignment should be ignored
+- whether to snap nodes to the center of the grid or to the lines of the grid
 
 ## Demo
 
-Click [here](https://rawgit.com/iVis-at-Bilkent/cytoscape.js-grid-guide/master/demo.html) for demo
+Click [here](https://ivis-at-bilkent.github.io/cytoscape.js-grid-guide/demo.html) for demo
 
 ## API
 
@@ -77,6 +78,7 @@ var options = {
 
     // General
     gridSpacing: 20, // Distance between the lines of the grid.
+    snapToGridCenter: true, // Snaps nodes to center of gridlines. When false, snaps to gridlines themselves. Note that either snapToGridOnRelease or snapToGridDuringDrag must be true.
 
     // Draw Grid
     zoomDash: true, // Determines whether the size of the dashes should change when the drawing is zoomed in and out if grid is drawn.

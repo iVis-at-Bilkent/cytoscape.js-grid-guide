@@ -1,9 +1,10 @@
-module.exports = function (cy, gridSpacing) {
+module.exports = function (cy, gridSpacing, gridSpacingOffset) {
 
     var snap = { };
 
     snap.changeOptions = function (opts) {
         gridSpacing = opts.gridSpacing;
+        gridSpacingOffset = opts.snapToGridCenter ? 0.5 : 0;
     };
 
     var getScratch = function (node) {
@@ -14,9 +15,11 @@ module.exports = function (cy, gridSpacing) {
     };
 
     snap.snapPos = function (pos) {
+        var xPosition = gridSpacingOffset ? Math.floor(pos.x / gridSpacing) : Math.round(pos.x / gridSpacing);
+        var yPosition = gridSpacingOffset ? Math.floor(pos.y / gridSpacing) : Math.round(pos.y / gridSpacing);
         var newPos = {
-            x: (Math.floor(pos.x / gridSpacing) + 0.5) * gridSpacing,
-            y: (Math.floor(pos.y / gridSpacing) + 0.5) * gridSpacing
+            x: (xPosition + gridSpacingOffset) * gridSpacing,
+            y: (yPosition + gridSpacingOffset) * gridSpacing
         };
 
         return newPos;
