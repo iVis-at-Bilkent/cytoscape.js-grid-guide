@@ -112,7 +112,7 @@ var options = {
 
 ## Dependencies
 
- * Cytoscape.js >=1.6.10
+ * Cytoscape.js ^3.3.0
 
 
 ## Usage instructions
