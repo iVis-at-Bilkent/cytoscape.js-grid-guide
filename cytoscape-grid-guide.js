@@ -996,7 +996,7 @@ function createRBTree(compare) {
   return new RedBlackTree(compare || defaultCompare, null)
 }
 },{}],2:[function(require,module,exports){
-module.exports = function (cytoscape, cy,  $, apiRegistered) {
+module.exports = function (cytoscape, cy, apiRegistered) {
 
     // Needed because parent nodes cannot be moved in Cytoscape.js < v3.2
     function moveTopDown(node, dx, dy) {
@@ -1072,8 +1072,8 @@ module.exports = function (cytoscape, cy,  $, apiRegistered) {
 
           for (var i = 0; i < eles.length; i++) {
               var node = eles[i];
-              var oldPos = $.extend({}, node.position());
-              var newPos = $.extend({}, node.position());
+              var oldPos = Object.assign({}, node.position());
+              var newPos = Object.assign({}, node.position());
 
               if (vertical != "none")
                   newPos.x = modelNode.position("x") + xFactor * (modelNode.outerWidth() - node.outerWidth()) / 2;
@@ -1391,7 +1391,7 @@ var debounce = (function(){
 
 module.exports = debounce;
 },{}],4:[function(require,module,exports){
-module.exports = function (opts, cy, $, debounce) {
+module.exports = function (opts, cy, debounce) {
 
     var options = opts;
 
@@ -1399,30 +1399,35 @@ module.exports = function (opts, cy, $, debounce) {
       options = opts;
     };
 
+    var offset = function(elt) {
+        var rect = elt.getBoundingClientRect();
 
-    var $canvas = $( '<canvas></canvas>' );
-    var $container = $( cy.container() );
-    var ctx = $canvas[ 0 ].getContext( '2d' );
+        return {
+          top: rect.top + document.documentElement.scrollTop,
+          left: rect.left + document.documentElement.scrollLeft
+        }
+    };
+
+    var $canvas = document.createElement('canvas');
+    var $container = cy.container();
+    var ctx = $canvas.getContext( '2d' );
     $container.append( $canvas );
 
     var resetCanvas = function () {
-        $canvas
-            .attr('height', 0)
-            .attr('width', 0)
-            .css( {
-                'position': 'absolute',
-                'top': 0,
-                'left': 0,
-                'z-index': options.gridStackOrder
-            });
+        $canvas.height = 0;
+        $canvas.width = 0;
+        $canvas.style.position = 'absolute';
+        $canvas.style.top = 0;
+        $canvas.style.left = 0;
+        $canvas.style.zIndex = options.gridStackOrder;
     };
 
     resetCanvas();
 
     var drawGrid = function() {
         var zoom = cy.zoom();
-        var canvasWidth = $container.width();
-        var canvasHeight = $container.height();
+        var canvasWidth = cy.width();
+        var canvasHeight = cy.height();
         var increment = options.gridSpacing*zoom;
         var pan = cy.pan();
         var initialValueX = pan.x%increment;
@@ -1456,36 +1461,30 @@ module.exports = function (opts, cy, $, debounce) {
     };
     
     var clearDrawing = function() {
-        var width = $container.width();
-        var height = $container.height();
+        var width = cy.width();
+        var height = cy.height();
 
         ctx.clearRect( 0, 0, width, height );
     };
 
     var resizeCanvas = debounce(function() {
-            $canvas
-                .attr( 'height', $container.height() )
-                .attr( 'width', $container.width() )
-                .css( {
-                    'position': 'absolute',
-                    'top': 0,
-                    'left': 0,
-                    'z-index': options.gridStackOrder
-                } );
+        $canvas.height = cy.height();
+        $canvas.width = cy.width();
+        $canvas.style.position = 'absolute';
+        $canvas.style.top = 0;
+        $canvas.style.left = 0;
+        $canvas.style.zIndex = options.gridStackOrder;
 
-            setTimeout( function() {
-                var canvasBb = $canvas.offset();
-                var containerBb = $container.offset();
+        setTimeout( function() {
+            $canvas.height = cy.height();
+            $canvas.width = cy.width();
 
-                $canvas
-                    .attr( 'height', $container.height() )
-                    .attr( 'width', $container.width() )
-                    .css( {
-                        'top': -( canvasBb.top - containerBb.top ),
-                        'left': -( canvasBb.left - containerBb.left )
-                    } );
-                drawGrid();
-            }, 0 );
+            var canvasBb = offset($canvas);
+            var containerBb = offset($container);
+            $canvas.style.top = -(canvasBb.top - containerBb.top);
+            $canvas.style.left = -(canvasBb.left - containerBb.left);
+            drawGrid();
+        }, 0 );
 
     }, 250);
 
@@ -1504,7 +1503,7 @@ module.exports = function (opts, cy, $, debounce) {
 };
 
 },{}],5:[function(require,module,exports){
-module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, guidelines, parentPadding, $, opts) {
+module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, guidelines, parentPadding, opts) {
 
 	var feature = function (func) {
 		return function (enable) {
@@ -1605,11 +1604,11 @@ module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, gui
 
 		if (enable) {
 			drawGrid.initCanvas();
-			$(window).on('resize', drawGrid.resizeCanvas);
+			window.addEventListener('resize', drawGrid.resizeCanvas);
 		} else {
 			drawGrid.clearCanvas();
 			drawGrid.resetCanvas();
-			$(window).off('resize', drawGrid.resizeCanvas);
+			window.removeEventListener('resize', drawGrid.resizeCanvas);
 		}
 	}
 
@@ -1656,7 +1655,7 @@ module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, gui
 			cy.on("pan", guidelinesPanHandler);
 			cy.on("drag", "node", guidelinesDragHandler);
 			cy.on("free", guidelinesFreeHandler);
-			$(window).on("resize", guidelinesWindowResizeHandler);
+			window.addEventListener('resize', guidelinesWindowResizeHandler);
 		}
 		else{
 			cy.off("tapstart", "node", guidelinesTapHandler);
@@ -1665,7 +1664,7 @@ module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, gui
 			cy.off("drag", "node", guidelinesDragHandler);
 			cy.off("free", guidelinesFreeHandler);
 			guidelines.resetCanvas();
-			$(window).off("resize", guidelinesWindowResizeHandler);
+			window.removeEventListener('resize', guidelinesWindowResizeHandler);
 		}
 	}
 
@@ -1695,11 +1694,11 @@ module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, gui
 		guidelines: ["gridSpacing", "guidelinesStackOrder", "guidelinesTolerance", "guidelinesStyle", "distributionGuidelines", "range", "minDistRange",  "geometricGuidelineRange"],
 		resize: ["gridSpacing"],
 		parentPadding: ["gridSpacing", "parentSpacing"],
-		snapToGridOnRelease: ["gridSpacing"]
+		snapToGridOnRelease: ["gridSpacing", "snapToGridCenter"]
 	};
 
 	function syncWithOptions(options) {
-		currentOptions = $.extend(true, {}, options);
+		currentOptions = Object.extend({}, options);
 		options.guidelines = options.initPosAlignment ||  options.distributionGuidelines || options.geometricGuideline;
 		for (var key in options)
 			if (latestOptions[key] != options[key])
@@ -1737,7 +1736,7 @@ module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, gui
 						}
 					}
 				}
-		latestOptions = $.extend(true, latestOptions, options);
+		latestOptions = Object.extend({}, latestOptions, options);
 	}
 
 	return {
@@ -1748,7 +1747,40 @@ module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, gui
 };
 
 },{}],6:[function(require,module,exports){
-module.exports = function (opts, cy, $, debounce) {
+/**
+ * Deep copy or merge objects - replacement for jQuery deep extend
+ * Taken from http://youmightnotneedjquery.com/#deep_extend
+ * and bug related to deep copy of Arrays is fixed.
+ * Usage:Object.extend({}, objA, objB)
+ */
+
+Object.extend = function(out) {
+	out = out || {};
+
+	for (var i = 1; i < arguments.length; i++) {
+		var obj = arguments[i];
+
+		if (!obj)
+			continue;
+
+		for (var key in obj) {
+			if (obj.hasOwnProperty(key)) {
+				if (Array.isArray(obj[key])) {
+					out[key] = obj[key].slice();
+				} else if (typeof obj[key] === 'object') {
+					out[key] = Object.extend(out[key], obj[key]);
+				} else {
+					out[key] = obj[key];
+				}
+			}
+		}
+	}
+
+	return out;
+};
+
+},{}],7:[function(require,module,exports){
+module.exports = function (opts, cy, debounce) {
 
 
 	var RBTree = require("functional-red-black-tree");
@@ -1764,6 +1796,15 @@ module.exports = function (opts, cy, $, debounce) {
 			options.guidelinesTolerance = 0.001;
 	};
 
+	var offset = function(elt) {
+		var rect = elt.getBoundingClientRect();
+
+		return {
+			top: rect.top + document.documentElement.scrollTop,
+			left: rect.left + document.documentElement.scrollLeft
+		}
+	};
+
 	var getCyScratch = function () {
 		var sc = cy.scratch("_guidelines");
 		if (!sc)
@@ -1775,52 +1816,45 @@ module.exports = function (opts, cy, $, debounce) {
 	/* Resize canvas */
 	var resizeCanvas = debounce(function () {
 		clearDrawing();
-		$canvas
-			.attr('height', $container.height())
-			.attr('width', $container.width())
-			.css({
-				'position': 'absolute',
-				'top': 0,
-				'left': 0,
-				'z-index': options.guidelinesStackOrder
-			});
-		setTimeout(function () {
-			var canvasBb = $canvas.offset();
-			var containerBb = $container.offset();
+		$canvas.height = cy.height();
+		$canvas.width = cy.width();
+		$canvas.style.position = 'absolute';
+		$canvas.style.top = 0;
+		$canvas.style.left = 0;
+		$canvas.style.zIndex = options.guidelinesStackOrder;
 
-			$canvas
-				.attr('height', $container.height())
-				.attr('width', $container.width())
-				.css({
-					'top': -( canvasBb.top - containerBb.top ),
-					'left': -( canvasBb.left - containerBb.left )
-				});
+		setTimeout(function () {
+
+			$canvas.height = cy.height();
+			$canvas.width = cy.width();
+
+			var canvasBb = offset($canvas);
+			var containerBb = offset($container);
+			$canvas.style.top = -(canvasBb.top - containerBb.top);
+			$canvas.style.left = -(canvasBb.left - containerBb.left);
 		}, 0);
 	}, 250);
 
 	/* Clear canvas */
 	var clearDrawing = function () {
-		var width = $container.width();
-		var height = $container.height();
+		var width = cy.width();
+		var height = cy.height();
 		ctx.clearRect(0, 0, width, height);
 	};
 
 	/* Create a canvas */
-	var $canvas = $('<canvas></canvas>');
-	var $container = $(cy.container());
-	var ctx = $canvas[0].getContext('2d');
+	var $canvas = document.createElement('canvas');
+	var $container = cy.container();
+	var ctx = $canvas.getContext('2d');
 	$container.append($canvas);
 
 	var resetCanvas = function () {
-		$canvas
-			.attr('height', 0)
-			.attr('width', 0)
-			.css( {
-				'position': 'absolute',
-				'top': 0,
-				'left': 0,
-				'z-index': options.gridStackOrder
-			});
+		$canvas.height = 0;
+		$canvas.width = 0;
+		$canvas.style.position = 'absolute';
+		$canvas.style.top = 0;
+		$canvas.style.left = 0;
+		$canvas.style.zIndex = options.guidelinesStackOrder;
 	};
 
 	resetCanvas();
@@ -1883,25 +1917,25 @@ module.exports = function (opts, cy, $, debounce) {
 		excludedNodes = activeNodes.union(activeNodes.ancestors());
 		excludedNodes = excludedNodes.union(activeNodes.descendants());
 		nodes.not(excludedNodes).each(function (node, i) {
-            if(typeof node === "number") {
-              node = i;
-            }
+			if(typeof node === "number") {
+				node = i;
+			}
 			var dims = lines.getDims(node);
 
 			["left", "center", "right"].forEach(function (val) {
 				var hKey = dims.horizontal[val];
 				if (HTree.get(hKey))
-				HTree.get(hKey).push(node);
+					HTree.get(hKey).push(node);
 				else
-				HTree = HTree.insert(hKey, [node]);
+					HTree = HTree.insert(hKey, [node]);
 			});
 
 			["top", "center", "bottom"].forEach(function (val) {
 				var vKey = dims.vertical[val];
 				if (VTree.get(vKey))
-				VTree.get(vKey).push(node);
+					VTree.get(vKey).push(node);
 				else
-				VTree = VTree.insert(vKey, [node]);
+					VTree = VTree.insert(vKey, [node]);
 			});
 
 		});
@@ -1998,32 +2032,32 @@ module.exports = function (opts, cy, $, debounce) {
 		ctx.lineTo(position.x + 5, position.y + 5);
 		ctx.stroke();
 	};
-	
+
 	/**
 	 * Calculate the amount of offset for distribution guidelines
 	 * @param nodes - list of nodes
 	 * @param type - horizontal or vertical
 	 */
 	calculateOffset = function(nodes, type){
-			var minNode = nodes[0], min = lines.getDims(minNode)[type]["center"];
-			var maxNode = nodes[0], max = lines.getDims(maxNode)[type]["center"];
+		var minNode = nodes[0], min = lines.getDims(minNode)[type]["center"];
+		var maxNode = nodes[0], max = lines.getDims(maxNode)[type]["center"];
 
-			for (var i = 0; i < nodes.length; i++){
-				var node = nodes[i];
-				if (lines.getDims(node)[type]["center"] < min){
-					min = lines.getDims(node)[type]["center"]; minNode = node;
-				}
-				if (lines.getDims(node)[type]["center"] > max){
-					max = lines.getDims(node)[type]["center"]; maxNode = node;
-				}
+		for (var i = 0; i < nodes.length; i++){
+			var node = nodes[i];
+			if (lines.getDims(node)[type]["center"] < min){
+				min = lines.getDims(node)[type]["center"]; minNode = node;
 			}
+			if (lines.getDims(node)[type]["center"] > max){
+				max = lines.getDims(node)[type]["center"]; maxNode = node;
+			}
+		}
 
-			if (type == "horizontal")
-				var offset = (min + max) / 2 < lines.getDims(nodes[1])[type]["center"] ? max + (0.5*maxNode.width() + options.guidelinesStyle.distGuidelineOffset)*cy.zoom() : min - (0.5*minNode.width() + options.guidelinesStyle.distGuidelineOffset)*cy.zoom();
-			else
-				var offset = (min + max) / 2 < lines.getDims(nodes[1])[type]["center"] ? max + (0.5*maxNode.height() + options.guidelinesStyle.distGuidelineOffset)*cy.zoom() : min - (0.5*minNode.height() + options.guidelinesStyle.distGuidelineOffset)*cy.zoom();
+		if (type == "horizontal")
+			var offset = (min + max) / 2 < lines.getDims(nodes[1])[type]["center"] ? max + (0.5*maxNode.width() + options.guidelinesStyle.distGuidelineOffset)*cy.zoom() : min - (0.5*minNode.width() + options.guidelinesStyle.distGuidelineOffset)*cy.zoom();
+		else
+			var offset = (min + max) / 2 < lines.getDims(nodes[1])[type]["center"] ? max + (0.5*maxNode.height() + options.guidelinesStyle.distGuidelineOffset)*cy.zoom() : min - (0.5*minNode.height() + options.guidelinesStyle.distGuidelineOffset)*cy.zoom();
 
-			return offset;
+		return offset;
 	}
 	/** Guidelines for horizontally distributed alignment
 	 * @param: node the node to be aligned
@@ -2043,18 +2077,18 @@ module.exports = function (opts, cy, $, debounce) {
 				if (Math.abs(leftDim["vertical"]["center"] - nodeDim["vertical"]["center"]) < options.guidelinesStyle.range*cy.zoom()){
 					if ((leftDim["horizontal"]["right"]) == key && 
 						nodeDim["horizontal"]["left"] - leftDim["horizontal"]["right"] > options.guidelinesStyle.minDistRange){
-							var ripo = Math.round(2*Xcenter)-key;
-							HTree.forEach(function($, rightNodes){
-								for (var j = 0; j < rightNodes.length; j++){
-									var right = rightNodes[j];
-									if (Math.abs(lines.getDims(right)["vertical"]["center"] - Ycenter) < options.guidelinesStyle.range*cy.zoom()){
-										if (Math.abs(ripo - lines.getDims(right)["horizontal"]["left"]) < 2*options.guidelinesTolerance){
-											leftNode = left; rightNode = right;
-										}
+						var ripo = Math.round(2*Xcenter)-key;
+						HTree.forEach(function($, rightNodes){
+							for (var j = 0; j < rightNodes.length; j++){
+								var right = rightNodes[j];
+								if (Math.abs(lines.getDims(right)["vertical"]["center"] - Ycenter) < options.guidelinesStyle.range*cy.zoom()){
+									if (Math.abs(ripo - lines.getDims(right)["horizontal"]["left"]) < 2*options.guidelinesTolerance){
+										leftNode = left; rightNode = right;
 									}
 								}
-							}, ripo - options.guidelinesTolerance, ripo + options.guidelinesTolerance);
-						}
+							}
+						}, ripo - options.guidelinesTolerance, ripo + options.guidelinesTolerance);
+					}
 				}
 			}
 		}, Xcenter - options.guidelinesStyle.range*cy.zoom(), Xcenter);
@@ -2066,7 +2100,7 @@ module.exports = function (opts, cy, $, debounce) {
 				alignedLocations.h = alignedLocations.hd;
 			}
 			var offset = calculateOffset([leftNode, node, rightNode], "vertical");
-	
+
 			lines.drawLine({
 				x: lines.getDims(leftNode)["horizontal"]["right"],
 				y: offset
@@ -2158,20 +2192,20 @@ module.exports = function (opts, cy, $, debounce) {
 				if (Math.abs(belowDim["horizontal"]["center"] - nodeDim["horizontal"]["center"]) < options.guidelinesStyle.range*cy.zoom()){
 					if (belowDim["vertical"]["bottom"] == key &&
 						nodeDim["vertical"]["top"] - belowDim["vertical"]["bottom"] > options.guidelinesStyle.minDistRange){
-							var abpo = Math.round((2*Ycenter)-key);
-							VTree.forEach(function($, aboveNodes){
-								//if (aboveNodes){
-								for (var j = 0; j < aboveNodes.length; j++){
-									var above = aboveNodes[j];
-									if (Math.abs(lines.getDims(above)["horizontal"]["center"] - Xcenter) < options.guidelinesStyle.range*cy.zoom()){
-										if (Math.abs(abpo - lines.getDims(above)["vertical"]["top"]) < 2*options.guidelinesTolerance){
-											belowNode = below; aboveNode = above;
-										}
+						var abpo = Math.round((2*Ycenter)-key);
+						VTree.forEach(function($, aboveNodes){
+							//if (aboveNodes){
+							for (var j = 0; j < aboveNodes.length; j++){
+								var above = aboveNodes[j];
+								if (Math.abs(lines.getDims(above)["horizontal"]["center"] - Xcenter) < options.guidelinesStyle.range*cy.zoom()){
+									if (Math.abs(abpo - lines.getDims(above)["vertical"]["top"]) < 2*options.guidelinesTolerance){
+										belowNode = below; aboveNode = above;
 									}
 								}
-								//}
-							}, abpo - options.guidelinesTolerance, abpo + options.guidelinesTolerance);
-						}
+							}
+							//}
+						}, abpo - options.guidelinesTolerance, abpo + options.guidelinesTolerance);
+					}
 				}
 			}
 		}, Ycenter - options.guidelinesStyle.range*cy.zoom(), Ycenter);
@@ -2240,12 +2274,12 @@ module.exports = function (opts, cy, $, debounce) {
 
 			lines.drawArrow({
 				x: offset,
-			y: lines.getDims(aboveNode)["vertical"]["top"]}, "bottom");
+				y: lines.getDims(aboveNode)["vertical"]["top"]}, "bottom");
 
 			lines.drawArrow({
 				x: offset,
 				y: nodeDim["vertical"]["bottom"]}, "top");
-			}
+		}
 		else{
 			var state = lines.verticalDistributionNext(node,"below" );
 
@@ -2290,12 +2324,12 @@ module.exports = function (opts, cy, $, debounce) {
 				for (var i = 0; i < nodes.length; i++){
 					var n = nodes[i];
 					if (options.centerToEdgeAlignment || (dimKey != "center" && n.renderedPosition(otherAxis) != exKey) || (dimKey == "center" && n.renderedPosition(otherAxis) == exKey)){
-					var dif = Math.abs(center - n.renderedPosition(axis));
-					if ( dif < targetKey && dif < options.guidelinesStyle.geometricGuidelineRange*cy.zoom()){
-						target = n;
-						targetKey = dif;
-						closestKey = exKey;
-					}
+						var dif = Math.abs(center - n.renderedPosition(axis));
+						if ( dif < targetKey && dif < options.guidelinesStyle.geometricGuidelineRange*cy.zoom()){
+							target = n;
+							targetKey = dif;
+							closestKey = exKey;
+						}
 					}
 				}
 			}, position - Number(options.guidelinesTolerance), position + Number(options.guidelinesTolerance));
@@ -2303,7 +2337,7 @@ module.exports = function (opts, cy, $, debounce) {
 			// if alignment found, draw lines and break
 			if (target) {
 				targetKey = lines.getDims(node)[type][dimKey];
-				
+
 				// Draw horizontal or vertical alignment line
 				if (type == "horizontal") {
 					alignedLocations.h = targetKey - closestKey;
@@ -2356,18 +2390,18 @@ module.exports = function (opts, cy, $, debounce) {
 				if (Math.abs(leftDim["vertical"]["center"] - nodeDim["vertical"]["center"]) < options.guidelinesStyle.range*cy.zoom()){
 					if ((leftDim["horizontal"][otherSide]) == key && 
 						compare[type](leftDim["horizontal"][otherSide], nodeDim["horizontal"][side])){
-							var ll = leftDim["horizontal"][side]-(nodeDim["horizontal"][side] - key);
-							HTree.forEach(function($, rightNodes){
-								for (var j = 0; j < rightNodes.length; j++){
-									var right = rightNodes[j];
-									if (Math.abs(lines.getDims(right)["vertical"]["center"] - Ycenter) < options.guidelinesStyle.range*cy.zoom()){
-										if (Math.abs(ll - lines.getDims(right)["horizontal"][otherSide]) < 2*options.guidelinesTolerance){
-											leftNode = left; rightNode = right;
-										}
+						var ll = leftDim["horizontal"][side]-(nodeDim["horizontal"][side] - key);
+						HTree.forEach(function($, rightNodes){
+							for (var j = 0; j < rightNodes.length; j++){
+								var right = rightNodes[j];
+								if (Math.abs(lines.getDims(right)["vertical"]["center"] - Ycenter) < options.guidelinesStyle.range*cy.zoom()){
+									if (Math.abs(ll - lines.getDims(right)["horizontal"][otherSide]) < 2*options.guidelinesTolerance){
+										leftNode = left; rightNode = right;
 									}
 								}
-							}, ll - options.guidelinesTolerance, ll + options.guidelinesTolerance);
-						}
+							}
+						}, ll - options.guidelinesTolerance, ll + options.guidelinesTolerance);
+					}
 				}
 			}
 		}, lowerBound, lowerBound + options.guidelinesStyle.range*cy.zoom());
@@ -2378,7 +2412,7 @@ module.exports = function (opts, cy, $, debounce) {
 			if (!options.geometricGuideline || alignedLocations.h == null || Math.abs(alignedLocations.h) > Math.abs(alignedLocations.hd)){
 				alignedLocations.h = alignedLocations.hd;
 			}
-			
+
 			lines.drawDH(node, leftNode, rightNode, type);
 			return true;
 		}
@@ -2488,18 +2522,18 @@ module.exports = function (opts, cy, $, debounce) {
 				if (Math.abs(belowDim["horizontal"]["center"] - nodeDim["horizontal"]["center"]) < options.guidelinesStyle.range*cy.zoom()){
 					if (belowDim["vertical"][otherSide] == key &&
 						compare[type](belowDim["vertical"][otherSide], nodeDim["vertical"][side])){
-							var ll = belowDim["vertical"][side]-(nodeDim["vertical"][side]-key);
-							VTree.forEach(function($, aboveNodes){
-								for (var j = 0; j < aboveNodes.length; j++){
-									var above = aboveNodes[j];
-									if (Math.abs(lines.getDims(above)["horizontal"]["center"] - Xcenter) < options.guidelinesStyle.range*cy.zoom()){
-										if (Math.abs(ll - lines.getDims(above)["vertical"][otherSide]) < 2*options.guidelinesTolerance){
-											belowNode = below; aboveNode = above;
-										}
+						var ll = belowDim["vertical"][side]-(nodeDim["vertical"][side]-key);
+						VTree.forEach(function($, aboveNodes){
+							for (var j = 0; j < aboveNodes.length; j++){
+								var above = aboveNodes[j];
+								if (Math.abs(lines.getDims(above)["horizontal"]["center"] - Xcenter) < options.guidelinesStyle.range*cy.zoom()){
+									if (Math.abs(ll - lines.getDims(above)["vertical"][otherSide]) < 2*options.guidelinesTolerance){
+										belowNode = below; aboveNode = above;
 									}
 								}
-							}, ll - options.guidelinesTolerance, ll + options.guidelinesTolerance);
-						}
+							}
+						}, ll - options.guidelinesTolerance, ll + options.guidelinesTolerance);
+					}
 				}
 			}
 		}, lowerBound, lowerBound+options.guidelinesStyle.range*cy.zoom());
@@ -2602,9 +2636,9 @@ module.exports = function (opts, cy, $, debounce) {
 		}
 
 		activeNodes.each(function (node, i) {
-            if(typeof node === "number") {
-              node = i;
-            }
+			if(typeof node === "number") {
+				node = i;
+			}
 			if (options.geometricGuideline){
 				lines.searchForLine("horizontal", node);
 				lines.searchForLine("vertical", node);
@@ -2630,10 +2664,10 @@ module.exports = function (opts, cy, $, debounce) {
 		}
 
 		var roots = nodes.filter(function (ele, i) {
-            if(typeof ele === "number") {
-              ele = i;
-            }
-            
+			if(typeof ele === "number") {
+				ele = i;
+			}
+
 			var parent = ele.parent()[0];
 			while (parent != null) {
 				if (nodesMap[parent.id()]) {
@@ -2700,7 +2734,7 @@ module.exports = function (opts, cy, $, debounce) {
 
 		nodesToMove.filter(":childless").forEach(function(node, i) {
 			if(typeof node === "number") {
-			  node = i;
+				node = i;
 			}
 			var newPos = {x: positionDiff.x + node.renderedPosition("x"),
 				y: positionDiff.y + node.renderedPosition("y")};
@@ -2716,20 +2750,20 @@ module.exports = function (opts, cy, $, debounce) {
 	cy.on("mousemove", function(e){
 		currMousePos = e.renderedPosition || e.cyRenderedPosition;
 		if (nodeToAlign)
-		nodeToAlign.each(function (node, i){
-			if(typeof node === "number") {
-			  node = i;
-			}
-		if (node.locked() && (Math.abs(currMousePos.x - oldMousePos.x) > 2*options.guidelinesTolerance
-			|| Math.abs(currMousePos.y - oldMousePos.y) > 2*options.guidelinesTolerance)){
+			nodeToAlign.each(function (node, i){
+				if(typeof node === "number") {
+					node = i;
+				}
+				if (node.locked() && (Math.abs(currMousePos.x - oldMousePos.x) > 2*options.guidelinesTolerance
+					|| Math.abs(currMousePos.y - oldMousePos.y) > 2*options.guidelinesTolerance)){
 
-			node.unlock();
-			var diff = {};
-			diff.x = currMousePos.x - tappedNode.renderedPosition("x");
-			diff.y = currMousePos.y - tappedNode.renderedPosition("y");;
-			moveNodes(diff, node);
-		};
-    });
+					node.unlock();
+					var diff = {};
+					diff.x = currMousePos.x - tappedNode.renderedPosition("x");
+					diff.y = currMousePos.y - tappedNode.renderedPosition("y");;
+					moveNodes(diff, node);
+				};
+			});
 
 	});
 	var nodeToAlign;
@@ -2737,7 +2771,7 @@ module.exports = function (opts, cy, $, debounce) {
 		nodeToAlign = activeNodes;
 		activeNodes.each(function (node, i){
 			if(typeof node === "number") {
-			  node = i;
+				node = i;
 			}
 			var newPos = node.renderedPosition();
 			if (alignedLocations.h){
@@ -2770,13 +2804,14 @@ module.exports = function (opts, cy, $, debounce) {
 	}
 };
 
-},{"functional-red-black-tree":1}],7:[function(require,module,exports){
+},{"functional-red-black-tree":1}],8:[function(require,module,exports){
 ;(function(){ 'use strict';
 
 	// registers the extension on a cytoscape lib ref
-	var register = function(cytoscape, $){
+	var register = function(cytoscape){
 
-		if(!cytoscape || !$){ return; } // can't register if cytoscape unspecified
+		if(!cytoscape){ return; } // can't register if cytoscape unspecified
+		require("./extend");
 
 		// flag that indicates if extension api functions are registed to cytoscape
 		// note that ideally these functions should not be directly registered to core from cytoscape.js
@@ -2800,6 +2835,7 @@ module.exports = function (opts, cy, $, debounce) {
 
 			// General
 			gridSpacing: 20, // Distance between the lines of the grid.
+			snapToGridCenter: true, // Snaps nodes to center of gridlines. When false, snaps to gridlines themselves.
 			zoomDash: true, // Determines whether the size of the dashes should change when the drawing is zoomed in and out if grid is drawn.
 			panGrid: false, // Determines whether the grid should move then the user moves the graph if grid is drawn.
 			gridStackOrder: -1, // Namely z-index
@@ -2850,7 +2886,7 @@ module.exports = function (opts, cy, $, debounce) {
 			var scratchPad = getScratch(cy);
 
 			// extend the already existing options for the instance or the default options
-			var options = $.extend(true, {}, scratchPad.options || defaults, opts);
+			var options = Object.extend({}, scratchPad.options || defaults, opts);
 
 			// reset the options for the instance
 			scratchPad.options = options;
@@ -2859,16 +2895,16 @@ module.exports = function (opts, cy, $, debounce) {
 
 				var snap, resize, snapToGridDuringDrag, drawGrid, eventsController, guidelines, parentPadding, alignment;
 
-				snap = _snapOnRelease(cy, options.gridSpacing);
+				snap = _snapOnRelease(cy, options.gridSpacing, options.snapToGridCenter);
 				resize = _resize(options.gridSpacing);
 				snapToGridDuringDrag = _snapToGridDuringDrag(cy, snap);
-				drawGrid = _drawGrid(options, cy, $, debounce);
-				guidelines = _guidelines(options, cy, $, debounce);
+				drawGrid = _drawGrid(options, cy, debounce);
+				guidelines = _guidelines(options, cy, debounce);
 				parentPadding = _parentPadding(options, cy);
 
-				eventsController = _eventsController(cy, snap, resize, snapToGridDuringDrag, drawGrid, guidelines, parentPadding, $, options);
+				eventsController = _eventsController(cy, snap, resize, snapToGridDuringDrag, drawGrid, guidelines, parentPadding, options);
 
-				alignment = _alignment(cytoscape, cy, $, apiRegistered);
+				alignment = _alignment(cytoscape, cy, apiRegistered);
 
 				// mark that api functions are registered to cytoscape
 				apiRegistered = true;
@@ -2899,13 +2935,13 @@ module.exports = function (opts, cy, $, debounce) {
 		});
 	}
 
-	if( typeof cytoscape !== 'undefined' && $ ){ // expose to global cytoscape (i.e. window.cytoscape)
-		register( cytoscape, $ );
+	if( typeof cytoscape !== 'undefined' ){ // expose to global cytoscape (i.e. window.cytoscape)
+		register( cytoscape );
 	}
 
 })();
 
-},{"./alignment":2,"./debounce":3,"./draw_grid":4,"./events_controller":5,"./guidelines":6,"./parentPadding":8,"./resize":9,"./snap_during_drag":10,"./snap_on_release":11}],8:[function(require,module,exports){
+},{"./alignment":2,"./debounce":3,"./draw_grid":4,"./events_controller":5,"./extend":6,"./guidelines":7,"./parentPadding":9,"./resize":10,"./snap_during_drag":11,"./snap_on_release":12}],9:[function(require,module,exports){
 module.exports = function (opts, cy) {
 
     var options = opts;
@@ -2942,7 +2978,7 @@ module.exports = function (opts, cy) {
         setPaddingOfParent: setPaddingOfParent
     };
 };
-},{}],9:[function(require,module,exports){
+},{}],10:[function(require,module,exports){
 module.exports = function (gridSpacing) {
 
 
@@ -2997,7 +3033,7 @@ module.exports = function (gridSpacing) {
     };
 
 };
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 module.exports = function (cy, snap) {
 
     var snapToGridDuringDrag = {};
@@ -3080,13 +3116,14 @@ module.exports = function (cy, snap) {
 
 };
 
-},{}],11:[function(require,module,exports){
-module.exports = function (cy, gridSpacing) {
+},{}],12:[function(require,module,exports){
+module.exports = function (cy, gridSpacing, gridSpacingOffset) {
 
     var snap = { };
 
     snap.changeOptions = function (opts) {
         gridSpacing = opts.gridSpacing;
+        gridSpacingOffset = opts.snapToGridCenter ? 0.5 : 0;
     };
 
     var getScratch = function (node) {
@@ -3097,9 +3134,11 @@ module.exports = function (cy, gridSpacing) {
     };
 
     snap.snapPos = function (pos) {
+        var xPosition = gridSpacingOffset ? Math.floor(pos.x / gridSpacing) : Math.round(pos.x / gridSpacing);
+        var yPosition = gridSpacingOffset ? Math.floor(pos.y / gridSpacing) : Math.round(pos.y / gridSpacing);
         var newPos = {
-            x: (Math.floor(pos.x / gridSpacing) + 0.5) * gridSpacing,
-            y: (Math.floor(pos.y / gridSpacing) + 0.5) * gridSpacing
+            x: (xPosition + gridSpacingOffset) * gridSpacing,
+            y: (yPosition + gridSpacingOffset) * gridSpacing
         };
 
         return newPos;
@@ -3154,4 +3193,4 @@ module.exports = function (cy, gridSpacing) {
 
 };
 
-},{}]},{},[7]);
+},{}]},{},[8]);

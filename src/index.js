@@ -1,9 +1,10 @@
 ;(function(){ 'use strict';
 
 	// registers the extension on a cytoscape lib ref
-	var register = function(cytoscape, $){
+	var register = function(cytoscape){
 
-		if(!cytoscape || !$){ return; } // can't register if cytoscape unspecified
+		if(!cytoscape){ return; } // can't register if cytoscape unspecified
+		require("./extend");
 
 		// flag that indicates if extension api functions are registed to cytoscape
 		// note that ideally these functions should not be directly registered to core from cytoscape.js
@@ -27,6 +28,7 @@
 
 			// General
 			gridSpacing: 20, // Distance between the lines of the grid.
+			snapToGridCenter: true, // Snaps nodes to center of gridlines. When false, snaps to gridlines themselves.
 			zoomDash: true, // Determines whether the size of the dashes should change when the drawing is zoomed in and out if grid is drawn.
 			panGrid: false, // Determines whether the grid should move then the user moves the graph if grid is drawn.
 			gridStackOrder: -1, // Namely z-index
@@ -77,7 +79,7 @@
 			var scratchPad = getScratch(cy);
 
 			// extend the already existing options for the instance or the default options
-			var options = $.extend(true, {}, scratchPad.options || defaults, opts);
+			var options = Object.extend({}, scratchPad.options || defaults, opts);
 
 			// reset the options for the instance
 			scratchPad.options = options;
@@ -86,16 +88,16 @@
 
 				var snap, resize, snapToGridDuringDrag, drawGrid, eventsController, guidelines, parentPadding, alignment;
 
-				snap = _snapOnRelease(cy, options.gridSpacing);
+				snap = _snapOnRelease(cy, options.gridSpacing, options.snapToGridCenter);
 				resize = _resize(options.gridSpacing);
 				snapToGridDuringDrag = _snapToGridDuringDrag(cy, snap);
-				drawGrid = _drawGrid(options, cy, $, debounce);
-				guidelines = _guidelines(options, cy, $, debounce);
+				drawGrid = _drawGrid(options, cy, debounce);
+				guidelines = _guidelines(options, cy, debounce);
 				parentPadding = _parentPadding(options, cy);
 
-				eventsController = _eventsController(cy, snap, resize, snapToGridDuringDrag, drawGrid, guidelines, parentPadding, $, options);
+				eventsController = _eventsController(cy, snap, resize, snapToGridDuringDrag, drawGrid, guidelines, parentPadding, options);
 
-				alignment = _alignment(cytoscape, cy, $, apiRegistered);
+				alignment = _alignment(cytoscape, cy, apiRegistered);
 
 				// mark that api functions are registered to cytoscape
 				apiRegistered = true;
@@ -126,8 +128,8 @@
 		});
 	}
 
-	if( typeof cytoscape !== 'undefined' && $ ){ // expose to global cytoscape (i.e. window.cytoscape)
-		register( cytoscape, $ );
+	if( typeof cytoscape !== 'undefined' ){ // expose to global cytoscape (i.e. window.cytoscape)
+		register( cytoscape );
 	}
 
 })();
