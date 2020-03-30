@@ -1109,7 +1109,7 @@ module.exports = function (cytoscape, cy, apiRegistered) {
 
         function returnToPositions(nodesData) {
             var currentPositions = {};
-            cy.nodes().positions(function (ele, i) {
+            cy.nodes().not(":parent").positions(function (ele, i) {
                 if(typeof ele === "number") {
                   ele = i;
                 }
