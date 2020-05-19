@@ -99,11 +99,11 @@ module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, gui
 
 		if (enable) {
 			drawGrid.initCanvas();
-			window.addEventListener('resize', drawGrid.resizeCanvas);
+      cy.on('resize', drawGrid.resizeCanvas);
 		} else {
 			drawGrid.clearCanvas();
 			drawGrid.resetCanvas();
-			window.removeEventListener('resize', drawGrid.resizeCanvas);
+      cy.off('resize', drawGrid.resizeCanvas);
 		}
 	}
 

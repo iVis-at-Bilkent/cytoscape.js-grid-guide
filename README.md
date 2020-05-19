@@ -38,7 +38,7 @@ U. Dogrusoz , A. Karacelik, I. Safarli, H. Balci, L. Dervishi, and M.C. Siper, "
 
 ## Demo
 
-Click [here](https://ivis-at-bilkent.github.io/cytoscape.js-grid-guide/demo.html) for demo
+Click [here](https://raw.githack.com/iVis-at-Bilkent/cytoscape.js-grid-guide/unstable/demo.html) for demo
 
 ## API
 
