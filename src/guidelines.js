@@ -64,7 +64,7 @@ module.exports = function (opts, cy, debounce) {
 	var $canvas = document.createElement('canvas');
 	var $container = cy.container();
 	var ctx = $canvas.getContext('2d');
-	$container.append($canvas);
+	$container.appendChild( $canvas );
 
 	var resetCanvas = function () {
 		$canvas.height = 0;
@@ -256,7 +256,7 @@ module.exports = function (opts, cy, debounce) {
 	 * @param nodes - list of nodes
 	 * @param type - horizontal or vertical
 	 */
-	calculateOffset = function(nodes, type){
+	var calculateOffset = function(nodes, type){
 		var minNode = nodes[0], min = lines.getDims(minNode)[type]["center"];
 		var maxNode = nodes[0], max = lines.getDims(maxNode)[type]["center"];
 

@@ -2,9 +2,9 @@ module.exports = function (opts, cy) {
 
     var options = opts;
     var ppClass = "_gridParentPadding";
+    var padding = options.parentSpacing < 0 ? options.gridSpacing : options.parentSpacing;
 
     function initPadding() {
-        var padding = options.parentSpacing < 0 ? options.gridSpacing : options.parentSpacing;
         cy.style()
             .selector('.' + ppClass)
             .style("compound-sizing-wrt-labels", "exclude")
