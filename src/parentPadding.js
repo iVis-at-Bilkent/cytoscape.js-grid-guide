@@ -2,7 +2,7 @@ module.exports = function (opts, cy) {
 
     var options = opts;
     var ppClass = "_gridParentPadding";
-    var padding = options.parentSpacing < 0 ? options.gridSpacing : options.parentSpacing;
+    var padding;
 
     function initPadding() {
         cy.style()
