@@ -18,7 +18,7 @@ module.exports = function (opts, cy, debounce) {
     var $canvas = document.createElement('canvas');
     var $container = cy.container();
     var ctx = $canvas.getContext( '2d' );
-    $container.append( $canvas );
+    $container.appendChild( $canvas );
 
     var resetCanvas = function () {
         $canvas.height = 0;

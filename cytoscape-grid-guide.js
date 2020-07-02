@@ -1411,7 +1411,7 @@ module.exports = function (opts, cy, debounce) {
     var $canvas = document.createElement('canvas');
     var $container = cy.container();
     var ctx = $canvas.getContext( '2d' );
-    $container.append( $canvas );
+    $container.appendChild( $canvas );
 
     var resetCanvas = function () {
         $canvas.height = 0;
@@ -1846,7 +1846,7 @@ module.exports = function (opts, cy, debounce) {
 	var $canvas = document.createElement('canvas');
 	var $container = cy.container();
 	var ctx = $canvas.getContext('2d');
-	$container.append($canvas);
+	$container.appendChild( $canvas );
 
 	var resetCanvas = function () {
 		$canvas.height = 0;
@@ -2038,7 +2038,7 @@ module.exports = function (opts, cy, debounce) {
 	 * @param nodes - list of nodes
 	 * @param type - horizontal or vertical
 	 */
-	calculateOffset = function(nodes, type){
+	var calculateOffset = function(nodes, type){
 		var minNode = nodes[0], min = lines.getDims(minNode)[type]["center"];
 		var maxNode = nodes[0], max = lines.getDims(maxNode)[type]["center"];
 
@@ -2946,9 +2946,9 @@ module.exports = function (opts, cy) {
 
     var options = opts;
     var ppClass = "_gridParentPadding";
+    var padding;
 
     function initPadding() {
-        var padding = options.parentSpacing < 0 ? options.gridSpacing : options.parentSpacing;
         cy.style()
             .selector('.' + ppClass)
             .style("compound-sizing-wrt-labels", "exclude")
