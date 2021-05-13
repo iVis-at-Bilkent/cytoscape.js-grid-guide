@@ -256,7 +256,7 @@ module.exports = function (opts, cy, debounce) {
 	 * @param nodes - list of nodes
 	 * @param type - horizontal or vertical
 	 */
-	calculateOffset = function(nodes, type){
+	const calculateOffset = function(nodes, type){
 		var minNode = nodes[0], min = lines.getDims(minNode)[type]["center"];
 		var maxNode = nodes[0], max = lines.getDims(maxNode)[type]["center"];
 
