@@ -18,7 +18,7 @@ module.exports = function (opts, cy) {
 
     function changeOptions(opts) {
         options = opts;
-        padding = options.parentSpacing < 0 ? options.gridSpacing : options.parentSpacing;
+        //padding = options.parentSpacing < 0 ? options.gridSpacing : options.parentSpacing;
         initPadding();
     }
 
