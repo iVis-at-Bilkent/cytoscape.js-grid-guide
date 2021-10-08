@@ -1,9 +1,10 @@
-;(function(){ 'use strict';
+; (function () {
+	'use strict';
 
 	// registers the extension on a cytoscape lib ref
-	var register = function(cytoscape){
+	var register = function (cytoscape) {
 
-		if(!cytoscape){ return; } // can't register if cytoscape unspecified
+		if (!cytoscape) { return; } // can't register if cytoscape unspecified
 		require("./extend");
 
 		// flag that indicates if extension api functions are registed to cytoscape
@@ -32,7 +33,8 @@
 			zoomDash: true, // Determines whether the size of the dashes should change when the drawing is zoomed in and out if grid is drawn.
 			panGrid: false, // Determines whether the grid should move then the user moves the graph if grid is drawn.
 			gridStackOrder: -1, // Namely z-index
-			gridColor: '#dedede', // Color of grid lines
+			gridBackgroundColor: '#fff', // Color for grid background
+			gridColor: "#dedede", // color for grid lines
 			lineWidth: 1.0, // Width of grid lines
 			guidelinesStackOrder: 4, // z-index of guidelines
 			guidelinesTolerance: 2.00, // Tolerance distance for rendered positions of nodes' interaction.
@@ -66,13 +68,13 @@
 
 		function getScratch(cy) {
 			if (!cy.scratch("_gridGuide")) {
-				cy.scratch("_gridGuide", { });
+				cy.scratch("_gridGuide", {});
 			}
 
 			return cy.scratch("_gridGuide");
 		}
 
-		cytoscape( 'core', 'gridGuide', function(opts){
+		cytoscape('core', 'gridGuide', function (opts) {
 			var cy = this;
 
 			// access the scratch pad for cy
@@ -114,22 +116,22 @@
 			}
 
 			return this; // chainability
-		} ) ;
+		});
 
 	};
 
-	if( typeof module !== 'undefined' && module.exports ){ // expose as a commonjs module
+	if (typeof module !== 'undefined' && module.exports) { // expose as a commonjs module
 		module.exports = register;
 	}
 
-	if( typeof define !== 'undefined' && define.amd ){ // expose as an amd/requirejs module
-		define('cytoscape-grid-guide', function(){
+	if (typeof define !== 'undefined' && define.amd) { // expose as an amd/requirejs module
+		define('cytoscape-grid-guide', function () {
 			return register;
 		});
 	}
 
-	if( typeof cytoscape !== 'undefined' ){ // expose to global cytoscape (i.e. window.cytoscape)
-		register( cytoscape );
+	if (typeof cytoscape !== 'undefined') { // expose to global cytoscape (i.e. window.cytoscape)
+		register(cytoscape);
 	}
 
 })();
