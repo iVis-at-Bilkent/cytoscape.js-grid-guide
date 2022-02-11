@@ -7,7 +7,9 @@
     "main": "src/index.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "gulp build",
+    "dev": "gulp dev"
   },
   "repository": {
     "type": "git",
@@ -26,11 +28,13 @@
   },
   "homepage": "https://github.com/iVis-at-Bilkent/cytoscape.js-grid-guide",
   "devDependencies": {
+    "browserify": "^17.0.0",
     "gulp": "^3.8.8",
     "gulp-jshint": "^1.8.5",
     "gulp-prompt": "^0.1.1",
     "gulp-replace": "^0.4.0",
     "gulp-shell": "^0.2.9",
+    "gulp-watch": "^5.0.1",
     "jshint-stylish": "^1.0.0",
     "run-sequence": "^1.0.0"
   },

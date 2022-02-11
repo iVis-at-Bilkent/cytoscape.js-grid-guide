@@ -1,8 +1,6 @@
 var gulp = require('gulp');
-var path = require('path');
+var watch = require('gulp-watch');
 var replace = require('gulp-replace');
-var child_process = require('child_process');
-var fs = require('fs');
 var shell = require('gulp-shell');
 var jshint = require('gulp-jshint');
 var jshStylish = require('jshint-stylish');
@@ -78,6 +76,13 @@ gulp.task('npm', shell.task([
 gulp.task('build', shell.task([
     'browserify ./src/index.js -o cytoscape-grid-guide.js'
 ]));
+
+// watch for changes in files, run build immediately
+gulp.task('dev', ['build'], function () {
+  watch('src/*.js', () => {
+    gulp.run('build');
+  });
+});
 
 // http://www.jshint.com/docs/options/
 gulp.task('lint', function(){
