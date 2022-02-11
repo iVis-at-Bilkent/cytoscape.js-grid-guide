@@ -1,3 +1,5 @@
+const h = require("./helper");
+
 module.exports = function (cy, snap) {
 
     var snapToGridDuringDrag = {};
@@ -20,6 +22,7 @@ module.exports = function (cy, snap) {
             draggedNodes = e.cy.$(":selected");
         else
             draggedNodes = cyTarget;
+        draggedNodes = h.removeIgnored( draggedNodes);
 
         startPos = e.position || e.cyPosition;
 
@@ -56,7 +59,7 @@ module.exports = function (cy, snap) {
         if (dist.x != 0 || dist.y != 0) {
             attachedNode.unlock();
             var nodes = draggedNodes.union(draggedNodes.descendants());
-
+            nodes = h.removeIgnored(nodes);
             nodes.filter(":childless").positions(function (node, i) {
                 if(typeof node === "number") {
                   node = i;

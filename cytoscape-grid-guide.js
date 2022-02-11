@@ -996,12 +996,14 @@ function createRBTree(compare) {
   return new RedBlackTree(compare || defaultCompare, null)
 }
 },{}],2:[function(require,module,exports){
+const h = require("./helper");
+
 module.exports = function (cytoscape, cy, apiRegistered) {
 
     // Needed because parent nodes cannot be moved in Cytoscape.js < v3.2
     function moveTopDown(node, dx, dy) {
         var nodes = node.union(node.descendants());
-
+        nodes = h.removeIgnored(nodes);
         nodes.filter(":childless").positions(function (node, i) {
             if(typeof node === "number") {
               node = i;
@@ -1151,7 +1153,7 @@ module.exports = function (cytoscape, cy, apiRegistered) {
 
 };
 
-},{}],3:[function(require,module,exports){
+},{"./helper":8}],3:[function(require,module,exports){
 
 var debounce = (function(){
     /**
@@ -2805,6 +2807,22 @@ module.exports = function (opts, cy, debounce) {
 };
 
 },{"functional-red-black-tree":1}],8:[function(require,module,exports){
+/**
+ * @param  {} elems collection of cytoscape elements
+ * returns the new collection that does not contain ignored
+ */
+module.exports = {
+  removeIgnored: (elems) => {
+    const cy = elems.cy();
+    const ignored = cy.scratch("_gridGuide").options.ignoredElems;
+    if (!ignored) {
+      return elems;
+    }
+    return elems.not(ignored);
+  },
+};
+
+},{}],9:[function(require,module,exports){
 ;(function(){ 'use strict';
 
 	// registers the extension on a cytoscape lib ref
@@ -2859,7 +2877,8 @@ module.exports = function (opts, cy, debounce) {
 			},
 
 			// Parent Padding
-			parentSpacing: -1 // -1 to set paddings of parents to gridSpacing
+			parentSpacing: -1, // -1 to set paddings of parents to gridSpacing
+      ignoredElems: '' // a cytoscape.js selector (string) or a cytoscape.js collection
 		};
 		var _snapOnRelease = require("./snap_on_release");
 		var _snapToGridDuringDrag = require("./snap_during_drag");
@@ -2941,7 +2960,7 @@ module.exports = function (opts, cy, debounce) {
 
 })();
 
-},{"./alignment":2,"./debounce":3,"./draw_grid":4,"./events_controller":5,"./extend":6,"./guidelines":7,"./parentPadding":9,"./resize":10,"./snap_during_drag":11,"./snap_on_release":12}],9:[function(require,module,exports){
+},{"./alignment":2,"./debounce":3,"./draw_grid":4,"./events_controller":5,"./extend":6,"./guidelines":7,"./parentPadding":10,"./resize":11,"./snap_during_drag":12,"./snap_on_release":13}],10:[function(require,module,exports){
 module.exports = function (opts, cy) {
 
     var options = opts;
@@ -2978,7 +2997,9 @@ module.exports = function (opts, cy) {
         setPaddingOfParent: setPaddingOfParent
     };
 };
-},{}],10:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
+const h = require("./helper");
+
 module.exports = function (gridSpacing) {
 
 
@@ -2994,6 +3015,10 @@ module.exports = function (gridSpacing) {
     };
 
     function resizeNode(node) {
+        node = h.removeIgnored(node);
+        if (node.length < 1) {
+          return;
+        }
         var width = node.width();
         var height = node.height();
 
@@ -3015,6 +3040,10 @@ module.exports = function (gridSpacing) {
     }
 
     function recoverNodeDimensions(node) {
+        node = h.removeIgnored(node);
+        if (node.length < 1) {
+          return;
+        }
         var oldSizes = getScratch(node).resize;
         if (oldSizes) 
             node.style({
@@ -3033,7 +3062,9 @@ module.exports = function (gridSpacing) {
     };
 
 };
-},{}],11:[function(require,module,exports){
+},{"./helper":8}],12:[function(require,module,exports){
+const h = require("./helper");
+
 module.exports = function (cy, snap) {
 
     var snapToGridDuringDrag = {};
@@ -3056,6 +3087,7 @@ module.exports = function (cy, snap) {
             draggedNodes = e.cy.$(":selected");
         else
             draggedNodes = cyTarget;
+        draggedNodes = h.removeIgnored( draggedNodes);
 
         startPos = e.position || e.cyPosition;
 
@@ -3092,7 +3124,7 @@ module.exports = function (cy, snap) {
         if (dist.x != 0 || dist.y != 0) {
             attachedNode.unlock();
             var nodes = draggedNodes.union(draggedNodes.descendants());
-
+            nodes = h.removeIgnored(nodes);
             nodes.filter(":childless").positions(function (node, i) {
                 if(typeof node === "number") {
                   node = i;
@@ -3116,7 +3148,9 @@ module.exports = function (cy, snap) {
 
 };
 
-},{}],12:[function(require,module,exports){
+},{"./helper":8}],13:[function(require,module,exports){
+const h = require("./helper");
+
 module.exports = function (cy, gridSpacing, gridSpacingOffset) {
 
     var snap = { };
@@ -3149,10 +3183,12 @@ module.exports = function (cy, gridSpacing, gridSpacingOffset) {
         var pos = node.position();
         var newPos = snap.snapPos(pos);
 
+        node = h.removeIgnored(node);
         node.position(newPos);
     };
 
     snap.snapNodesTopDown = function (nodes) {
+        nodes = h.removeIgnored(nodes);
         // getTOpMostNodes -> nodes
         cy.startBatch();
         nodes.union(nodes.descendants()).filter(":childless").positions(function (node, i) {
@@ -3173,12 +3209,14 @@ module.exports = function (cy, gridSpacing, gridSpacingOffset) {
         else
             nodes = cyTarget;
 
+        nodes = h.removeIgnored(nodes);
         snap.snapNodesTopDown(nodes);
 
     };
 
 
     snap.recoverSnapNode = function (node) {
+        node = h.removeIgnored(node);
         var snapScratch = getScratch(node).snap;
         if (snapScratch) {
             node.position(snapScratch.oldPos);
@@ -3193,4 +3231,4 @@ module.exports = function (cy, gridSpacing, gridSpacingOffset) {
 
 };
 
-},{}]},{},[8]);
+},{"./helper":8}]},{},[9]);

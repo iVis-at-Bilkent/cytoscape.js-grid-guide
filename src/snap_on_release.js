@@ -1,3 +1,5 @@
+const h = require("./helper");
+
 module.exports = function (cy, gridSpacing, gridSpacingOffset) {
 
     var snap = { };
@@ -30,10 +32,12 @@ module.exports = function (cy, gridSpacing, gridSpacingOffset) {
         var pos = node.position();
         var newPos = snap.snapPos(pos);
 
+        node = h.removeIgnored(node);
         node.position(newPos);
     };
 
     snap.snapNodesTopDown = function (nodes) {
+        nodes = h.removeIgnored(nodes);
         // getTOpMostNodes -> nodes
         cy.startBatch();
         nodes.union(nodes.descendants()).filter(":childless").positions(function (node, i) {
@@ -54,12 +58,14 @@ module.exports = function (cy, gridSpacing, gridSpacingOffset) {
         else
             nodes = cyTarget;
 
+        nodes = h.removeIgnored(nodes);
         snap.snapNodesTopDown(nodes);
 
     };
 
 
     snap.recoverSnapNode = function (node) {
+        node = h.removeIgnored(node);
         var snapScratch = getScratch(node).snap;
         if (snapScratch) {
             node.position(snapScratch.oldPos);

@@ -1,3 +1,5 @@
+const h = require("./helper");
+
 module.exports = function (gridSpacing) {
 
 
@@ -13,6 +15,10 @@ module.exports = function (gridSpacing) {
     };
 
     function resizeNode(node) {
+        node = h.removeIgnored(node);
+        if (node.length < 1) {
+          return;
+        }
         var width = node.width();
         var height = node.height();
 
@@ -34,6 +40,10 @@ module.exports = function (gridSpacing) {
     }
 
     function recoverNodeDimensions(node) {
+        node = h.removeIgnored(node);
+        if (node.length < 1) {
+          return;
+        }
         var oldSizes = getScratch(node).resize;
         if (oldSizes) 
             node.style({

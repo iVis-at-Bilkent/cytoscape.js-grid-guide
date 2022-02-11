@@ -52,7 +52,8 @@
 			},
 
 			// Parent Padding
-			parentSpacing: -1 // -1 to set paddings of parents to gridSpacing
+			parentSpacing: -1, // -1 to set paddings of parents to gridSpacing
+      ignoredElems: '' // a cytoscape.js selector (string) or a cytoscape.js collection
 		};
 		var _snapOnRelease = require("./snap_on_release");
 		var _snapToGridDuringDrag = require("./snap_during_drag");
