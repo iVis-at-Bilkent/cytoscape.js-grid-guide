@@ -1655,7 +1655,7 @@ module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, gui
 			cy.on("pan", guidelinesPanHandler);
 			cy.on("drag", "node", guidelinesDragHandler);
 			cy.on("free", guidelinesFreeHandler);
-			window.addEventListener('resize', guidelinesWindowResizeHandler);
+			cy.on('resize', guidelinesWindowResizeHandler);
 		}
 		else{
 			cy.off("tapstart", "node", guidelinesTapHandler);
@@ -1664,7 +1664,7 @@ module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, gui
 			cy.off("drag", "node", guidelinesDragHandler);
 			cy.off("free", guidelinesFreeHandler);
 			guidelines.resetCanvas();
-			window.removeEventListener('resize', guidelinesWindowResizeHandler);
+			cy.off('resize', guidelinesWindowResizeHandler);
 		}
 	}
 
