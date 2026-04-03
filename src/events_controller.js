@@ -121,18 +121,21 @@ module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, gui
 		guidelines.lines.init(alignmentNodes, activeTopMostNodes);
 	}
 	var guidelinesDragHandler = function(e){
-		if (this.id() == activeTopMostNodes.id()){
-			// Use only the primary grabbed node for guideline calculations
-			var alignmentNodes = guidelines.getTopMostNodes(primaryGrabbedNode.collection());
-			guidelines.lines.update(alignmentNodes);
+		// Only process the drag event for the node the user actually grabbed
+		if (!primaryGrabbedNode || this.id() !== primaryGrabbedNode.id()) return;
 
-			if (currentOptions.snapToAlignmentLocationDuringDrag)
-				guidelines.lines.snapToAlignmentLocation(activeTopMostNodes, primaryGrabbedNode);
-		}
+		var alignmentNodes = guidelines.getTopMostNodes(primaryGrabbedNode.collection());
+		guidelines.lines.update(alignmentNodes);
+
+		// Only snap when dragging a single node — multi-node snapping moves nodes randomly
+		var isMultiDrag = activeTopMostNodes && activeTopMostNodes.length > 1;
+		if (currentOptions.snapToAlignmentLocationDuringDrag && !isMultiDrag)
+			guidelines.lines.snapToAlignmentLocation(activeTopMostNodes, primaryGrabbedNode);
 	};
 	var guidelinesFreeHandler = function(e){
-		// Use 'freeon' which fires ONLY on the directly clicked node.
-		if (currentOptions.snapToAlignmentLocationOnRelease)
+		// Only snap on release for single-node drag
+		var isMultiDrag = activeTopMostNodes && activeTopMostNodes.length > 1;
+		if (currentOptions.snapToAlignmentLocationOnRelease && !isMultiDrag)
 			guidelines.lines.snapToAlignmentLocation(activeTopMostNodes, primaryGrabbedNode);
 
 		guidelines.lines.destroy();
