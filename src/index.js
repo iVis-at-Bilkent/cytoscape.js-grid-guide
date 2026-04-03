@@ -21,7 +21,8 @@
 			distributionGuidelines: false, //Distribution guidelines
 			geometricGuideline: false, // Geometric guidelines
 			initPosAlignment: false, // Guideline to initial mouse position
-			centerToEdgeAlignment: false, // Center tı edge alignment
+			centerToEdgeAlignment: false, // Center to edge alignment
+			centerOnlyAlignment: false, // When true, only snap to center-center alignment (ignore edges)
 			resize: false, // Adjust node sizes to cell sizes
 			parentPadding: false, // Adjust parent sizes to cell sizes by padding
 			drawGrid: true, // Draw grid background

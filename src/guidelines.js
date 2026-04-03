@@ -122,7 +122,7 @@ module.exports = function (opts, cy, debounce) {
 	 * Initialize trees and initial position of node
 	 * @param activeNodes : top most active nodes
 	 */
-	lines.init = function (activeNodes) {
+	lines.init = function (activeNodes, allActiveNodes) {
 		VTree = RBTree();
 		HTree = RBTree();
 		// TODO: seperate initialization of nodeInitPos
@@ -133,16 +133,20 @@ module.exports = function (opts, cy, debounce) {
 			nodeInitPos = activeNodes.renderedPosition();
 		}
 
+		// When multi-dragging, exclude ALL selected nodes from alignment trees,
+		// not just the primary node used for alignment calculations
+		var nodesToExclude = allActiveNodes || activeNodes;
 		var nodes = cy.nodes(":visible");
-		excludedNodes = activeNodes.union(activeNodes.ancestors());
-		excludedNodes = excludedNodes.union(activeNodes.descendants());
+		excludedNodes = nodesToExclude.union(nodesToExclude.ancestors());
+		excludedNodes = excludedNodes.union(nodesToExclude.descendants());
 		nodes.not(excludedNodes).each(function (node, i) {
 			if(typeof node === "number") {
 				node = i;
 			}
 			var dims = lines.getDims(node);
 
-			["left", "center", "right"].forEach(function (val) {
+			var hDims = options.centerOnlyAlignment ? ["center"] : ["left", "center", "right"];
+			hDims.forEach(function (val) {
 				var hKey = dims.horizontal[val];
 				if (HTree.get(hKey))
 					HTree.get(hKey).push(node);
@@ -150,7 +154,8 @@ module.exports = function (opts, cy, debounce) {
 					HTree = HTree.insert(hKey, [node]);
 			});
 
-			["top", "center", "bottom"].forEach(function (val) {
+			var vDims = options.centerOnlyAlignment ? ["center"] : ["top", "center", "bottom"];
+			vDims.forEach(function (val) {
 				var vKey = dims.vertical[val];
 				if (VTree.get(vKey))
 					VTree.get(vKey).push(node);
@@ -536,7 +541,9 @@ module.exports = function (opts, cy, debounce) {
 		center = node.renderedPosition(axis);
 		// check if node aligned in any dimension:
 		// {center, left, right} or {center, top, bottom}
-		for (var dimKey in dims) {
+		var dimKeys = options.centerOnlyAlignment ? ["center"] : Object.keys(dims);
+		for (var di = 0; di < dimKeys.length; di++) {
+			var dimKey = dimKeys[di];
 			position = dims[dimKey];
 
 			// find the closest alignment in range of tolerance
@@ -969,48 +976,61 @@ module.exports = function (opts, cy, debounce) {
 	var currMousePos, oldMousePos = {"x": 0, "y": 0};
 	cy.on("mousemove", function(e){
 		currMousePos = e.renderedPosition || e.cyRenderedPosition;
-		if (nodeToAlign)
-			nodeToAlign.each(function (node, i){
-				if(typeof node === "number") {
-					node = i;
-				}
-				if (node.locked() && (Math.abs(currMousePos.x - oldMousePos.x) > 2*options.guidelinesTolerance
-					|| Math.abs(currMousePos.y - oldMousePos.y) > 2*options.guidelinesTolerance)){
-
-					node.unlock();
-					var diff = {};
-					diff.x = currMousePos.x - tappedNode.renderedPosition("x");
-					diff.y = currMousePos.y - tappedNode.renderedPosition("y");;
-					moveNodes(diff, node);
+		if (nodeToAlign) {
+			var shouldMove = Math.abs(currMousePos.x - oldMousePos.x) > 2*options.guidelinesTolerance
+				|| Math.abs(currMousePos.y - oldMousePos.y) > 2*options.guidelinesTolerance;
+			if (shouldMove) {
+				// Compute diff ONCE before the loop — if tappedNode is moved first,
+				// its renderedPosition changes and subsequent nodes get a wrong diff
+				var diff = {
+					x: currMousePos.x - tappedNode.renderedPosition("x"),
+					y: currMousePos.y - tappedNode.renderedPosition("y")
 				};
-			});
-
+				nodeToAlign.each(function (node, i) {
+					if (typeof node === "number") {
+						node = i;
+					}
+					if (node.locked()) {
+						node.unlock();
+						moveNodes(diff, node);
+					}
+				});
+			}
+		}
 	});
 	var nodeToAlign;
-	lines.snapToAlignmentLocation = function(activeNodes){
+	lines.snapToAlignmentLocation = function(activeNodes, primaryNode){
 		nodeToAlign = activeNodes;
-		activeNodes.each(function (node, i){
-			if(typeof node === "number") {
-				node = i;
-			}
-			var newPos = node.renderedPosition();
-			if (alignedLocations.h){
-				oldMousePos = currMousePos;
-				newPos.x -= alignedLocations.h;
+
+		// Calculate the snap offset from the primary (grabbed) node only
+		var snapOffsetH = alignedLocations.h;
+		var snapOffsetV = alignedLocations.v;
+
+		if (snapOffsetH || snapOffsetV) {
+			oldMousePos = currMousePos;
+
+			// Apply the same uniform offset to ALL nodes in the selection
+			activeNodes.each(function (node, i) {
+				if (typeof node === "number") {
+					node = i;
+				}
+				var newPos = node.renderedPosition();
+				if (snapOffsetH) {
+					newPos.x -= snapOffsetH;
+				}
+				if (snapOffsetV) {
+					newPos.y -= snapOffsetV;
+				}
 				node.renderedPosition(newPos);
-			}
-			if (alignedLocations.v){
-				oldMousePos = currMousePos;
-				newPos.y -= alignedLocations.v;
-				node.renderedPosition(newPos);
-			};
-			if (alignedLocations.v || alignedLocations.h){
-				alignedLocations.h = null;
-				alignedLocations.v = null;
-				nodeToAlign.lock();
-			}
-		});
-		lines.update(activeNodes);
+			});
+
+			alignedLocations.h = null;
+			alignedLocations.v = null;
+			nodeToAlign.lock();
+		}
+
+		// Only use the primary node for guideline calculations, not all selected nodes
+		lines.update(getTopMostNodes(primaryNode.collection()));
 	}
 
 	return {

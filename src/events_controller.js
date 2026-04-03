@@ -109,26 +109,39 @@ module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, gui
 
 	// Guidelines
 	var activeTopMostNodes = null;
+	var primaryGrabbedNode = null; // Track the single node the user clicked to start the drag
 	var guidelinesGrabHandler = function(e){
+		// Cytoscape fires 'grab' for EVERY selected node, not just the clicked one.
+		// Only process the first call — that's the node the user actually clicked.
+		if (primaryGrabbedNode) return;
+
         var cyTarget = e.target || e.cyTarget;
 		var nodes = cyTarget.selected() ? e.cy.$(":selected") : cyTarget;
 		activeTopMostNodes = guidelines.getTopMostNodes(nodes.nodes());
-		guidelines.lines.init(activeTopMostNodes);
+		primaryGrabbedNode = cyTarget;
+		var alignmentNodes = guidelines.getTopMostNodes(cyTarget.collection());
+		guidelines.lines.init(alignmentNodes, activeTopMostNodes);
 	}
 	var guidelinesDragHandler = function(e){
 		if (this.id() == activeTopMostNodes.id()){
-			guidelines.lines.update(activeTopMostNodes);
+			// Use only the primary grabbed node for guideline calculations
+			var alignmentNodes = guidelines.getTopMostNodes(primaryGrabbedNode.collection());
+			guidelines.lines.update(alignmentNodes);
 
 			if (currentOptions.snapToAlignmentLocationDuringDrag)
-				guidelines.lines.snapToAlignmentLocation(activeTopMostNodes);
+				guidelines.lines.snapToAlignmentLocation(activeTopMostNodes, primaryGrabbedNode);
 		}
 	};
 	var guidelinesFreeHandler = function(e){
+		// Cytoscape fires 'free' for every dragged node — only process once.
+		if (!activeTopMostNodes) return;
+
 		if (currentOptions.snapToAlignmentLocationOnRelease)
-			guidelines.lines.snapToAlignmentLocation(activeTopMostNodes);
+			guidelines.lines.snapToAlignmentLocation(activeTopMostNodes, primaryGrabbedNode);
 
 		guidelines.lines.destroy();
 		activeTopMostNodes = null;
+		primaryGrabbedNode = null;
 	};
 	var guidelinesWindowResizeHandler = function(e){
 		guidelines.lines.resize();
@@ -139,7 +152,8 @@ module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, gui
 	var guidelinesPanHandler = function(e){
 		if (activeTopMostNodes){
 			guidelines.setMousePos(cy.pan());
-			guidelines.lines.init(activeTopMostNodes);
+			var alignmentNodes = guidelines.getTopMostNodes(primaryGrabbedNode.collection());
+			guidelines.lines.init(alignmentNodes, activeTopMostNodes);
 		}
 	}
 	function setGuidelines(enable) {

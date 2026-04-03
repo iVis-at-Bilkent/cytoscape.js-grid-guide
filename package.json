@@ -2,6 +2,7 @@
   "name": "cytoscape-grid-guide",
   "version": "2.3.3",
   "description": "A sophisticated and highly customizable Cytoscape.js extension for grid and guideline interactions.",
+  "type": "commonjs",
   "main": "src/index.js",
   "spm": {
     "main": "src/index.js"
