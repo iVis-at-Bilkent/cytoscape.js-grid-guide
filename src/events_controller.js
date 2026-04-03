@@ -111,10 +111,8 @@ module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, gui
 	var activeTopMostNodes = null;
 	var primaryGrabbedNode = null; // Track the single node the user clicked to start the drag
 	var guidelinesGrabHandler = function(e){
-		// Cytoscape fires 'grab' for EVERY selected node, not just the clicked one.
-		// Only process the first call — that's the node the user actually clicked.
-		if (primaryGrabbedNode) return;
-
+		// Use 'grabon' which fires ONLY on the directly clicked node,
+		// unlike 'grab' which fires for every selected node.
         var cyTarget = e.target || e.cyTarget;
 		var nodes = cyTarget.selected() ? e.cy.$(":selected") : cyTarget;
 		activeTopMostNodes = guidelines.getTopMostNodes(nodes.nodes());
@@ -133,9 +131,7 @@ module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, gui
 		}
 	};
 	var guidelinesFreeHandler = function(e){
-		// Cytoscape fires 'free' for every dragged node — only process once.
-		if (!activeTopMostNodes) return;
-
+		// Use 'freeon' which fires ONLY on the directly clicked node.
 		if (currentOptions.snapToAlignmentLocationOnRelease)
 			guidelines.lines.snapToAlignmentLocation(activeTopMostNodes, primaryGrabbedNode);
 
@@ -160,18 +156,18 @@ module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, gui
 		if (enable){
 			guidelines.resizeCanvas();
 			cy.on("tapstart", "node", guidelinesTapHandler);
-			cy.on("grab", guidelinesGrabHandler);
+			cy.on("grabon", guidelinesGrabHandler);
 			cy.on("pan", guidelinesPanHandler);
 			cy.on("drag", "node", guidelinesDragHandler);
-			cy.on("free", guidelinesFreeHandler);
+			cy.on("freeon", guidelinesFreeHandler);
 			window.addEventListener('resize', guidelinesWindowResizeHandler);
 		}
 		else{
 			cy.off("tapstart", "node", guidelinesTapHandler);
-			cy.off("grab", guidelinesGrabHandler);
+			cy.off("grabon", guidelinesGrabHandler);
 			cy.off("pan", guidelinesPanHandler);
 			cy.off("drag", "node", guidelinesDragHandler);
-			cy.off("free", guidelinesFreeHandler);
+			cy.off("freeon", guidelinesFreeHandler);
 			guidelines.resetCanvas();
 			window.removeEventListener('resize', guidelinesWindowResizeHandler);
 		}
