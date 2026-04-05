@@ -109,26 +109,38 @@ module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, gui
 
 	// Guidelines
 	var activeTopMostNodes = null;
+	var primaryGrabbedNode = null; // Track the single node the user clicked to start the drag
 	var guidelinesGrabHandler = function(e){
+		// Use 'grabon' which fires ONLY on the directly clicked node,
+		// unlike 'grab' which fires for every selected node.
         var cyTarget = e.target || e.cyTarget;
 		var nodes = cyTarget.selected() ? e.cy.$(":selected") : cyTarget;
 		activeTopMostNodes = guidelines.getTopMostNodes(nodes.nodes());
-		guidelines.lines.init(activeTopMostNodes);
+		primaryGrabbedNode = cyTarget;
+		var alignmentNodes = guidelines.getTopMostNodes(cyTarget.collection());
+		guidelines.lines.init(alignmentNodes, activeTopMostNodes);
 	}
 	var guidelinesDragHandler = function(e){
-		if (this.id() == activeTopMostNodes.id()){
-			guidelines.lines.update(activeTopMostNodes);
+		// Only process the drag event for the node the user actually grabbed
+		if (!primaryGrabbedNode || this.id() !== primaryGrabbedNode.id()) return;
 
-			if (currentOptions.snapToAlignmentLocationDuringDrag)
-				guidelines.lines.snapToAlignmentLocation(activeTopMostNodes);
-		}
+		var alignmentNodes = guidelines.getTopMostNodes(primaryGrabbedNode.collection());
+		guidelines.lines.update(alignmentNodes);
+
+		// Only snap when dragging a single node — multi-node snapping moves nodes randomly
+		var isMultiDrag = activeTopMostNodes && activeTopMostNodes.length > 1;
+		if (currentOptions.snapToAlignmentLocationDuringDrag && !isMultiDrag)
+			guidelines.lines.snapToAlignmentLocation(activeTopMostNodes, primaryGrabbedNode);
 	};
 	var guidelinesFreeHandler = function(e){
-		if (currentOptions.snapToAlignmentLocationOnRelease)
-			guidelines.lines.snapToAlignmentLocation(activeTopMostNodes);
+		// Only snap on release for single-node drag
+		var isMultiDrag = activeTopMostNodes && activeTopMostNodes.length > 1;
+		if (currentOptions.snapToAlignmentLocationOnRelease && !isMultiDrag)
+			guidelines.lines.snapToAlignmentLocation(activeTopMostNodes, primaryGrabbedNode);
 
 		guidelines.lines.destroy();
 		activeTopMostNodes = null;
+		primaryGrabbedNode = null;
 	};
 	var guidelinesWindowResizeHandler = function(e){
 		guidelines.lines.resize();
@@ -139,25 +151,26 @@ module.exports = function (cy, snap, resize, snapToGridDuringDrag, drawGrid, gui
 	var guidelinesPanHandler = function(e){
 		if (activeTopMostNodes){
 			guidelines.setMousePos(cy.pan());
-			guidelines.lines.init(activeTopMostNodes);
+			var alignmentNodes = guidelines.getTopMostNodes(primaryGrabbedNode.collection());
+			guidelines.lines.init(alignmentNodes, activeTopMostNodes);
 		}
 	}
 	function setGuidelines(enable) {
 		if (enable){
 			guidelines.resizeCanvas();
 			cy.on("tapstart", "node", guidelinesTapHandler);
-			cy.on("grab", guidelinesGrabHandler);
+			cy.on("grabon", guidelinesGrabHandler);
 			cy.on("pan", guidelinesPanHandler);
 			cy.on("drag", "node", guidelinesDragHandler);
-			cy.on("free", guidelinesFreeHandler);
+			cy.on("freeon", guidelinesFreeHandler);
 			window.addEventListener('resize', guidelinesWindowResizeHandler);
 		}
 		else{
 			cy.off("tapstart", "node", guidelinesTapHandler);
-			cy.off("grab", guidelinesGrabHandler);
+			cy.off("grabon", guidelinesGrabHandler);
 			cy.off("pan", guidelinesPanHandler);
 			cy.off("drag", "node", guidelinesDragHandler);
-			cy.off("free", guidelinesFreeHandler);
+			cy.off("freeon", guidelinesFreeHandler);
 			guidelines.resetCanvas();
 			window.removeEventListener('resize', guidelinesWindowResizeHandler);
 		}

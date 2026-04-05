@@ -1822,6 +1822,7 @@ module.exports = function (opts, cy, debounce) {
 		$canvas.style.top = 0;
 		$canvas.style.left = 0;
 		$canvas.style.zIndex = options.guidelinesStackOrder;
+    $canvas.style.pointerEvents = "none";
 
 		setTimeout(function () {
 
@@ -1855,6 +1856,7 @@ module.exports = function (opts, cy, debounce) {
 		$canvas.style.top = 0;
 		$canvas.style.left = 0;
 		$canvas.style.zIndex = options.guidelinesStackOrder;
+    $canvas.style.pointerEvents = "none";
 	};
 
 	resetCanvas();
