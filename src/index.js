@@ -79,6 +79,10 @@
 			// access the scratch pad for cy
 			var scratchPad = getScratch(cy);
 
+			if (opts === 'get') {
+				return scratchPad.instance;
+			}
+
 			// extend the already existing options for the instance or the default options
 			var options = Object.extend({}, scratchPad.options || defaults, opts);
 
@@ -89,7 +93,7 @@
 
 				var snap, resize, snapToGridDuringDrag, drawGrid, eventsController, guidelines, parentPadding, alignment;
 
-				snap = _snapOnRelease(cy, options.gridSpacing, options.snapToGridCenter);
+				snap = _snapOnRelease(cy, options);
 				resize = _resize(options.gridSpacing);
 				snapToGridDuringDrag = _snapToGridDuringDrag(cy, snap);
 				drawGrid = _drawGrid(options, cy, debounce);
@@ -104,6 +108,12 @@
 				apiRegistered = true;
 
 				eventsController.init(options);
+
+				scratchPad.instance = {
+					snapPosition: function(pos, phase) {
+						return snap.snapPosition(pos, phase);
+					}
+				};
 
 				// init params in scratchPad
 				scratchPad.initialized = true;

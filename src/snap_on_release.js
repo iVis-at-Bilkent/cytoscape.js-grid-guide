@@ -1,12 +1,41 @@
 const h = require("./helper");
 
-module.exports = function (cy, gridSpacing, gridSpacingOffset) {
+module.exports = function (cy, opts, snapToGridCenter) {
 
     var snap = { };
+    var gridSpacing;
+    var gridSpacingOffset;
 
-    snap.changeOptions = function (opts) {
+    function getCurrentOptions() {
+        var scratch = cy.scratch("_gridGuide");
+        return scratch && scratch.options;
+    }
+
+    function applyOptions(opts, snapToGridCenter) {
+        if (typeof opts === "number") {
+            gridSpacing = opts;
+            gridSpacingOffset = typeof snapToGridCenter === "number" ? snapToGridCenter : (snapToGridCenter ? 0.5 : 0);
+            return;
+        }
+
+        opts = opts || {};
         gridSpacing = opts.gridSpacing;
         gridSpacingOffset = opts.snapToGridCenter ? 0.5 : 0;
+    }
+
+    applyOptions(opts, snapToGridCenter);
+
+    snap.changeOptions = function (opts) {
+        applyOptions(opts);
+    };
+
+    snap.isSnapToGridEnabled = function (phase) {
+        var currentOptions = getCurrentOptions();
+        if (!currentOptions) {
+            return false;
+        }
+
+        return phase === "drag" ? currentOptions.snapToGridDuringDrag : currentOptions.snapToGridOnRelease;
     };
 
     var getScratch = function (node) {
@@ -25,6 +54,14 @@ module.exports = function (cy, gridSpacing, gridSpacingOffset) {
         };
 
         return newPos;
+    };
+
+    snap.snapPosition = function (pos, phase) {
+        if (!snap.isSnapToGridEnabled(phase) || !gridSpacing) {
+            return pos;
+        }
+
+        return snap.snapPos(pos);
     };
 
     snap.snapNode = function (node) {
